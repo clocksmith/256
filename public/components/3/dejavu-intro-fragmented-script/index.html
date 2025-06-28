@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fragmented Script of Déjà Vu - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #0d0d0d; /* Darker background */
+        --text-color: #e0e0e0;
+        --border-color: #333; /* Subtler border */
+        --script-line-color: #00f0f0; /* Brighter cyan */
+        --fragment-color: #ff4500; /* Orange-Red */
+        --glow-color: rgba(0, 240, 240, 0.7);
+        --fragment-glow: rgba(255, 69, 0, 0.8);
+        --glitch-color-1: #ff00ff; /* Magenta for glitches */
+        --glitch-color-2: #ffff00; /* Yellow for glitches */
+        --glow-color-rgb-fallback: 0, 240, 240;
+      }
+
+      body.light-mode {
+        --bg-color: #e8e8e8;
+        --text-color: #1a1a1a;
+        --border-color: #ccc;
+        --script-line-color: #008080; /* Teal */
+        --fragment-color: #d93600;
+        --glow-color: rgba(0, 128, 128, 0.5);
+        --fragment-glow: rgba(217, 54, 0, 0.6);
+        --glitch-color-1: #cc00cc;
+        --glitch-color-2: #cccc00;
+        --glow-color-rgb-fallback: 0, 128, 128;
+      }
+
+      html, body {
+        box-sizing: border-box;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: "Courier New", Courier, monospace; /* More script-like */
+      }
+
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(var(--glow-color-rgb, var(--glow-color-rgb-fallback)), 0.05) 0%,
+          transparent 60%
+        );
+        perspective: 600px; /* For 3D effects */
+      }
+
+      .script-wrapper {
+        position: relative;
+        width: 95%;
+        height: 95%;
+        max-width: 600px; 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transform-style: preserve-3d;
+        transform: rotateX(10deg) rotateY(-5deg) rotateZ(-2deg);
+        animation: wrapper-drift 20s infinite alternate ease-in-out;
+      }
+
+      .line-group {
+        display: contents; /* Allows direct children to be flex items of parent */
+      }
+
+      .line {
+        height: 1.5px;
+        background-color: var(--script-line-color);
+        width: 100%;
+        opacity: 0.7;
+        box-shadow: 0 0 4px var(--glow-color), 0 0 2px var(--glow-color) inset;
+        margin-bottom: calc(min(1.5vh, 8px)); /* Responsive spacing */
+        animation: line-subtle-flow 15s linear infinite alternate;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+      }
+      
+      .line:hover {
+        transform: scaleX(1.02);
+        box-shadow: 0 0 8px var(--glow-color), 0 0 6px var(--script-line-color);
+      }
+      
+      .line.stutter {
+        animation: line-stutter-effect 0.5s steps(3, end) infinite alternate, line-subtle-flow 15s linear infinite alternate -0.2s;
+      }
+      .line.loop {
+        animation: line-loop-effect 3s ease-in-out infinite, line-subtle-flow 15s linear infinite alternate -0.4s;
+      }
+      .line.glitch-chars::before {
+        content: attr(data-glitch-text);
+        position: absolute;
+        left: 0;
+        top: -1px; /* Align with line */
+        width: 100%;
+        font-size: calc(min(1.5vh, 8px)); /* Match line spacing approx */
+        color: var(--glitch-color-1);
+        opacity: 0;
+        animation: text-glitch 1s steps(2, start) infinite alternate;
+        pointer-events: none;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .fragment {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0; /* Start invisible, fade in */
+        box-shadow: 0 0 15px var(--fragment-glow), 0 0 30px var(--fragment-glow), 0 0 5px var(--fragment-color) inset;
+        animation: fragment-appear 1s forwards, fragment-drift-pulse 5s ease-in-out infinite alternate;
+        mix-blend-mode: screen; /* Brighter blending */
+        cursor: grab;
+        background-color: var(--fragment-color);
+        transition: transform 0.2s ease-out;
+      }
+      .fragment:active { cursor: grabbing; transform: scale(1.2); }
+
+      @keyframes wrapper-drift {
+        0% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(-2deg) translateX(0px); }
+        50% { transform: rotateX(8deg) rotateY(-3deg) rotateZ(-1deg) translateX(5px) translateY(3px); }
+        100% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(-2deg) translateX(0px); }
+      }
+
+      @keyframes line-subtle-flow {
+        0% { transform: translateX(-2px) skewX(-0.5deg); }
+        100% { transform: translateX(2px) skewX(0.5deg); }
+      }
+
+      @keyframes line-stutter-effect {
+        0% { transform: translateX(-3px) scaleX(0.98); opacity: 0.5; background-color: var(--glitch-color-1); }
+        33% { transform: translateX(3px) scaleX(1.02); opacity: 0.8; background-color: var(--script-line-color); }
+        66% { transform: translateX(-2px) scaleX(0.95); opacity: 0.4; background-color: var(--glitch-color-2); }
+        100% { transform: translateX(0px) scaleX(1); opacity: 0.7; background-color: var(--script-line-color); }
+      }
+
+      @keyframes line-loop-effect {
+        0%, 100% { width: 100%; opacity: 0.7; }
+        25% { width: 30%; opacity: 0.3; margin-left: 35%; } /* Loop 'contraction' */
+        35% { width: 30%; opacity: 0.3; margin-left: 35%; }
+        45% { width: 100%; opacity: 0.7; margin-left: 0%; } /* Return to normal */
+        50% { width: 100%; opacity: 0.7; margin-left: 0%; } /* Brief flash of re-experience */
+        52% { width: 30%; opacity: 0.3; margin-left: 35%; } 
+        62% { width: 30%; opacity: 0.3; margin-left: 35%; }
+        72% { width: 100%; opacity: 0.7; margin-left: 0%; }
+      }
+      
+      @keyframes text-glitch {
+        0% { opacity: 0.7; clip-path: inset(0 0 0 0); color: var(--glitch-color-1); }
+        25% { opacity: 0; clip-path: inset(30% 0 30% 0); }
+        50% { opacity: 0.6; clip-path: inset(0 0 0 0); color: var(--glitch-color-2); }
+        75% { opacity: 0; clip-path: inset(50% 0 10% 0); }
+        100% { opacity: 0.7; clip-path: inset(0 0 0 0); color: var(--glitch-color-1); }
+      }
+
+      @keyframes fragment-appear {
+        to { opacity: 0.9; }
+      }
+      @keyframes fragment-drift-pulse {
+        0% { transform: scale(0.9) translate(0px, 0px); opacity: 0.8; }
+        50% { transform: scale(1.1) translate(calc(min(2vw, 10px)), calc(min(-2vh, -10px))); opacity: 1; }
+        100% { transform: scale(0.9) translate(0px, 0px); opacity: 0.8; }
+      }
+      
+      @media (prefers-reduced-motion: reduce) {
+        .script-wrapper, .line, .fragment, .line.glitch-chars::before {
+          animation: none !important;
+        }
+        .line { opacity: 0.7; transform: none; }
+        .fragment { opacity: 0.9; transform: scale(1); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" role="img" aria-label="Abstract 3D animation of flowing, skewed script lines, some periodically stuttering, looping, or showing glitched text characters. Intensely glowing fragments appear, drift, and pulse, symbolizing a dynamic, unstable, and misfiring memory script characteristic of a déjà vu experience. Lines and fragments react to hover and click.">
+      <div class="script-wrapper" id="scriptWrapper">
+        </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const isLightMode = params.get("theme") === "light";
+      if (isLightMode) document.body.classList.add("light-mode");
+      
+      document.documentElement.style.setProperty("--glow-color-rgb", isLightMode ? "0,128,128" : "0,240,240");
+
+      const scriptWrapper = document.getElementById('scriptWrapper');
+      const numLines = 15;
+      const fragmentData = [
+        { top: '15%', left: '10%', sizeVw: 1.8, sizeVh: 1.8, delay: 0.5 },
+        { top: '60%', left: '85%', sizeVw: 2.2, sizeVh: 2.2, delay: 1.5 },
+        { top: '80%', left: '30%', sizeVw: 2.0, sizeVh: 2.0, delay: 2.5 },
+        { top: '35%', left: '50%', sizeVw: 1.5, sizeVh: 1.5, delay: 3.5 } // A more central, smaller one
+      ];
+      const glitchTextContent = "[REALITY_STREAM_CORRUPTED_..._déjà_vu_sequence_engage¿]";
+
+      for (let i = 0; i < numLines; i++) {
+        const line = document.createElement('div');
+        line.classList.add('line');
+        line.style.animationDelay = `${Math.random() * -5}s`;
+        line.style.width = `${85 + Math.random() * 15}%`;
+        if (i === Math.floor(numLines / 4) || i === Math.floor(numLines * 3 / 4)) {
+          line.classList.add('stutter');
+        }
+        if (i === Math.floor(numLines / 2)) {
+          line.classList.add('loop');
+        }
+        if (i === Math.floor(numLines * 0.6)) {
+            line.classList.add('glitch-chars');
+            line.setAttribute('data-glitch-text', glitchTextContent.substring(Math.random() * 5, Math.random() * 15 + 15) + "...");
+        }
+        line.addEventListener('click', () => {
+            line.classList.toggle('stutter'); // Toggle effect on click
+            line.style.backgroundColor = line.classList.contains('stutter') ? 'var(--glitch-color-1)' : 'var(--script-line-color)';
+        });
+        scriptWrapper.appendChild(line);
+      }
+
+      fragmentData.forEach(data => {
+        const fragment = document.createElement('div');
+        fragment.classList.add('fragment');
+        fragment.style.top = data.top;
+        fragment.style.left = data.left;
+        const size = `min(max(${data.sizeVw}vw, 10px), max(${data.sizeVh}vh, 10px), 25px)`;
+        fragment.style.width = size;
+        fragment.style.height = size;
+        fragment.style.animationDelay = `${data.delay}s, ${data.delay + 0.1}s`; // For appear then drift/pulse
+
+        let offsetX, offsetY, isDragging = false;
+        fragment.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - fragment.getBoundingClientRect().left;
+            offsetY = e.clientY - fragment.getBoundingClientRect().top;
+            fragment.style.animationPlayState = 'paused'; // Pause drift while dragging
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const containerRect = scriptWrapper.getBoundingClientRect();
+            let newX = e.clientX - containerRect.left - offsetX;
+            let newY = e.clientY - containerRect.top - offsetY;
+            // Constrain dragging within the wrapper (approx)
+            newX = Math.max(0, Math.min(newX, containerRect.width - fragment.offsetWidth));
+            newY = Math.max(0, Math.min(newY, containerRect.height - fragment.offsetHeight));
+
+            fragment.style.left = `${(newX / containerRect.width) * 100}%`;
+            fragment.style.top = `${(newY / containerRect.height) * 100}%`;
+        });
+        document.addEventListener('mouseup', () => {
+            if(isDragging) {
+                isDragging = false;
+                fragment.style.animationPlayState = 'running';
+            }
+        });
+        scriptWrapper.appendChild(fragment);
+      });
+    </script>
+  </body>
+</html>

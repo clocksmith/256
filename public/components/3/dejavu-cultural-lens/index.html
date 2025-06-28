@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cultural Interpretation Lens - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #121212;
+        --text-color: #efefef;
+        --border-color: #3a3a3a;
+        --base-memory-color: #c07000; /* Rich Amber */
+        --lens-frame-color: #00e080; /* Mint Green */
+        --arrow-color: #00f0f0; /* Bright Cyan */
+        --glow-color-lens: rgba(0, 224, 128, 0.6);
+        --lens-label-color: #f5f5f5;
+      }
+      body.light-mode {
+        --bg-color: #fdfdfd;
+        --text-color: #151515;
+        --border-color: #dcdcdc;
+        --base-memory-color: #e08010;
+        --lens-frame-color: #00b060;
+        --arrow-color: #00c0c0;
+        --glow-color-lens: rgba(0, 176, 96, 0.5);
+        --lens-label-color: #050505;
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: "Georgia", serif; }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: clamp(1rem, 4vh, 2rem); padding: clamp(1.2rem, 5vh, 2.5rem);
+        border: 1px solid var(--border-color); position: relative;
+        width: 100%; height: 100%;
+      }
+      .memory-object {
+        width: clamp(55px, 14vh, 75px); height: clamp(55px, 14vh, 75px);
+        border-radius: 50%; display: flex; justify-content: center; align-items: center;
+        font-size: clamp(1.8rem, 6vh, 2.5rem); font-weight: bold;
+        color: rgba(255,255,255,0.95);
+        box-shadow: 0 0 15px color-mix(in srgb, var(--base-memory-color) 60%, transparent),
+                    inset 0 0 10px rgba(0,0,0,0.35);
+        z-index: 1; transition: filter 0.4s ease-in-out, transform 0.4s ease-in-out, background-color 0.4s ease;
+        background-color: var(--base-memory-color);
+      }
+      .memory-object:hover { transform: scale(1.1) rotate(5deg); }
+      #memoryObjectOutput { font-size: clamp(2rem, 7vh, 3rem); } /* Larger output icon */
+
+      .lens-stage-wrapper {
+        width: clamp(150px, 40vw, 220px); height: clamp(100px, 25vh, 150px);
+        position: relative; display:flex; justify-content: center; align-items: center;
+      }
+      .lens-orbit-path { /* For visual guide, optional */
+        position:absolute; width: 100%; height: 100%;
+        border: 1px dashed color-mix(in srgb, var(--lens-frame-color) 30%, transparent);
+        border-radius: 50%;
+        opacity: 0.5;
+      }
+      .cultural-lens {
+        position: absolute;
+        width: clamp(75px, 20vh, 110px); height: clamp(75px, 20vh, 110px);
+        border: clamp(5px, 1.2vh, 7px) solid var(--lens-frame-color);
+        border-radius: 50%;
+        background-color: rgba(120,120,120,0.1); /* Very subtle base */
+        box-shadow: 0 0 18px var(--glow-color-lens), inset 0 0 12px rgba(0,0,0,0.4);
+        display: flex; justify-content: center; align-items: center;
+        animation: lens-orbit 12s linear infinite;
+        will-change: transform, opacity;
+        backdrop-filter: blur(2px); /* Lens effect */
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .cultural-lens:hover { transform: scale(1.15) !important; /* Override animation scale for hover */ box-shadow: 0 0 25px var(--glow-color-lens), 0 0 10px var(--lens-frame-color); z-index: 20;}
+      .cultural-lens.lens1 { animation-delay: 0s; }
+      .cultural-lens.lens2 { animation-delay: -4s; }
+      .cultural-lens.lens3 { animation-delay: -8s; }
+
+      .lens-label {
+        position: absolute; bottom: -1.8em;
+        font-size: clamp(0.65em, 1.8vh, 0.8em); font-weight: 600;
+        color: var(--lens-label-color);
+        background-color: color-mix(in srgb, var(--bg-color) 85%, transparent);
+        padding: 3px 6px; border-radius: 4px; text-align: center;
+        text-shadow: 0 0 2px var(--bg-color);
+      }
+      .arrow-flow-svg {
+        width: clamp(40%, 100px, 60%); height: clamp(20px, 5vh, 30px);
+        overflow: visible;
+      }
+      .arrow-flow-path {
+        stroke: var(--arrow-color); stroke-width: 2.5px; fill: none;
+        marker-end: url(#arrowhead);
+        stroke-dasharray: 10 5; /* Dashed line */
+        animation: arrow-flow-dash 1s linear infinite;
+      }
+      @keyframes lens-orbit {
+        0% { transform: translate(0px, calc(clamp(100px, 25vh, 150px) * -0.6)) scale(0.7) rotate(-15deg); opacity: 0.5; z-index:1; } /* Top, smaller */
+        25% { transform: translate(calc(clamp(150px, 40vw, 220px) * 0.6), 0px) scale(1) rotate(0deg); opacity: 1; z-index:10; } /* Right, full size */
+        50% { transform: translate(0px, calc(clamp(100px, 25vh, 150px) * 0.6)) scale(0.7) rotate(15deg); opacity: 0.5; z-index:1; } /* Bottom, smaller */
+        75% { transform: translate(calc(clamp(150px, 40vw, 220px) * -0.6), 0px) scale(1) rotate(0deg); opacity: 1; z-index:10; } /* Left, full size */
+        100% { transform: translate(0px, calc(clamp(100px, 25vh, 150px) * -0.6)) scale(0.7) rotate(-15deg); opacity: 0.5; z-index:1; }
+      }
+      @keyframes arrow-flow-dash { to { stroke-dashoffset: -30; } } /* 2 * (10+5) */
+      
+      @media (prefers-reduced-motion: reduce) {
+        .cultural-lens, .arrow-flow-path, .memory-object { animation: none !important; }
+        .cultural-lens { opacity: 0.9; }
+        .cultural-lens.lens1 { transform: translate(0, -50px) scale(0.8); }
+        .cultural-lens.lens2 { transform: translate(-60px, 10px) scale(0.9); }
+        .cultural-lens.lens3 { transform: translate(60px, 10px) scale(0.9); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" id="mainContainer" role="img" aria-label="Interactive animation: A 'memory object' (brain icon) connects via an animated arrow to a central stage where three 'cultural lenses' (Prophecy, Psychology, Mythology) orbit. Clicking a lens applies its unique visual filter (e.g., hue-shift, sepia) to the memory object, changing its appearance. Another arrow leads to an 'interpreted memory' (lightbulb icon).">
+      <div class="memory-object" id="memoryObjectInputEl">🧠</div>
+      <svg class="arrow-flow-svg">
+        <defs><marker id="arrowhead" viewBox="-5 -5 10 10" refX="0" refY="0" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L -5 -5 L -2.5 0 L -5 5 Z" fill="var(--arrow-color)" transform="rotate(180)"/></marker></defs>
+        <line class="arrow-flow-path" x1="10%" y1="50%" x2="90%" y2="50%" />
+      </svg>
+      <div class="lens-stage-wrapper">
+        <div class="lens-orbit-path"></div>
+        <div class="cultural-lens lens1" data-label="Prophecy" data-filter="hue-rotate(90deg) saturate(2) brightness(1.2)" data-bg-color-shift="#33aa77">
+          <span class="lens-label">Prophecy</span>
+        </div>
+        <div class="cultural-lens lens2" data-label="Psychology" data-filter="contrast(1.8) brightness(0.8) saturate(0.5)" data-bg-color-shift="#aa7733">
+          <span class="lens-label">Psychology</span>
+        </div>
+        <div class="cultural-lens lens3" data-label="Mythology" data-filter="sepia(0.9) opacity(0.95) brightness(1.05)" data-bg-color-shift="#7733aa">
+          <span class="lens-label">Mythology</span>
+        </div>
+      </div>
+      <svg class="arrow-flow-svg">
+        <line class="arrow-flow-path" x1="10%" y1="50%" x2="90%" y2="50%" />
+      </svg>
+      <div class="memory-object" id="memoryObjectOutputEl">💡</div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") document.body.classList.add("light-mode");
+
+      const memoryObjectInput = document.getElementById('memoryObjectInputEl');
+      const memoryObjectOutput = document.getElementById('memoryObjectOutputEl');
+      const lenses = document.querySelectorAll('.cultural-lens');
+      let currentLensInterval = null;
+      let activeLensFilter = 'none';
+      let activeLensColor = getComputedStyle(document.documentElement).getPropertyValue('--base-memory-color').trim();
+
+      lenses.forEach(lens => {
+        lens.addEventListener('click', () => {
+          if (currentLensInterval) clearInterval(currentLensInterval); // Stop auto-cycling on click
+          
+          activeLensFilter = lens.dataset.filter;
+          activeLensColor = lens.dataset.bgColorShift || activeLensColor;
+          memoryObjectInput.style.filter = activeLensFilter;
+          memoryObjectInput.style.backgroundColor = activeLensColor;
+          memoryObjectOutput.style.filter = activeLensFilter; // Also apply to output for consistency
+          memoryObjectOutput.style.backgroundColor = activeLensColor;
+          memoryObjectOutput.textContent = lens.dataset.label.charAt(0); // Change output icon
+        });
+      });
+
+      // Auto-cycle lens effect for passive viewing (if no manual click)
+      function autoCycleLenses() {
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          let currentIndex = 0;
+          currentLensInterval = setInterval(() => {
+              const lens = lenses[currentIndex];
+              activeLensFilter = lens.dataset.filter;
+              activeLensColor = lens.dataset.bgColorShift || getComputedStyle(document.documentElement).getPropertyValue('--base-memory-color').trim();
+
+              memoryObjectInput.style.filter = activeLensFilter;
+              memoryObjectInput.style.backgroundColor = activeLensColor;
+              memoryObjectOutput.style.filter = activeLensFilter;
+              memoryObjectOutput.style.backgroundColor = activeLensColor;
+              memoryObjectOutput.textContent = lens.dataset.label.charAt(0);
+              
+              currentIndex = (currentIndex + 1) % lenses.length;
+          }, 4000); // Matches animation segment for each lens
+      }
+      
+      autoCycleLenses();
+      document.getElementById('mainContainer').addEventListener('click', (event) => {
+          // If click is not on a lens, reset to default state.
+          if (!event.target.closest('.cultural-lens')) {
+            if (currentLensInterval) clearInterval(currentLensInterval);
+            memoryObjectInput.style.filter = 'none';
+            memoryObjectInput.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--base-memory-color').trim();
+            memoryObjectOutput.style.filter = 'none';
+            memoryObjectOutput.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--base-memory-color').trim();
+            memoryObjectOutput.textContent = '💡';
+            autoCycleLenses(); // Restart auto-cycle
+          }
+      });
+
+    </script>
+  </body>
+</html>

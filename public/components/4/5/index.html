@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapping the Mental Maelstrom: Defining Attention Thrashing</title>
+    <!-- CONFIRMATION: No external JS libraries for the visualization are used. -->
+    <style>
+        :root {
+            --bg: #111827;
+            --text-color: #e5e7eb;
+            --node-bg: #374151;
+            --node-border: #4b5563;
+            --central-node-bg: #be123c;
+            --cause-node-bg: #1d4ed8;
+            --symptom-node-bg: #b45309;
+            --line-color: #6b7280;
+            --highlight-color: #f59e0b;
+        }
+        body.light-mode {
+            --bg: #f9fafb;
+            --text-color: #111827;
+            --node-bg: #e5e7eb;
+            --node-border: #d1d5db;
+            --central-node-bg: #dc2626;
+            --cause-node-bg: #2563eb;
+            --symptom-node-bg: #d97706;
+            --line-color: #9ca3af;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-color);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #flowchart-container {
+            position: relative;
+            width: 95vmin;
+            height: 95vmin;
+        }
+        .node {
+            position: absolute;
+            padding: 8px 12px;
+            border: 1px solid var(--node-border);
+            border-radius: 8px;
+            background-color: var(--node-bg);
+            font-size: clamp(8px, 1.5vmin, 12px);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .node:hover {
+            transform: scale(1.05);
+            border-color: var(--highlight-color);
+        }
+        #central-node { background-color: var(--central-node-bg); font-weight: bold; font-size: 1.2em; }
+        .cause-node { background-color: var(--cause-node-bg); }
+        .symptom-node { background-color: var(--symptom-node-bg); }
+        .line {
+            position: absolute;
+            background-color: var(--line-color);
+            z-index: 1;
+            transform-origin: 0 0;
+            transition: background-color 0.2s ease;
+        }
+        .line.highlighted {
+            background-color: var(--highlight-color);
+            z-index: 5;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: #000;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        body.light-mode .tooltip { background-color: #fff; color: #000; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div id="flowchart-container"></div>
+    <div class="tooltip" id="tooltip"></div>
+    <script>
+        const theme = new URLSearchParams(window.location.search).get('theme') || 'dark';
+        document.body.classList.add(theme === 'light' ? 'light-mode' : 'dark-mode');
+
+        const container = document.getElementById('flowchart-container');
+        const tooltip = document.getElementById('tooltip');
+        
+        const nodes = {
+            central: { id: 'central-node', text: 'Attention Thrashing (The Inner Tempest)', x: 50, y: 50, tooltip: "The core state of inefficient, unstable, and misdirected LLM focus under high context load." },
+            cause1: { id: 'cause1', text: 'Overwhelming Context', class: 'cause-node', x: 20, y: 20, tooltip: "Excessive context window size and a high volume of irrelevant tokens." },
+            cause2: { id: 'cause2', text: 'Mechanism Limits', class: 'cause-node', x: 80, y: 20, tooltip: "Inherent O(N²) complexity and KV cache memory pressure." },
+            symptom1: { id: 'symptom1', text: 'High Latency / Low Throughput', class: 'symptom-node', x: 10, y: 80, tooltip: "Slower response times and reduced processing speed." },
+            symptom2: { id: 'symptom2', text: 'Accuracy Degradation', class: 'symptom-node', x: 40, y: 80, tooltip: "'Lost in the Middle' errors and poor 'Needle-in-a-Haystack' performance." },
+            symptom3: { id: 'symptom3', text: 'Ineffective Focus', class: 'symptom-node', x: 70, y: 80, tooltip: "Attention gets 'stuck' on irrelevant tokens (Attention Sinks)." },
+             symptom4: { id: 'symptom4', text: 'Resource Waste', class: 'symptom-node', x: 90, y: 50, tooltip: "Disproportionate FLOPs and memory bandwidth spent on non-productive processing." }
+        };
+
+        const connections = [
+            ['cause1', 'central'], ['cause2', 'central'],
+            ['central', 'symptom1'], ['central', 'symptom2'],
+            ['central', 'symptom3'], ['central', 'symptom4']
+        ];
+
+        let lineElements = {};
+
+        function createNode(nodeData) {
+            const nodeEl = document.createElement('div');
+            nodeEl.id = nodeData.id;
+            nodeEl.className = 'node ' + (nodeData.class || '');
+            nodeEl.textContent = nodeData.text;
+            nodeEl.style.left = `calc(${nodeData.x}% - ${nodeEl.offsetWidth / 2}px)`;
+            nodeEl.style.top = `calc(${nodeData.y}% - ${nodeEl.offsetHeight / 2}px)`;
+            nodeEl.dataset.tooltip = nodeData.tooltip;
+            container.appendChild(nodeEl);
+            return nodeEl;
+        }
+        
+        function createLine(p1, p2, id) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+            const lineEl = document.createElement('div');
+            lineEl.className = 'line';
+            lineEl.id = id;
+            lineEl.style.width = `${distance}px`;
+            lineEl.style.height = '2px';
+            lineEl.style.left = `${p1.x}px`;
+            lineEl.style.top = `${p1.y}px`;
+            lineEl.style.transform = `rotate(${angle}deg)`;
+            container.appendChild(lineEl);
+            return lineEl;
+        }
+
+        function drawFlowchart() {
+            Object.values(nodes).forEach(n => createNode(n));
+            
+            connections.forEach(([fromId, toId]) => {
+                const fromNode = document.getElementById(nodes[fromId].id);
+                const toNode = document.getElementById(nodes[toId].id);
+
+                const fromRect = fromNode.getBoundingClientRect();
+                const toRect = toNode.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                const p1 = { x: fromRect.left + fromRect.width / 2 - containerRect.left, y: fromRect.top + fromRect.height / 2 - containerRect.top };
+                const p2 = { x: toRect.left + toRect.width / 2 - containerRect.left, y: toRect.top + toRect.height / 2 - containerRect.top };
+
+                const lineId = `line-${fromId}-${toId}`;
+                lineElements[lineId] = createLine(p1, p2, lineId);
+            });
+        }
+        
+        document.querySelectorAll('.node').forEach(node => {
+            node.addEventListener('mouseover', (e) => {
+                tooltip.textContent = e.target.dataset.tooltip;
+                tooltip.style.opacity = '1';
+            });
+            node.addEventListener('mousemove', (e) => {
+                tooltip.style.left = `${e.clientX + 15}px`;
+                tooltip.style.top = `${e.clientY + 15}px`;
+            });
+            node.addEventListener('mouseout', () => {
+                tooltip.style.opacity = '0';
+            });
+             node.addEventListener('click', (e) => {
+                 const clickedId = e.target.id.replace('-node','');
+                 
+                 Object.values(lineElements).forEach(line => line.classList.remove('highlighted'));
+
+                 connections.forEach(([from, to]) => {
+                     if(from === clickedId || to === clickedId){
+                         const line = document.getElementById(`line-${from}-${to}`);
+                         if(line) line.classList.add('highlighted');
+                     }
+                 });
+             });
+        });
+        
+        drawFlowchart(); // Initial draw
+        // Redraw on resize to adjust positions
+        new ResizeObserver(drawFlowchart).observe(container);
+
+    </script>
+</body>
+</html>

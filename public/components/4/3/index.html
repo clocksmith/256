@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mind's Interconnecting Threads: A Self-Attention Simulation</title>
+    <!-- CONFIRMATION: No external JS libraries for the visualization are used. -->
+    <style>
+        :root {
+            --bg: #1a1a1a;
+            --text-color: #f0f0f0;
+            --node-bg: #333;
+            --node-border: #555;
+            --node-active-border: #4dd0e1;
+            --node-distractor-border: #ff7043;
+            --q-strand: #4fc3f7;
+            --k-strand: #81c784;
+            --v-strand: #e57373;
+        }
+        body.light-mode {
+            --bg: #fafafa;
+            --text-color: #212121;
+            --node-bg: #e0e0e0;
+            --node-border: #bdbdbd;
+            --node-active-border: #0097a7;
+            --node-distractor-border: #e64a19;
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+            background-color: var(--bg);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #canvas-container {
+            position: relative;
+            width: 95vmin;
+            height: 95vmin;
+        }
+        .thought-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: var(--node-bg);
+            border: 2px solid var(--node-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+        .thought-node.active {
+            border-color: var(--node-active-border);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--node-active-border);
+        }
+        .thought-node.distractor {
+            border-color: var(--node-distractor-border);
+        }
+        .strand {
+            position: absolute;
+            height: 2px;
+            transform-origin: 0 50%;
+            z-index: 1;
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: 1px solid var(--text-color);
+            background: var(--bg);
+            color: var(--text-color);
+            cursor: pointer;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="controls">
+        <button id="next-step-btn">Next Step</button>
+        <button id="reset-btn">Reset</button>
+    </div>
+    <script>
+        const theme = new URLSearchParams(window.location.search).get('theme') || 'dark';
+        document.body.classList.add(theme === 'light' ? 'light-mode' : 'dark-mode');
+
+        const container = document.getElementById('canvas-container');
+        const nextBtn = document.getElementById('next-step-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        const nodesData = [
+            { text: 'The cat', isDistractor: false }, { text: 'sat', isDistractor: false },
+            { text: 'on the', isDistractor: false }, { text: 'mat', isDistractor: false },
+            { text: 'because', isDistractor: false }, { text: 'it', isDistractor: true },
+            { text: 'was', isDistractor: false }, { text: 'warm', isDistractor: false }
+        ];
+        let nodes = [];
+        let strands = [];
+        let state = -1;
+        const activeNodeIndex = 0; // The node we are calculating attention FOR
+
+        function createNodes() {
+            container.innerHTML = '';
+            nodes = [];
+            const radius = container.offsetWidth / 2 - 40;
+            const centerX = container.offsetWidth / 2;
+            const centerY = container.offsetHeight / 2;
+
+            nodesData.forEach((data, i) => {
+                const angle = (i / nodesData.length) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'thought-node' + (data.isDistractor ? ' distractor' : '');
+                nodeEl.textContent = data.text;
+                nodeEl.style.left = `${x - 30}px`;
+                nodeEl.style.top = `${y - 30}px`;
+                container.appendChild(nodeEl);
+                nodes.push({ el: nodeEl, x, y, data });
+            });
+        }
+
+        function createStrand(fromNode, toNode, color) {
+            const dx = toNode.x - fromNode.x;
+            const dy = toNode.y - fromNode.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            
+            const strandEl = document.createElement('div');
+            strandEl.className = 'strand';
+            strandEl.style.backgroundColor = color;
+            strandEl.style.width = `${distance}px`;
+            strandEl.style.left = `${fromNode.x}px`;
+            strandEl.style.top = `${fromNode.y}px`;
+            strandEl.style.transform = `rotate(${angle}deg)`;
+            container.appendChild(strandEl);
+            return strandEl;
+        }
+
+        function runStep() {
+            state = (state + 1) % 5;
+            strands.forEach(s => s.remove());
+            strands = [];
+            nodes.forEach(n => n.el.classList.remove('active'));
+
+            const activeNode = nodes[activeNodeIndex];
+            activeNode.el.classList.add('active');
+
+            switch (state) {
+                case 0: // Show Query Strands
+                    nodes.forEach(n => {
+                        const strand = createStrand(activeNode, n, 'var(--q-strand)');
+                        strands.push(strand);
+                        setTimeout(() => strand.style.opacity = '0.5', 50);
+                    });
+                    break;
+                case 1: // Show Key Strands & Resonance
+                    nodes.forEach(n => {
+                        const strand = createStrand(activeNode, n, 'var(--k-strand)');
+                        strands.push(strand);
+                        setTimeout(() => strand.style.opacity = '0.5', 50);
+                    });
+                    break;
+                case 2: // Show Attention Scores (Softmax)
+                    nodes.forEach((n, i) => {
+                        const isRelevant = i === 3; // "mat" is most relevant to "it"
+                        const isSelf = i === activeNodeIndex;
+                        const opacity = isRelevant ? 1.0 : (isSelf ? 0.4 : 0.1);
+                        const color = isRelevant ? 'var(--node-active-border)' : 'var(--k-strand)';
+                        
+                        const strand = createStrand(activeNode, n, color);
+                        strands.push(strand);
+                        setTimeout(() => {
+                           strand.style.opacity = opacity;
+                           strand.style.height = `${1 + opacity * 3}px`;
+                        }, 50);
+                    });
+                    break;
+                case 3: // Show Value Aggregation
+                    nodes.forEach((n, i) => {
+                         const isRelevant = i === 3;
+                         if (isRelevant) {
+                            const strand = createStrand(n, activeNode, 'var(--v-strand)');
+                            strands.push(strand);
+                            setTimeout(() => { strand.style.opacity = '0.8'; strand.style.height = '3px'}, 50);
+                         }
+                    });
+                    break;
+                case 4: // Final refined state
+                    activeNode.el.style.backgroundColor = '#66bb6a'; // Show a 'refined' state
+                    break;
+            }
+        }
+        
+        function reset() {
+            state = -1;
+            strands.forEach(s => s.remove());
+            strands = [];
+            nodes.forEach(n => {
+                n.el.classList.remove('active');
+                n.el.style.backgroundColor = '';
+            });
+        }
+
+        nextBtn.addEventListener('click', runStep);
+        resetBtn.addEventListener('click', reset);
+        
+        createNodes();
+    </script>
+</body>
+</html>

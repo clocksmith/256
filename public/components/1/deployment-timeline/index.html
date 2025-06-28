@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estimated L4/L5 Deployment Timeline (Interactive)</title>
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --padding: 0.8rem;
+        --grid-line: #ccc;
+        --bar-limited: #a0cfff;
+        --bar-scaled: #5e97f6;
+        --bar-widespread: #1a73e8;
+        --bar-hover: #ffc107;
+        --tooltip-bg: #333;
+        --tooltip-text: #fff;
+      }
+      body.dark-mode {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --grid-line: #555;
+        --bar-limited: #5f84a8;
+        --bar-scaled: #8ab4f8;
+        --bar-widespread: #c6dafc;
+        --bar-hover: #f0ad4e;
+        --tooltip-bg: #222;
+        --tooltip-text: #eee;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: var(--padding);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 0.8rem;
+        line-height: 1.4;
+        overflow-x: hidden; /* Prevent horizontal scroll from tooltips */
+      }
+      .chart-wrapper {
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: var(--padding);
+      }
+      .chart-container {
+        width: 100%;
+        overflow-x: auto; /* Allow scroll for small screens */
+      }
+      .timeline-chart {
+        display: grid;
+        grid-template-columns: 120px repeat(4, 1fr); /* Wider label column */
+        gap: 0.6rem 0.3rem; /* Increased gap */
+        min-width: 550px; /* Ensure headers are readable */
+        padding-bottom: 1.5rem;
+        position: relative;
+        border-left: 1px solid var(--grid-line);
+        margin-left: var(--padding);
+        margin-top: var(--padding);
+      }
+      .timeline-header {
+        grid-column: 2 / -1;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        text-align: center;
+        font-size: 0.75rem; /* Slightly larger header */
+        font-weight: bold;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid var(--grid-line);
+        position: sticky;
+        top: 0;
+        background-color: var(--bg-color);
+        z-index: 10;
+      }
+      .use-case-label {
+        text-align: right;
+        padding-right: 0.6rem;
+        font-weight: bold;
+        white-space: normal;
+        line-height: 1.2;
+        align-self: center;
+        font-size: 0.75rem; /* Slightly larger label */
+      }
+      .timeline-bar-container {
+        display: flex;
+        height: 20px; /* Slightly taller bars */
+        border-radius: 3px; /* Rounded container */
+        overflow: hidden;
+        background-color: var(--border-color);
+        position: relative; /* For tooltip */
+        cursor: pointer;
+      }
+      .bar-segment {
+        height: 100%;
+        transition: width 0.5s ease, background-color 0.2s ease;
+        position: relative; /* For text inside bar */
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; /* Text at the end */
+        overflow: hidden;
+      }
+      .bar-segment span {
+        /* Text inside the bar */
+        font-size: 0.6rem;
+        color: black;
+        mix-blend-mode: difference;
+        filter: invert(1) grayscale(1) contrast(100);
+        font-weight: bold;
+        opacity: 0.8;
+        padding-right: 3px;
+        white-space: nowrap;
+      }
+      body.dark-mode .bar-segment span {
+        filter: none;
+      }
+      .bar-limited {
+        background-color: var(--bar-limited);
+      }
+      .bar-scaled {
+        background-color: var(--bar-scaled);
+      }
+      .bar-widespread {
+        background-color: var(--bar-widespread);
+      }
+      .timeline-bar-container:hover .bar-segment {
+        background-color: var(--bar-hover);
+      }
+      .tooltip {
+        position: absolute;
+        background-color: var(--tooltip-bg);
+        color: var(--tooltip-text);
+        padding: 0.4rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        z-index: 20;
+        white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        transform: translate(-50%, -110%); /* Position above bar */
+      }
+      .timeline-bar-container:hover .tooltip {
+        opacity: 1;
+      }
+      .legend {
+        margin-top: 1rem;
+        font-size: 0.7rem;
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        justify-content: center;
+      }
+      .legend li {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .legend span.legend-color {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chart-wrapper">
+      <div class="chart-container">
+        <div class="timeline-chart">
+          <div class="timeline-header">
+            <div>2025-2028</div>
+            <div>2029-2032</div>
+            <div>2033-2036</div>
+            <div>2037+</div>
+          </div>
+
+          <!-- Robotaxi -->
+          <div class="use-case-label">Robotaxi (Urban Geofenced)</div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2025-2028: Limited (70%), Scaled (30%)"
+          >
+            <div class="bar-segment bar-limited" style="width: 70%">
+              <span>Ltd</span>
+            </div>
+            <div class="bar-segment bar-scaled" style="width: 30%">
+              <span>Scl</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2029-2032: Scaled (80%), Widespread (20%)"
+          >
+            <div class="bar-segment bar-scaled" style="width: 80%">
+              <span>Scaled</span>
+            </div>
+            <div class="bar-segment bar-widespread" style="width: 20%">
+              <span>Wide</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2033-2036: Widespread (90%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 90%">
+              <span>Widespread</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2037+: Widespread (100%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 100%"></div>
+            <div class="tooltip"></div>
+          </div>
+
+          <!-- Long-Haul Trucking -->
+          <div class="use-case-label">Long-Haul Trucking (Highway)</div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2025-2028: Limited (50%)"
+          >
+            <div class="bar-segment bar-limited" style="width: 50%">
+              <span>Limited</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2029-2032: Scaled (70%)"
+          >
+            <div class="bar-segment bar-scaled" style="width: 70%">
+              <span>Scaled</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2033-2036: Widespread (80%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 80%">
+              <span>Widespread</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2037+: Widespread (100%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 100%"></div>
+            <div class="tooltip"></div>
+          </div>
+
+          <!-- Personal AV (Highway Assist L3/4) -->
+          <div class="use-case-label">Personal AV (Highway L3/4)</div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2025-2028: Limited (40%)"
+          >
+            <div class="bar-segment bar-limited" style="width: 40%">
+              <span>Limited</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2029-2032: Scaled (60%), Widespread (10%)"
+          >
+            <div class="bar-segment bar-scaled" style="width: 60%">
+              <span>Scaled</span>
+            </div>
+            <div class="bar-segment bar-widespread" style="width: 10%">
+              <span>W</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2033-2036: Widespread (95%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 95%">
+              <span>Widespread</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2037+: Widespread (100%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 100%"></div>
+            <div class="tooltip"></div>
+          </div>
+
+          <!-- Personal AV (Urban L4/L5) -->
+          <div class="use-case-label">Personal AV (Urban L4/L5)</div>
+          <div class="timeline-bar-container" data-tooltip="2025-2028: N/A">
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2029-2032: Limited (30%)"
+          >
+            <div class="bar-segment bar-limited" style="width: 30%">
+              <span>Limited</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2033-2036: Scaled (50%), Widespread (15%)"
+          >
+            <div class="bar-segment bar-scaled" style="width: 50%">
+              <span>Scaled</span>
+            </div>
+            <div class="bar-segment bar-widespread" style="width: 15%">
+              <span>W</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2037+: Widespread (70%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 70%">
+              <span>Widespread</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+
+          <!-- Local Goods Delivery -->
+          <div class="use-case-label">Local Goods Delivery (L4)</div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2025-2028: Limited (60%)"
+          >
+            <div class="bar-segment bar-limited" style="width: 60%">
+              <span>Limited</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2029-2032: Scaled (75%)"
+          >
+            <div class="bar-segment bar-scaled" style="width: 75%">
+              <span>Scaled</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2033-2036: Widespread (85%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 85%">
+              <span>Widespread</span>
+            </div>
+            <div class="tooltip"></div>
+          </div>
+          <div
+            class="timeline-bar-container"
+            data-tooltip="2037+: Widespread (100%)"
+          >
+            <div class="bar-segment bar-widespread" style="width: 100%"></div>
+            <div class="tooltip"></div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="legend">
+        <li>
+          <span class="legend-color bar-limited"></span> Pilot / Limited
+          Deployment
+        </li>
+        <li><span class="legend-color bar-scaled"></span> Scaled Deployment</li>
+        <li>
+          <span class="legend-color bar-widespread"></span> Widespread Adoption
+        </li>
+      </ul>
+      <p
+        style="
+          font-size: 0.7rem;
+          opacity: 0.7;
+          margin-top: 0.5rem;
+          text-align: center;
+        "
+      >
+        Note: Timeline estimates are illustrative, based on aggregated analyst
+        forecasts. Hover for details.
+      </p>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+      }
+
+      document
+        .querySelectorAll(".timeline-bar-container")
+        .forEach((container) => {
+          const tooltipElement = container.querySelector(".tooltip");
+          const tooltipText = container.dataset.tooltip;
+          if (tooltipElement && tooltipText) {
+            tooltipElement.textContent = tooltipText;
+          }
+
+          container.addEventListener("mousemove", (e) => {
+            if (!tooltipElement) return;
+            const rect = container.getBoundingClientRect();
+            // Position tooltip relative to the container, then adjust based on mouse within bar
+            let x = e.clientX - rect.left;
+            // Keep tooltip within chart boundaries
+            const chartWrapper = document.querySelector(".chart-wrapper");
+            const chartRect = chartWrapper.getBoundingClientRect();
+
+            tooltipElement.style.left = `${Math.min(
+              Math.max(x, tooltipElement.offsetWidth / 2),
+              rect.width - tooltipElement.offsetWidth / 2
+            )}px`;
+            tooltipElement.style.top = `-${tooltipElement.offsetHeight + 5}px`; // Position above bar
+          });
+        });
+    </script>
+  </body>
+</html>

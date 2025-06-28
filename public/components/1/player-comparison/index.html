@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AV Player Comparison (Enhanced Table)</title>
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --header-bg: #e9ecef;
+        --row-bg-even: #f1f3f5;
+        --padding-h: 0.7rem;
+        --padding-v: 0.5rem;
+        --hover-bg: #e2e6ea;
+        --focus-outline: 2px solid #4dabf7;
+        --waymo-accent: #4285f4;
+        --tesla-accent: #e82127;
+        --cruise-accent: #0f9d58;
+        --aurora-accent: #7c4dff;
+        --mobileye-accent: #0071c5;
+        --zoox-accent: #ff9900;
+      }
+      body.dark-mode {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --header-bg: #333;
+        --row-bg-even: #252525;
+        --hover-bg: #383838;
+        --focus-outline: 2px solid #8ab4f8;
+        --waymo-accent: #8ab4f8;
+        --tesla-accent: #f28b82;
+        --cruise-accent: #57bb8a;
+        --aurora-accent: #b39ddb;
+        --mobileye-accent: #66b3ff;
+        --zoox-accent: #ffd54f;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 0.75rem; /* Smaller base for dense table */
+        line-height: 1.4;
+      }
+      .table-wrapper {
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+        margin: var(--padding-v);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .table-container {
+        width: 100%;
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: normal;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border-color);
+        padding: var(--padding-v) var(--padding-h);
+        text-align: left;
+        vertical-align: top;
+      }
+      td:not(:last-child),
+      th:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+      th {
+        background-color: var(--header-bg);
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        font-size: 0.7rem; /* Smaller header text */
+        text-transform: uppercase;
+      }
+      tbody tr:nth-child(even) {
+        background-color: var(--row-bg-even);
+      }
+      tbody tr:hover {
+        background-color: var(--hover-bg);
+      }
+      td.company-name {
+        font-weight: bold;
+        min-width: 70px;
+        font-size: 0.8rem;
+      }
+      .status-operational {
+        color: var(--cruise-accent);
+      } /* Greenish */
+      .status-limited {
+        color: var(--mobileye-accent);
+      } /* Blueish */
+      .status-ambition {
+        color: var(--tesla-accent);
+      } /* Reddish */
+      .status-paused {
+        color: var(--aurora-accent);
+        opacity: 0.8;
+      } /* Purplish */
+
+      .tech-highlight {
+        display: inline-block;
+        padding: 0.1em 0.3em;
+        border-radius: 3px;
+        font-size: 0.9em;
+        margin-right: 0.3em;
+        margin-bottom: 0.2em;
+      }
+      .tech-lidar {
+        background-color: rgba(
+          var(--waymo-r, 66),
+          var(--waymo-g, 133),
+          var(--waymo-b, 244),
+          0.2
+        );
+        border: 1px solid
+          rgba(
+            var(--waymo-r, 66),
+            var(--waymo-g, 133),
+            var(--waymo-b, 244),
+            0.5
+          );
+      }
+      .tech-vision {
+        background-color: rgba(
+          var(--tesla-r, 232),
+          var(--tesla-g, 33),
+          var(--tesla-b, 39),
+          0.2
+        );
+        border: 1px solid
+          rgba(var(--tesla-r, 232), var(--tesla-g, 33), var(--tesla-b, 39), 0.5);
+      }
+      .tech-hdmap {
+        background-color: rgba(
+          var(--cruise-r, 15),
+          var(--cruise-g, 157),
+          var(--cruise-b, 88),
+          0.2
+        );
+        border: 1px solid
+          rgba(
+            var(--cruise-r, 15),
+            var(--cruise-g, 157),
+            var(--cruise-b, 88),
+            0.5
+          );
+      }
+      body.dark-mode .tech-lidar {
+        background-color: rgba(138, 180, 248, 0.2);
+        border: 1px solid rgba(138, 180, 248, 0.5);
+      }
+      body.dark-mode .tech-vision {
+        background-color: rgba(242, 139, 130, 0.2);
+        border: 1px solid rgba(242, 139, 130, 0.5);
+      }
+      body.dark-mode .tech-hdmap {
+        background-color: rgba(87, 187, 138, 0.2);
+        border: 1px solid rgba(87, 187, 138, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="table-wrapper">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Backer(s)</th>
+              <th>Focus</th>
+              <th>Tech Highlights</th>
+              <th>Status/Markets (Mid-2025)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr tabindex="0">
+              <td class="company-name" style="color: var(--waymo-accent)">
+                Waymo
+              </td>
+              <td>Alphabet</td>
+              <td>Robotaxi, Personal AV Dev</td>
+              <td>
+                <span class="tech-highlight tech-lidar"
+                  >Multi-sensor (Lidar++)</span
+                >
+                <span class="tech-highlight tech-hdmap">Custom HD Maps</span>
+                In-house AI
+              </td>
+              <td class="status-operational">
+                L4 Robotaxi (Phoenix, SF, LA); Expanding. Toyota partnership.
+              </td>
+            </tr>
+            <tr tabindex="0">
+              <td class="company-name" style="color: var(--tesla-accent)">
+                Tesla
+              </td>
+              <td>Public, E. Musk</td>
+              <td>Personal AV (FSD), Robotaxi (Goal)</td>
+              <td>
+                <span class="tech-highlight tech-vision">Vision-only</span>
+                End-to-End NN, Fleet Learning
+              </td>
+              <td class="status-ambition">
+                Global L2 ADAS (FSD Supervised); Robotaxi event planned.
+                Regulatory scrutiny.
+              </td>
+            </tr>
+            <tr tabindex="0">
+              <td class="company-name" style="color: var(--cruise-accent)">
+                Cruise
+              </td>
+              <td>GM, Honda</td>
+              <td>Robotaxi</td>
+              <td>
+                <span class="tech-highlight tech-lidar">Multi-sensor</span>
+                <span class="tech-highlight tech-hdmap">HD Maps</span> GM
+                Integration
+              </td>
+              <td class="status-paused">
+                Ops paused/limited testing (Phoenix safety drivers)
+                post-incident. Rebuilding.
+              </td>
+            </tr>
+            <tr tabindex="0">
+              <td class="company-name" style="color: var(--mobileye-accent)">
+                Mobileye
+              </td>
+              <td>Intel</td>
+              <td>ADAS Supplier, Full Stack AV</td>
+              <td>Vision-centric (+Lidar/Radar), REM HD Maps, EyeQ SoCs</td>
+              <td class="status-limited">
+                Leading ADAS supplier. Developing Mobileye Drive (L4). Strong Q1
+                '25.
+              </td>
+            </tr>
+            <tr tabindex="0">
+              <td class="company-name" style="color: var(--aurora-accent)">
+                Aurora
+              </td>
+              <td>Public (Ex-Uber ATG)</td>
+              <td>Autonomous Trucking</td>
+              <td>
+                <span class="tech-highlight tech-lidar">FirstLight Lidar</span>
+                Aurora Driver, Virtual Testing
+              </td>
+              <td class="status-operational">
+                Commercial driverless trucking (Dallas-Houston). Freight
+                partnerships.
+              </td>
+            </tr>
+            <tr tabindex="0">
+              <td class="company-name" style="color: var(--zoox-accent)">
+                Zoox
+              </td>
+              <td>Amazon</td>
+              <td>Robotaxi (Purpose-built)</td>
+              <td>
+                <span class="tech-highlight tech-lidar">Multi-sensor</span>
+                Custom bidirectional AV
+              </td>
+              <td class="status-limited">
+                Testing purpose-built AV (LV, SF, LA). Not yet commercial public
+                service.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+        // Set CSS vars for dark mode accents if not already covered by general dark mode
+        const root = document.documentElement;
+        root.style.setProperty("--waymo-r", 138);
+        root.style.setProperty("--waymo-g", 180);
+        root.style.setProperty("--waymo-b", 248);
+        root.style.setProperty("--tesla-r", 242);
+        root.style.setProperty("--tesla-g", 139);
+        root.style.setProperty("--tesla-b", 130);
+        root.style.setProperty("--cruise-r", 87);
+        root.style.setProperty("--cruise-g", 187);
+        root.style.setProperty("--cruise-b", 138);
+      } else {
+        const root = document.documentElement;
+        root.style.setProperty("--waymo-r", 66);
+        root.style.setProperty("--waymo-g", 133);
+        root.style.setProperty("--waymo-b", 244);
+        root.style.setProperty("--tesla-r", 232);
+        root.style.setProperty("--tesla-g", 33);
+        root.style.setProperty("--tesla-b", 39);
+        root.style.setProperty("--cruise-r", 15);
+        root.style.setProperty("--cruise-g", 157);
+        root.style.setProperty("--cruise-b", 88);
+      }
+    </script>
+  </body>
+</html>

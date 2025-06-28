@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Knowledge Synthesis Map - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #15101F; /* Deep Indigo */
+        --text-color: #f0e8ff; /* Pale Lavender text */
+        --border-color: #3a2a4a;
+        --center-node-bg: #9400d3; /* Dark Violet */
+        --branch-node-bg-neuro: #007bff; /* Bright Blue */
+        --branch-node-bg-cog: #ff8c00; /* Dark Orange */
+        --branch-node-bg-comp: #28a745; /* Green */
+        --branch-node-bg-cult: #dc3545; /* Red */
+        --line-color: #b39ddb; /* Light Purple for lines */
+        --center-glow: var(--center-node-bg);
+        --node-text-shadow: rgba(0,0,0,0.5);
+      }
+      body.light-mode {
+        --bg-color: #f8f0ff;
+        --text-color: #201030;
+        --border-color: #e0d0f0;
+        --center-node-bg: #8a2be2; /* Blue Violet */
+        --branch-node-bg-neuro: #006fe6;
+        --branch-node-bg-cog: #e67e00;
+        --branch-node-bg-comp: #22963c;
+        --branch-node-bg-cult: #c82333;
+        --line-color: #9f7aea;
+        --center-glow: var(--center-node-bg);
+        --node-text-shadow: rgba(255,255,255,0.3);
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: "Montserrat", sans-serif; }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        width: 100%; height: 100%; border: 1px solid var(--border-color);
+        padding: 0.5rem; display:flex; justify-content:center; align-items:center;
+        background: radial-gradient( ellipse farthest-corner at 50% 50%,
+          color-mix(in srgb, var(--bg-color) 60%, var(--center-node-bg) 40%) 0%, var(--bg-color) 75% );
+      }
+      .mind-map-svg { width: 100%; height: 100%; max-width:500px; max-height:450px; display:block; margin:auto; }
+
+      .node-group {
+        cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Elastic transition */
+        will-change: transform;
+      }
+      .node-group.active { transform: scale(1.15) !important; z-index: 10;}
+      .node-group.inactive { opacity: 0.5; filter: grayscale(50%); transform: scale(0.9); }
+      .node-group:not(.active):hover { transform: scale(1.08); opacity: 0.8; filter: grayscale(20%); }
+      
+      .node-shape {
+        stroke: color-mix(in srgb, currentColor 60%, var(--border-color) 40%); stroke-width: 1.2px;
+        filter: drop-shadow(0 0 5px currentColor) drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
+        transition: filter 0.3s ease, stroke-width 0.3s ease;
+      }
+      .node-group.active .node-shape { filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 5px white); stroke-width: 1.8px;}
+      .node-group:not(.active):hover .node-shape { filter: drop-shadow(0 0 8px currentColor) brightness(1.15); }
+      
+      .node-text {
+        fill: var(--text-color); font-size: 7px; font-family: inherit;
+        text-anchor: middle; dominant-baseline: middle; pointer-events: none;
+        paint-order: stroke; stroke: var(--node-text-shadow); stroke-width: 0.4px; stroke-linejoin: round;
+        transition: font-size 0.3s ease;
+      }
+      .node-group.active .node-text { font-size: 7.5px; font-weight: bold; }
+      .center-node .node-shape { fill: var(--center-node-bg); }
+      .center-node .node-text { font-size: 9px; font-weight: bold; }
+      .branch-neuro .node-shape { fill: var(--branch-node-bg-neuro); }
+      .branch-cog .node-shape { fill: var(--branch-node-bg-cog); }
+      .branch-comp .node-shape { fill: var(--branch-node-bg-comp); }
+      .branch-cult .node-shape { fill: var(--branch-node-bg-cult); }
+
+      .connection-path {
+        stroke: var(--line-color); stroke-width: 2px; opacity: 0.7;
+        stroke-dasharray: 5 3; animation: path-flow-map-animated 6s linear infinite;
+        filter: drop-shadow(0 0 2.5px var(--line-color));
+        transition: opacity 0.3s ease, stroke-width 0.3s ease;
+      }
+      .connection-path.active { opacity: 1; stroke-width: 2.8px; filter: drop-shadow(0 0 5px var(--line-color)) drop-shadow(0 0 2px white); }
+      .connection-path.inactive { opacity: 0.3; filter: grayscale(70%); }
+
+      @keyframes path-flow-map-animated { to { stroke-dashoffset: -48; } } /* (5+3)*6 */
+      
+      @media (prefers-reduced-motion: reduce) {
+        .connection-path, .node-group { animation: none !important; transition: filter 0.3s, opacity 0.3s; }
+        .node-group.active { transform: scale(1.1) !important; }
+        .node-group.inactive { opacity: 0.6; transform: scale(0.95); }
+        .node-group:not(.active):hover { transform: scale(1.05); opacity: 0.9; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" role="img" aria-label="Interactive SVG mind map: A central 'Déjà Vu Synthesis' node connects to four color-coded branch nodes (Neuroscience, Cognitive Psych, Computational/AI, Cultural Views) via animated dashed lines. Clicking a node highlights it and its connection, dimming others, to emphasize its contribution to the overall understanding.">
+      <svg class="mind-map-svg" id="mindMapSVG" viewBox="0 0 120 100" preserveAspectRatio="xMidYMid meet">
+        <g id="map-connection-paths"></g>
+        <g class="node-group center-node" id="centerNodeMap" transform="translate(60 50)" style="--current-color: var(--center-node-bg);" tabindex="0" aria-label="Central Theme: Déjà Vu Synthesis">
+          <ellipse class="node-shape" cx="0" cy="0" rx="26" ry="18" />
+          <text class="node-text"><tspan x="0" dy="-0.4em">Déjà Vu</tspan><tspan x="0" dy="1.2em">Synthesis</tspan></text>
+        </g>
+        <g id="map-branch-nodes"></g>
+      </svg>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") document.body.classList.add("light-mode");
+
+      const svgNSMapEl = "http://www.w3.org/2000/svg";
+      const mapBranchNodes = document.getElementById("map-branch-nodes");
+      const mapConnectionPaths = document.getElementById("map-connection-paths");
+      const centerNodeMap = document.getElementById("centerNodeMap");
+      
+      const mapBranchData = [
+        { id: "neuro", angle: -100, dist: 39, rx: 21, ry: 13, txtL: ["Neuroscience", "(MTL, Glitches)"], class: "branch-neuro", colorVar: "--branch-node-bg-neuro" },
+        { id: "cog", angle: -45, dist: 40, rx: 22, ry: 13, txtL: ["Cognitive Psych", "(Dual Process)"], class: "branch-cog", colorVar: "--branch-node-bg-cog" },
+        { id: "comp", angle: 45, dist: 40, rx: 23, ry: 13, txtL: ["Computational/AI", "(Hallucinations)"], class: "branch-comp", colorVar: "--branch-node-bg-comp" },
+        { id: "cult", angle: 100, dist: 39, rx: 21, ry: 13, txtL: ["Cultural Views", "(Interpretations)"], class: "branch-cult", colorVar: "--branch-node-bg-cult" }
+      ];
+      const mapCenterPos = { x: 60, y: 50 };
+      let activeNodeId = null;
+
+      function createMapNode(nodeData) {
+        const angleRad = (nodeData.angle * Math.PI) / 180;
+        const nodeCx = mapCenterPos.x + nodeData.dist * Math.cos(angleRad);
+        const nodeCy = mapCenterPos.y + nodeData.dist * Math.sin(angleRad);
+
+        const path = document.createElementNS(svgNSMapEl, "path");
+        path.classList.add("connection-path");
+        path.id = `path-${nodeData.id}`;
+        const cOffsetX = (nodeCy - mapCenterPos.y) * 0.25; 
+        const cOffsetY = -(nodeCx - mapCenterPos.x) * 0.25;
+        path.setAttribute("d", `M ${mapCenterPos.x} ${mapCenterPos.y} Q ${ (mapCenterPos.x + nodeCx)/2 + cOffsetX } ${ (mapCenterPos.y + nodeCy)/2 + cOffsetY }, ${nodeCx} ${nodeCy}`);
+        path.setAttribute("fill", "none");
+        mapConnectionPaths.appendChild(path);
+
+        const g = document.createElementNS(svgNSMapEl, "g");
+        g.classList.add("node-group", nodeData.class);
+        g.id = nodeData.id;
+        g.setAttribute("transform", `translate(${nodeCx} ${nodeCy})`);
+        g.style.setProperty("--current-color", `var(${nodeData.colorVar})`);
+        g.setAttribute("tabindex", "0");
+        g.setAttribute("aria-label", nodeData.txtL.join(' '));
+
+        const ellipse = document.createElementNS(svgNSMapEl, "ellipse");
+        ellipse.classList.add("node-shape");
+        ellipse.setAttribute("cx", "0"); ellipse.setAttribute("cy", "0");
+        ellipse.setAttribute("rx", nodeData.rx); ellipse.setAttribute("ry", nodeData.ry);
+        g.appendChild(ellipse);
+
+        const text = document.createElementNS(svgNSMapEl, "text");
+        text.classList.add("node-text");
+        nodeData.txtL.forEach((line, idx) => {
+          const tspan = document.createElementNS(svgNSMapEl, "tspan");
+          tspan.setAttribute("x", "0");
+          tspan.setAttribute("dy", idx === 0 && nodeData.txtL.length > 1 ? "-0.4em" : (idx > 0 ? "1.2em" : "0"));
+          tspan.textContent = line;
+          text.appendChild(tspan);
+        });
+        g.appendChild(text);
+        mapBranchNodes.appendChild(g);
+
+        g.addEventListener('click', () => toggleNodeFocus(nodeData.id));
+        g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') toggleNodeFocus(nodeData.id); });
+      }
+      
+      mapBranchData.forEach(createMapNode);
+      
+      function toggleNodeFocus(nodeId) {
+        const previouslyActive = activeNodeId;
+        activeNodeId = (activeNodeId === nodeId) ? null : nodeId;
+
+        document.querySelectorAll('.node-group, .connection-path').forEach(el => {
+            el.classList.remove('active', 'inactive');
+        });
+        
+        if (activeNodeId) {
+          document.getElementById(activeNodeId)?.classList.add('active');
+          document.getElementById(`path-${activeNodeId}`)?.classList.add('active');
+          document.querySelectorAll('.node-group, .connection-path').forEach(el => {
+            if (el.id !== activeNodeId && el.id !== `path-${activeNodeId}` && el !== centerNodeMap) {
+              el.classList.add('inactive');
+            }
+          });
+          centerNodeMap.classList.remove('inactive'); // Center node is always relevant
+        }
+      }
+      centerNodeMap.addEventListener('click', () => toggleNodeFocus(null)); // Click center to reset focus
+    </script>
+  </body>
+</html>

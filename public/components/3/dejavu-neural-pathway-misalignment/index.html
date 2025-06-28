@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neural Pathway Misalignment - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #0a0a0a;
+        --text-color: #f0f0f0;
+        --border-color: #303030;
+        --neuron-color: #aa44ff; /* Vivid Purple */
+        --path-color: #00ffff; /* Bright Cyan */
+        --misalignment-color: #ff1493; /* Deep Pink */
+        --short-circuit-color: #ffff00; /* Yellow flash */
+        --neuron-glow-color: rgba(170, 68, 255, 0.7);
+        --path-glow-color: rgba(0, 255, 255, 0.6);
+        --misalignment-glow-color: rgba(255, 20, 147, 0.7);
+        --neuron-color-rgb-fallback: 170, 68, 255;
+      }
+      body.light-mode {
+        --bg-color: #fafafa;
+        --text-color: #0f0f0f;
+        --border-color: #d0d0d0;
+        --neuron-color: #8833dd;
+        --path-color: #00cccc;
+        --misalignment-color: #dd1177;
+        --short-circuit-color: #ffdd00;
+        --neuron-glow-color: rgba(136, 51, 221, 0.5);
+        --path-glow-color: rgba(0, 204, 204, 0.4);
+        --misalignment-glow-color: rgba(221, 17, 119, 0.5);
+        --neuron-color-rgb-fallback: 136, 51, 221;
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin:0; padding:0; overflow: hidden; background-color: var(--bg-color); }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        width: 100%; height: 100%; border: 1px solid var(--border-color);
+        display:flex; justify-content: center; align-items: center; padding: 0.5rem;
+        background: radial-gradient( ellipse at center,
+          rgba(var(--neuron-color-rgb, var(--neuron-color-rgb-fallback)), 0.04) 0%, transparent 70% );
+      }
+      .neural-canvas-svg {
+        width: 100%; height: 100%; max-width: 450px; max-height: 450px; aspect-ratio: 1 / 1;
+        cursor: default; /* Default cursor for SVG */
+      }
+      .neuron-node {
+        fill: var(--neuron-color); stroke: var(--neuron-glow-color); stroke-width: 0.7px;
+        filter: drop-shadow(0 0 4px var(--neuron-glow-color));
+        animation: neuron-subtle-pulse 3s infinite ease-in-out;
+        transition: r 0.2s ease, filter 0.2s ease;
+        cursor: pointer;
+      }
+      .neuron-node:hover { r: calc(min(3.8vh, 3.8vw, 11px)) !important; filter: drop-shadow(0 0 8px var(--neuron-glow-color)) brightness(1.2); }
+      .neuron-node.firing { animation: neuron-fire-pulse 0.5s ease-out; }
+      
+      .path-line {
+        fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.8px;
+        animation: path-signal-transmission 3.5s linear infinite;
+        transition: stroke-width 0.2s ease, filter 0.2s ease;
+        cursor: pointer;
+      }
+      .path-line:hover { stroke-width: 3.5px; filter: brightness(1.3); }
+      .path-normal { stroke: var(--path-color); filter: drop-shadow(0 0 2.5px var(--path-glow-color)); }
+      .path-normal.active-signal { animation: path-signal-transmission 3.5s linear infinite, active-signal-pulse 0.8s linear infinite alternate; }
+
+      .path-misaligned {
+        stroke: var(--misalignment-color); stroke-dasharray: 6 3.5;
+        filter: drop-shadow(0 0 3.5px var(--misalignment-glow-color));
+        animation: path-signal-transmission 2.5s linear infinite alternate, 
+                   misaligned-path-flicker 0.5s steps(2, jump-none) infinite alternate;
+      }
+      .path-misaligned:hover { filter: drop-shadow(0 0 6px var(--misalignment-glow-color)) brightness(1.3); }
+
+      .short-circuit-loop-path {
+        stroke: var(--misalignment-color); stroke-dasharray: 4 2.5; stroke-width: 2.2px;
+        filter: drop-shadow(0 0 4px var(--misalignment-glow-color));
+        animation: short-circuit-flow 1.8s linear infinite, misaligned-path-flicker 0.4s steps(2, jump-none) infinite alternate -0.2s;
+      }
+      .short-circuit-flash-effect {
+        position: absolute; top:0; left:0; width:100%; height:100%;
+        background-color: var(--short-circuit-color);
+        opacity:0; mix-blend-mode: lighten;
+        pointer-events: none;
+        animation: short-circuit-screen-flash 0.3s ease-out;
+      }
+
+      @keyframes neuron-subtle-pulse {
+        0%, 100% { r: calc(min(3.2vh, 3.2vw, 9px)); opacity: 0.8; }
+        50% { r: calc(min(3.5vh, 3.5vw, 10px)); opacity: 1; }
+      }
+      @keyframes neuron-fire-pulse {
+        0% { r: calc(min(4vh, 4vw, 12px)); filter: drop-shadow(0 0 10px var(--neuron-glow-color)) brightness(1.5); }
+        50% { r: calc(min(3.6vh, 3.6vw, 10.5px)); filter: drop-shadow(0 0 6px var(--neuron-glow-color)) brightness(1.3); }
+        100% { r: calc(min(3.2vh, 3.2vw, 9px)); filter: drop-shadow(0 0 4px var(--neuron-glow-color)) brightness(1); }
+      }
+      @keyframes path-signal-transmission { to { stroke-dashoffset: -35; } }
+      @keyframes active-signal-pulse {
+        from { stroke: var(--path-color); filter: drop-shadow(0 0 2.5px var(--path-glow-color));}
+        to { stroke: color-mix(in srgb, var(--path-color) 60%, white); filter: drop-shadow(0 0 5px var(--path-glow-color)) brightness(1.5);}
+      }
+      @keyframes misaligned-path-flicker {
+        0% { opacity: 0.7; stroke-width: 2.8px; }
+        100% { opacity: 1; stroke-width: 3.2px; }
+      }
+      @keyframes short-circuit-flow { to { stroke-dashoffset: -25; } }
+      @keyframes short-circuit-screen-flash {
+        0% { opacity: 0.7; } 20% { opacity: 0.7; } 100% { opacity: 0; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .neuron-node, .path-line, .path-misaligned, .short-circuit-loop-path { animation: none !important; }
+        .neuron-node { r: calc(min(3.2vh, 3.2vw, 9px)); opacity: 0.9; }
+        .path-line { stroke-dashoffset: 0 !important; }
+        .path-misaligned, .short-circuit-loop-path { opacity: 0.85; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" id="visContainer" role="img" aria-label="Interactive SVG animation of a neural network. Pulsing purple neurons can be clicked to 'fire' them. Signals flow along cyan pathways. One magenta pathway is misaligned; clicking it triggers a 'short circuit' flash and causes its signal to become more erratic and loop, symbolizing a neural processing error.">
+      <svg class="neural-canvas-svg" id="neuralCanvas" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+      </svg>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const isLightMode = params.get("theme") === "light";
+      if (isLightMode) document.body.classList.add("light-mode");
+      document.documentElement.style.setProperty("--neuron-color-rgb", isLightMode ? "136,51,221" : "170,68,255");
+
+      const svgNS = "http://www.w3.org/2000/svg";
+      const canvas = document.getElementById('neuralCanvas');
+      const visContainer = document.getElementById('visContainer');
+
+      const neuronsData = [
+        { id: 'n1', cx: 18, cy: 22 }, { id: 'n2', cx: 45, cy: 15 }, { id: 'n3', cx: 75, cy: 25 },
+        { id: 'n4', cx: 30, cy: 50 }, { id: 'n5', cx: 60, cy: 55 }, { id: 'n6', cx: 82, cy: 60 },
+        { id: 'n7', cx: 25, cy: 80 }, { id: 'n8', cx: 50, cy: 88 }, { id: 'n9', cx: 70, cy: 82 }
+      ];
+      const pathsData = [
+        { from: 'n1', to: 'n4', type: 'normal' }, { from: 'n2', to: 'n5', type: 'normal' },
+        { from: 'n4', to: 'n7', type: 'normal', delay: -0.5 }, { from: 'n5', to: 'n8', type: 'normal', delay: -0.7 },
+        { from: 'n7', to: 'n8', type: 'normal', delay: -1.0 }, { from: 'n3', to: 'n6', type: 'normal', delay: -0.3 },
+        { from: 'n6', to: 'n9', type: 'normal', delay: -0.8 }, { from: 'n9', to: 'n8', type: 'normal', delay: -1.2 },
+        { from: 'n2', to: 'n4', type: 'misaligned', d: "M 45 15 Q 30 30, 30 50" , id: 'misalignedPath1'}, // Diverging
+        { from: 'n5', to: 'n7', type: 'misaligned', d: "M 60 55 Q 40 75, 25 80", id: 'misalignedPath2' } // Another glitchy path
+      ];
+      const misalignedLoopData = { cx: 38, cy: 40, r: 5, parentPathId: 'misalignedPath1' };
+
+
+      function createSVGElement(tag, attributes) {
+        const el = document.createElementNS(svgNS, tag);
+        for (const key in attributes) {
+          el.setAttribute(key, attributes[key]);
+        }
+        return el;
+      }
+
+      pathsData.forEach(p => {
+        const fromNeuron = neuronsData.find(n => n.id === p.from);
+        const toNeuron = neuronsData.find(n => n.id === p.to);
+        let pathEl;
+        if (p.d) { // Custom path for misaligned
+            pathEl = createSVGElement('path', { d: p.d, class: `path-line path-${p.type}`, 'stroke-dashoffset': 35 });
+        } else {
+            pathEl = createSVGElement('line', {
+            x1: fromNeuron.cx, y1: fromNeuron.cy, x2: toNeuron.cx, y2: toNeuron.cy,
+            class: `path-line path-${p.type}`, 'stroke-dashoffset': 35
+            });
+        }
+        if (p.delay) pathEl.style.animationDelay = `${p.delay}s`;
+        if (p.id) pathEl.id = p.id;
+
+        pathEl.addEventListener('click', () => {
+            pathEl.classList.toggle('active-signal');
+            if (p.type === 'misaligned') triggerShortCircuit(pathEl);
+        });
+        canvas.appendChild(pathEl);
+      });
+      
+      const loop = createSVGElement('circle', {
+          cx: misalignedLoopData.cx, cy: misalignedLoopData.cy, r: misalignedLoopData.r,
+          fill: 'none', class: 'short-circuit-loop-path', 'stroke-dashoffset': 25
+      });
+      canvas.appendChild(loop);
+
+
+      neuronsData.forEach(n => {
+        const neuronEl = createSVGElement('circle', {
+          id: n.id, cx: n.cx, cy: n.cy, r: `calc(min(3.2vh, 3.2vw, 9px))`, class: 'neuron-node'
+        });
+        neuronEl.style.animationDelay = `${Math.random() * -2}s`;
+        neuronEl.addEventListener('click', () => {
+          neuronEl.classList.add('firing');
+          neuronEl.addEventListener('animationend', () => neuronEl.classList.remove('firing'), { once: true });
+        });
+        canvas.appendChild(neuronEl);
+      });
+      
+      function triggerShortCircuit(pathElement) {
+        const flash = document.createElement('div');
+        flash.className = 'short-circuit-flash-effect';
+        visContainer.appendChild(flash);
+        setTimeout(() => visContainer.removeChild(flash), 300);
+
+        // Make misaligned paths more erratic
+        document.querySelectorAll('.path-misaligned, .short-circuit-loop-path').forEach(el => {
+            el.style.animationDuration = `${parseFloat(getComputedStyle(el).animationDuration) * 0.5}s`;
+            setTimeout(() => { // Reset after a bit
+                 el.style.animationDuration = '';
+            }, 2000);
+        });
+      }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          // Apply static styles if reduced motion is preferred
+      }
+
+    </script>
+  </body>
+</html>

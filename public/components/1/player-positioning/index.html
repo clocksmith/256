@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AV Player Positioning (Interactive Quadrant)</title>
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --padding: 1rem; /* Increased padding */
+        --grid-line: #ccc;
+        --point-size: 10px; /* Larger points */
+        --waymo-color: #4285f4;
+        --tesla-color: #cc0000;
+        --aurora-color: #7c4dff;
+        --cruise-color: #0f9d58;
+        --zoox-color: #ffab00;
+        --motional-color: #20c997; /* Added Motional */
+        --tooltip-bg: #333;
+        --tooltip-text: #fff;
+      }
+      body.dark-mode {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --grid-line: #555;
+        --waymo-color: #8ab4f8;
+        --tesla-color: #f28b82;
+        --aurora-color: #b39ddb;
+        --cruise-color: #57bb8a;
+        --zoox-color: #ffd54f;
+        --motional-color: #66d9b7; /* Added Motional */
+        --tooltip-bg: #222;
+        --tooltip-text: #eee;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: var(--padding);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center chart vertically */
+        align-items: center;
+        min-height: 100vh; /* Ensure vertical centering */
+        box-sizing: border-box;
+        overflow: hidden; /* Prevent scrollbars from tooltips */
+      }
+      .chart-title {
+        font-size: 0.9rem; /* Slightly larger title */
+        font-weight: bold;
+        margin-bottom: 0.8rem; /* More space below title */
+        text-align: center;
+      }
+      .quadrant-chart-container {
+        width: 95%; /* Responsive width */
+        max-width: 400px; /* Max size */
+        aspect-ratio: 1 / 1;
+        position: relative;
+      }
+      .quadrant-chart {
+        width: 100%;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        position: relative;
+        background: linear-gradient(
+              to right,
+              var(--grid-line) 1px,
+              transparent 1px
+            )
+            50% 0 / 2px 100%,
+          /* Vertical axis line */
+            linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px) 0
+            50% / 100% 2px; /* Horizontal axis line */
+        background-repeat: no-repeat;
+      }
+      .quadrant-label {
+        position: absolute;
+        font-size: 0.65rem; /* Slightly larger labels */
+        opacity: 0.8; /* More visible labels */
+        background-color: var(
+          --bg-color
+        ); /* Ensure readability over grid lines */
+        padding: 1px 4px; /* Add some padding */
+        border-radius: 2px;
+        white-space: nowrap;
+      }
+      .label-y-top {
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .label-y-bottom {
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .label-x-left {
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%) translateX(-100%) rotate(-90deg);
+        transform-origin: right center;
+        padding-right: 5px;
+      }
+      .label-x-right {
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%) translateX(100%) rotate(90deg);
+        transform-origin: left center;
+        padding-left: 5px;
+      }
+
+      .player-point {
+        position: absolute;
+        width: var(--point-size);
+        height: var(--point-size);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        cursor: pointer; /* Indicate interactivity */
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        border: 1px solid var(--bg-color); /* Contrast border */
+      }
+      .player-point:hover {
+        transform: translate(-50%, -50%) scale(1.5);
+        box-shadow: 0 0 8px currentColor; /* Glow with player color */
+        z-index: 10;
+      }
+      .player-point .tooltip {
+        visibility: hidden;
+        background-color: var(--tooltip-bg);
+        color: var(--tooltip-text);
+        text-align: center;
+        border-radius: 4px;
+        padding: 5px 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 130%; /* Position above point */
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .player-point:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+      /* Positioning (0,0 is bottom-left, 100,100 is top-right) */
+      .waymo {
+        background-color: var(--waymo-color);
+        top: calc(100% - 85%);
+        left: 80%;
+      } /* High Mat, Broadish Amb */
+      .tesla {
+        background-color: var(--tesla-color);
+        top: calc(100% - 90%);
+        left: 55%;
+      } /* Med Mat, Highest Amb */
+      .aurora {
+        background-color: var(--aurora-color);
+        top: calc(100% - 40%);
+        left: 70%;
+      } /* Med-High Mat, Niche (Trucking) */
+      .cruise {
+        background-color: var(--cruise-color);
+        top: calc(100% - 60%);
+        left: 30%;
+      } /* Low-Med Mat (post-pause), Robotaxi Amb */
+      .zoox {
+        background-color: var(--zoox-color);
+        top: calc(100% - 30%);
+        left: 45%;
+      } /* Med Mat, Niche (Purpose-built) */
+      .motional {
+        background-color: var(--motional-color);
+        top: calc(100% - 50%);
+        left: 60%;
+      } /* Med Mat, Robotaxi Amb */
+    </style>
+  </head>
+  <body>
+    <div class="chart-title">Illustrative AV Player Positioning (Q2 2025)</div>
+    <div class="quadrant-chart-container">
+      <div class="quadrant-chart">
+        <span class="quadrant-label label-y-top">Broad Ambition / Scale</span>
+        <span class="quadrant-label label-y-bottom"
+          >Niche Focus / Specialized</span
+        >
+        <span class="quadrant-label label-x-left"
+          >Lower Tech Maturity / Early Deployment</span
+        >
+        <span class="quadrant-label label-x-right"
+          >Higher Tech Maturity / Scaled Deployment</span
+        >
+
+        <div
+          class="player-point waymo"
+          data-name="Waymo"
+          data-details="L4 Robotaxi Leader, Expanding"
+        >
+          <span class="tooltip">Waymo: L4 Robotaxi Leader</span>
+        </div>
+        <div
+          class="player-point tesla"
+          data-name="Tesla"
+          data-details="Vision-Only FSD, Global Ambition"
+        >
+          <span class="tooltip">Tesla: Vision FSD, Global</span>
+        </div>
+        <div
+          class="player-point aurora"
+          data-name="Aurora"
+          data-details="Autonomous Trucking Focus"
+        >
+          <span class="tooltip">Aurora: Trucking Focus</span>
+        </div>
+        <div
+          class="player-point cruise"
+          data-name="Cruise"
+          data-details="Robotaxi, Rebuilding Phase"
+        >
+          <span class="tooltip">Cruise: Robotaxi, Rebuilding</span>
+        </div>
+        <div
+          class="player-point zoox"
+          data-name="Zoox"
+          data-details="Purpose-Built Urban AV"
+        >
+          <span class="tooltip">Zoox: Purpose-Built AV</span>
+        </div>
+        <div
+          class="player-point motional"
+          data-name="Motional"
+          data-details="Robotaxi, Ride-hail Partnerships"
+        >
+          <span class="tooltip">Motional: Robotaxi Partnerships</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+      }
+      // Simple JS to update tooltip text dynamically if needed, or for future interactions
+      document.querySelectorAll(".player-point").forEach((point) => {
+        const tooltip = point.querySelector(".tooltip");
+        if (tooltip) {
+          tooltip.textContent = `${point.dataset.name}: ${point.dataset.details}`;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corrupted Data Packet Flow - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #0c0c0c;
+        --text-color: #e8e8e8;
+        --border-color: #333;
+        --packet-color: #50fa7b; /* Lime Green */
+        --echo-packet-color: rgba(80, 250, 123, 0.35);
+        --corruption-color: #ff5555; /* Bright Red */
+        --corruption-flicker-color: #ff8888; /* Lighter Red */
+        --path-color: #00e0e0; /* Cyan */
+        --node-bg: #252525;
+        --node-border: #484848;
+        --glow-color: rgba(80, 250, 123, 0.7);
+        --corruption-glow: rgba(255, 85, 85, 0.8);
+        --path-glow: rgba(0, 224, 224, 0.5);
+      }
+      body.light-mode {
+        --bg-color: #f5f5f5;
+        --text-color: #1c1c1c;
+        --border-color: #c5c5c5;
+        --packet-color: #33cc66; /* Slightly darker green */
+        --echo-packet-color: rgba(51, 204, 102, 0.3);
+        --corruption-color: #ee4444;
+        --corruption-flicker-color: #ff7777;
+        --path-color: #00b0b0;
+        --node-bg: #e0e0e0;
+        --node-border: #b0b0b0;
+        --glow-color: rgba(51, 204, 102, 0.6);
+        --corruption-glow: rgba(238, 68, 68, 0.6);
+        --path-glow: rgba(0, 176, 176, 0.4);
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); font-family: "Consolas", monospace; }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        position: relative; width: 100%; height: 100%;
+        border: 1px solid var(--border-color);
+        display: flex; flex-direction: column;
+        justify-content: space-between; align-items: center;
+        padding: clamp(1rem, 5vh, 2rem) clamp(0.5rem, 3vw, 1rem);
+        background: linear-gradient( var(--bg-color) 10%,
+          color-mix(in srgb, var(--bg-color) 60%, var(--path-color) 40%) 50%,
+          var(--bg-color) 90% );
+        cursor: pointer; /* For reset */
+      }
+      .node {
+        background-color: var(--node-bg); border: 1.5px solid var(--node-border);
+        padding: clamp(0.6rem, 2.5vh, 1rem) clamp(1rem, 5vw, 2rem);
+        border-radius: 8px; font-size: clamp(0.75em, 2vh, 0.95em);
+        text-align: center; box-shadow: 0 5px 10px rgba(0,0,0,0.35);
+        z-index: 1; color: var(--text-color); width: 85%; max-width: 280px;
+        transition: transform 0.2s ease;
+      }
+      .node:hover { transform: scale(1.03); }
+
+      .path-area-svg {
+        position: absolute; top: 15%; bottom: 15%; left: 50%;
+        transform: translateX(-50%); width: 80px; /* Wider for multiple packets */
+        z-index: 0;
+      }
+      .path-line-visual {
+        stroke: var(--path-color); stroke-width: 3px;
+        stroke-dasharray: 8 4; filter: drop-shadow(0 0 3px var(--path-glow));
+        animation: path-line-flow 1s linear infinite;
+      }
+
+      .data-packet-group {
+        position: absolute; top: 0; left: 50%;
+        width: 100%; height: 100%;
+        transform-style: preserve-3d;
+      }
+      .packet-animation-instance {
+        position: absolute; left:50%;
+        animation: packet-flow-down 4s linear infinite;
+      }
+      .data-packet {
+        position: absolute; transform: translateX(-50%);
+        width: clamp(35px, 12vw, 45px); height: clamp(20px, 6vh, 25px);
+        border-radius: 6px; display: flex; justify-content: space-around;
+        align-items: center; padding: 3px;
+        animation: packet-gentle-wobble 1s ease-in-out infinite alternate;
+        transform-style: preserve-3d; /* For glitch effect */
+      }
+      .main-packet {
+        background-color: var(--packet-color);
+        box-shadow: 0 0 14px var(--glow-color), 0 0 6px var(--glow-color) inset;
+        z-index: 2;
+      }
+      .echo-packet {
+        background-color: var(--echo-packet-color);
+        box-shadow: 0 0 10px var(--echo-packet-color);
+        z-index: 1; opacity: 0;
+        animation: echo-packet-phase 4s linear infinite;
+      }
+      .packet-segment {
+        width: 28%; height: 75%;
+        background-color: color-mix(in srgb, var(--packet-color) 50%, black);
+        border-radius: 2px;
+      }
+      .corrupted-segment {
+        background-color: var(--corruption-color);
+        box-shadow: 0 0 6px var(--corruption-glow);
+        animation: corruption-intense-flicker 0.25s steps(2, jump-none) infinite, segment-glitch-transform 0.5s infinite alternate;
+      }
+      .corrupted-segment::before { /* Glitch pseudo-element */
+        content: ''; position: absolute;
+        width: 100%; height: 100%; top:0; left:0;
+        background-color: var(--corruption-flicker-color);
+        opacity: 0;
+        animation: segment-glitch-overlay 0.3s steps(3, end) infinite alternate;
+        transform: skew(-10deg);
+      }
+
+      @keyframes path-line-flow { to { stroke-dashoffset: -24; } }
+      @keyframes packet-flow-down {
+        0% { transform: translateY(15%); opacity: 0; }
+        10%, 90% { opacity: 1; }
+        100% { transform: translateY(85%); opacity: 0; }
+      }
+      @keyframes echo-packet-phase {
+        0%, 100% { opacity: 0; transform: translateX(-60%) translateY(8px) scale(0.85); }
+        15% { opacity: 0.7; }
+        40%, 60% { transform: translateX(-55%) translateY(0px) scale(1); } /* Briefly aligns */
+        85% { opacity: 0.7; }
+      }
+      @keyframes packet-gentle-wobble {
+        from { transform: translateX(-52%) rotateY(-2deg) rotateX(1deg); }
+        to { transform: translateX(-48%) rotateY(2deg) rotateX(-1deg); }
+      }
+      @keyframes corruption-intense-flicker {
+        0% { background-color: var(--corruption-color); filter: brightness(1); }
+        50% { background-color: var(--corruption-flicker-color); filter: brightness(1.5) saturate(1.5); }
+      }
+      @keyframes segment-glitch-transform {
+        from { transform: scale(1) skewX(0deg); }
+        to { transform: scale(0.9) skewX(5deg); }
+      }
+      @keyframes segment-glitch-overlay {
+        0% {opacity:0;} 50% {opacity:0.5;} 100% {opacity:0;}
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .path-line-visual, .packet-animation-instance, .data-packet, .corrupted-segment, .corrupted-segment::before, .echo-packet {
+          animation: none !important;
+        }
+        .packet-animation-instance { transform: translateY(50%); opacity:1; }
+        .main-packet { opacity: 1; }
+        .echo-packet { opacity: 0.6; transform:translateX(-60%) translateY(8px) scale(0.85); }
+        .corrupted-segment { background-color: var(--corruption-color); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" id="visContainerFull" role="img" aria-label="Animated diagram: Data packets flow vertically. A main green packet, with one segment intensely flickering red (corruption) and glitching, moves down. A fainter 'echo' packet materializes, briefly aligns, then fades, suggesting illusory duplication or a stale cache. Clicking resets the animation.">
+      <div class="node" id="nodeInput">Memory Input Queue (Cache L3)</div>
+      <svg class="path-area-svg" viewBox="0 0 80 100" preserveAspectRatio="none">
+        <line class="path-line-visual" x1="40" y1="0" x2="40" y2="100"/>
+      </svg>
+      <div class="data-packet-group" id="packetContainer">
+      </div>
+      <div class="node" id="nodeOutput">Processing & Tagging Unit (MTL)</div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") document.body.classList.add("light-mode");
+
+      const packetContainer = document.getElementById('packetContainer');
+      const visContainerFull = document.getElementById('visContainerFull');
+      let packetInstanceCounter = 0;
+
+      function createPacketInstance(delay) {
+        const instanceId = `packet-inst-${packetInstanceCounter++}`;
+        const instanceWrapper = document.createElement('div');
+        instanceWrapper.className = 'packet-animation-instance';
+        instanceWrapper.id = instanceId;
+        instanceWrapper.style.animationDelay = `${delay}s`;
+        
+        instanceWrapper.innerHTML = `
+          <div class="data-packet main-packet">
+            <div class="packet-segment"></div>
+            <div class="packet-segment corrupted-segment"></div>
+            <div class="packet-segment"></div>
+          </div>
+          <div class="data-packet echo-packet">
+              <div class="packet-segment" style="opacity:0.6"></div>
+              <div class="packet-segment" style="opacity:0.6"></div>
+              <div class="packet-segment" style="opacity:0.6"></div>
+          </div>
+        `;
+        packetContainer.appendChild(instanceWrapper);
+
+        instanceWrapper.addEventListener('animationiteration', () => {
+            // Re-randomize animation delay for next iteration for variability
+            // This might not work as expected if animation-iteration-count is infinite
+            // For true variability on loop, better to remove and re-add or manage with JS timeouts
+        });
+         instanceWrapper.addEventListener('animationend', () => { // If not infinite
+            instanceWrapper.remove();
+         });
+      }
+      
+      function startPacketFlow() {
+        packetContainer.innerHTML = ''; // Clear existing packets
+        packetInstanceCounter = 0; 
+        // Create a few packets with staggered starts
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            createPacketInstance(0);
+            createPacketInstance(1.5); // Staggered by 1.5s
+            createPacketInstance(3.0); // Staggered by 3s
+        } else {
+            // For reduced motion, show one static set
+            const instanceWrapper = document.createElement('div');
+            instanceWrapper.className = 'packet-animation-instance'; // For static positioning
+            instanceWrapper.style.transform = 'translateY(50%)'; instanceWrapper.style.opacity = '1';
+            instanceWrapper.innerHTML = `
+              <div class="data-packet main-packet" style="animation:none; opacity:1; transform:translateX(-50%)">
+                <div class="packet-segment"></div><div class="packet-segment corrupted-segment" style="animation:none"></div><div class="packet-segment"></div>
+              </div>
+              <div class="data-packet echo-packet" style="animation:none; opacity:0.6; transform:translateX(-60%) translateY(8px) scale(0.85)">
+                <div class="packet-segment" style="opacity:0.6"></div><div class="packet-segment" style="opacity:0.6"></div><div class="packet-segment" style="opacity:0.6"></div>
+              </div>`;
+            packetContainer.appendChild(instanceWrapper);
+        }
+      }
+
+      visContainerFull.addEventListener('click', startPacketFlow);
+      startPacketFlow(); // Initial flow
+    </script>
+  </body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conceptual: AV Risk Assessment Matrix</title>
+    <style>
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --low-risk-color: #4caf50;
+        --medium-risk-color: #ffc107;
+        --high-risk-color: #f44336;
+        --cell-bg: #2c2c2c;
+        --header-bg: #383838;
+      }
+      body.light-mode {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --low-risk-color: #a5d6a7;
+        --medium-risk-color: #ffee58;
+        --high-risk-color: #ef9a9a;
+        --cell-bg: #f1f3f5;
+        --header-bg: #e9ecef;
+      }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        margin: 0;
+        padding: 1rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+        font-size: 0.8rem;
+      }
+      .matrix-container {
+        display: grid;
+        grid-template-columns: auto repeat(3, 1fr); /* Likelihood labels + 3 likelihood columns */
+        grid-template-rows: auto repeat(3, 1fr); /* Severity labels + 3 severity rows */
+        gap: 2px;
+        border: 1px solid var(--border-color);
+        background-color: var(--border-color); /* Grid lines effect */
+        width: 100%;
+        max-width: 320px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      .matrix-cell,
+      .matrix-header {
+        background-color: var(--cell-bg);
+        padding: 0.5rem;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 40px;
+      }
+      .matrix-header {
+        background-color: var(--header-bg);
+        font-weight: bold;
+        font-size: 0.7rem;
+      }
+      .header-empty {
+        /* Top-left empty cell */
+        background-color: var(--header-bg);
+      }
+      .header-likelihood {
+        /* Column headers for Likelihood */
+        writing-mode: vertical-rl; /* Experimental for fitting */
+        text-orientation: mixed;
+        transform: rotate(180deg);
+      }
+      .header-severity {
+        /* Row headers for Severity */
+        justify-content: flex-end; /* Align text to the right */
+        padding-right: 0.8rem;
+      }
+      .risk-cell {
+        cursor: pointer;
+        transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #111; /* Dark text for better contrast on colored cells */
+      }
+      body.dark-mode .risk-cell {
+        color: #fff; /* Light text for dark mode on colored cells */
+      }
+      .risk-cell:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px currentColor; /* Uses cell's color for glow */
+        z-index: 1;
+        position: relative;
+      }
+      .low-risk {
+        background-color: var(--low-risk-color);
+      }
+      .medium-risk {
+        background-color: var(--medium-risk-color);
+      }
+      .high-risk {
+        background-color: var(--high-risk-color);
+      }
+
+      /* Example: Mapping Likelihood (L) / Severity (S) to risk */
+      /* S: Low, L: Low -> Low */
+      .cell-s1-l1 {
+        grid-row: 2;
+        grid-column: 2;
+      }
+      /* S: Low, L: Med -> Low */
+      .cell-s1-l2 {
+        grid-row: 2;
+        grid-column: 3;
+      }
+      /* S: Low, L: High -> Med */
+      .cell-s1-l3 {
+        grid-row: 2;
+        grid-column: 4;
+      }
+
+      /* S: Med, L: Low -> Low */
+      .cell-s2-l1 {
+        grid-row: 3;
+        grid-column: 2;
+      }
+      /* S: Med, L: Med -> Med */
+      .cell-s2-l2 {
+        grid-row: 3;
+        grid-column: 3;
+      }
+      /* S: Med, L: High -> High */
+      .cell-s2-l3 {
+        grid-row: 3;
+        grid-column: 4;
+      }
+
+      /* S: High, L: Low -> Med */
+      .cell-s3-l1 {
+        grid-row: 4;
+        grid-column: 2;
+      }
+      /* S: High, L: Med -> High */
+      .cell-s3-l2 {
+        grid-row: 4;
+        grid-column: 3;
+      }
+      /* S: High, L: High -> High */
+      .cell-s3-l3 {
+        grid-row: 4;
+        grid-column: 4;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="matrix-container" aria-labelledby="matrixTitle">
+      <div id="matrixTitle" style="display: none">
+        AV Risk Assessment Matrix
+      </div>
+
+      <div class="matrix-header header-empty" aria-hidden="true"></div>
+      <div class="matrix-header header-likelihood">Low Likelihood</div>
+      <div class="matrix-header header-likelihood">Medium Likelihood</div>
+      <div class="matrix-header header-likelihood">High Likelihood</div>
+
+      <div class="matrix-header header-severity">Low Severity</div>
+      <div
+        class="matrix-cell risk-cell low-risk cell-s1-l1"
+        tabindex="0"
+        aria-label="Risk: Low, Severity: Low, Likelihood: Low"
+      >
+        Minor Glitch
+      </div>
+      <div
+        class="matrix-cell risk-cell low-risk cell-s1-l2"
+        tabindex="0"
+        aria-label="Risk: Low, Severity: Low, Likelihood: Medium"
+      >
+        Brief Disengage
+      </div>
+      <div
+        class="matrix-cell risk-cell medium-risk cell-s1-l3"
+        tabindex="0"
+        aria-label="Risk: Medium, Severity: Low, Likelihood: High"
+      >
+        System Halt
+      </div>
+
+      <div class="matrix-header header-severity">Medium Severity</div>
+      <div
+        class="matrix-cell risk-cell low-risk cell-s2-l1"
+        tabindex="0"
+        aria-label="Risk: Low, Severity: Medium, Likelihood: Low"
+      >
+        Near Miss
+      </div>
+      <div
+        class="matrix-cell risk-cell medium-risk cell-s2-l2"
+        tabindex="0"
+        aria-label="Risk: Medium, Severity: Medium, Likelihood: Medium"
+      >
+        Minor Collision
+      </div>
+      <div
+        class="matrix-cell risk-cell high-risk cell-s2-l3"
+        tabindex="0"
+        aria-label="Risk: High, Severity: Medium, Likelihood: High"
+      >
+        Moderate Incident
+      </div>
+
+      <div class="matrix-header header-severity">High Severity</div>
+      <div
+        class="matrix-cell risk-cell medium-risk cell-s3-l1"
+        tabindex="0"
+        aria-label="Risk: Medium, Severity: High, Likelihood: Low"
+      >
+        Injury Potential
+      </div>
+      <div
+        class="matrix-cell risk-cell high-risk cell-s3-l2"
+        tabindex="0"
+        aria-label="Risk: High, Severity: High, Likelihood: Medium"
+      >
+        Serious Injury
+      </div>
+      <div
+        class="matrix-cell risk-cell high-risk cell-s3-l3"
+        tabindex="0"
+        aria-label="Risk: High, Severity: High, Likelihood: High"
+      >
+        Catastrophic Event
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+      // Add interactivity: e.g., display details on cell click/hover
+      document.querySelectorAll(".risk-cell").forEach((cell) => {
+        cell.addEventListener("click", () => {
+          // Could open a modal with more info about the risk type
+          console.log("Clicked risk cell:", cell.getAttribute("aria-label"));
+          // For demo, briefly change border
+          const originalBorder = cell.style.outline;
+          cell.style.outline = "2px solid var(--text-color)";
+          setTimeout(() => {
+            cell.style.outline = originalBorder;
+          }, 300);
+        });
+        cell.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            cell.click();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

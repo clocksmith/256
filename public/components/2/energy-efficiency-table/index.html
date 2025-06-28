@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Interactive comparison table of AI accelerator energy efficiency for inference, using INT8/FP8 compute figures and TDP, with Q2 2025 data."
+    />
+    <title>Energy Efficiency for Inference (Q2 2025) - Enhanced</title>
+    <style>
+      :root {
+        --bg-color-light: #f0f8ff;
+        --text-color-light: #1a1a1a;
+        --surface-bg-light: rgba(255, 255, 255, 0.9);
+        --border-color-light: rgba(0, 0, 0, 0.12);
+        --glow-green-light: rgba(0, 150, 80, 0.75); /* Green for efficiency */
+        --table-header-bg-light: rgba(230, 230, 230, 0.8);
+        --table-row-bg-light: rgba(252, 252, 252, 0.75);
+        --table-row-hover-light: rgba(240, 245, 250, 0.95);
+        --sort-arrow-light: #666;
+
+        --bg-color-dark: #0e1014;
+        --text-color-dark: #e8e8e8;
+        --surface-bg-dark: rgba(28, 30, 35, 0.92);
+        --border-color-dark: rgba(255, 255, 255, 0.15);
+        --glow-green-dark: rgba(40, 200, 100, 0.85); /* Brighter green */
+        --table-header-bg-dark: rgba(48, 52, 60, 0.9);
+        --table-row-bg-dark: rgba(35, 38, 45, 0.8);
+        --table-row-hover-dark: rgba(58, 62, 70, 0.95);
+        --sort-arrow-dark: #bbb;
+
+        --bg-color: var(--bg-color-dark);
+        --text-color: var(--text-color-dark);
+        --surface-bg: var(--surface-bg-dark);
+        --border-color: var(--border-color-dark);
+        --glow-green: var(--glow-green-dark);
+        --table-header-bg: var(--table-header-bg-dark);
+        --table-row-bg: var(--table-row-bg-dark);
+        --table-row-hover: var(--table-row-hover-dark);
+        --sort-arrow: var(--sort-arrow-dark);
+      }
+      body.light-mode {
+        --bg-color: var(--bg-color-light);
+        --text-color: var(--text-color-light);
+        --surface-bg: var(--surface-bg-light);
+        --border-color: var(--border-color-light);
+        --glow-green: var(--glow-green-light);
+        --table-header-bg: var(--table-header-bg-light);
+        --table-row-bg: var(--table-row-bg-light);
+        --table-row-hover: var(--table-row-hover-light);
+        --sort-arrow: var(--sort-arrow-light);
+      }
+      html {
+        font-size: 16px;
+      }
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+        margin: 0;
+        padding: 0.8rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.55;
+        font-size: 0.8rem;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .table-container {
+        max-width: 100%;
+        overflow-x: auto;
+        background-color: var(--surface-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+        white-space: normal; /* Allow wrapping in notes */
+      }
+      td:not(:last-child),
+      th:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      thead th:last-child,
+      tbody td:last-child {
+        border-right: none;
+      }
+      th {
+        background-color: var(--table-header-bg);
+        font-weight: 600;
+        color: var(--glow-green);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        cursor: pointer; /* Indicate sortable columns */
+      }
+      th .sort-arrow {
+        display: inline-block;
+        margin-left: 4px;
+        opacity: 0.5;
+        color: var(--sort-arrow);
+      }
+      th.sorted-asc .sort-arrow::after {
+        content: " ▲";
+        opacity: 1;
+      }
+      th.sorted-desc .sort-arrow::after {
+        content: " ▼";
+        opacity: 1;
+      }
+      tbody tr {
+        background-color: var(--table-row-bg);
+        transition: background-color 0.18s ease-in-out;
+      }
+      tbody tr:hover {
+        background-color: var(--table-row-hover);
+      }
+      td.numeric {
+        text-align: right;
+        white-space: nowrap;
+      }
+      td.special-note {
+        color: color-mix(in srgb, var(--text-color) 70%, transparent);
+        font-style: italic;
+        font-size: 0.9em;
+      }
+      td:empty::after {
+        content: "–";
+        color: color-mix(in srgb, var(--text-color) 50%, transparent);
+      }
+      .notes-column {
+        min-width: 200px;
+      } /* Ensure notes column has space */
+    </style>
+  </head>
+  <body>
+    <div class="table-container">
+      <table id="efficiency-table">
+        <thead>
+          <tr>
+            <th data-sort="string">Model</th>
+            <th data-sort="string">Architecture</th>
+            <th data-sort="number" class="numeric">Est. TDP (W)</th>
+            <th data-sort="number" class="numeric">
+              Peak Infer. Compute (INT8/FP8)
+            </th>
+            <th data-sort="number" class="numeric">
+              Eff. Perf/Watt (TFLOPs/W)
+            </th>
+            <th data-sort="string" class="notes-column">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-tdp="700" data-compute="1979" data-perf-watt="2.83">
+            <td>NVIDIA H100</td>
+            <td>Hopper</td>
+            <td class="numeric">700</td>
+            <td class="numeric">1979 TOPS (INT8)</td>
+            <td class="numeric">2.83</td>
+            <td>Baseline datacenter GPU for comparison.</td>
+          </tr>
+          <tr data-tdp="1000" data-compute="5000" data-perf-watt="5.00">
+            <td>NVIDIA B200</td>
+            <td>Blackwell</td>
+            <td class="numeric">~1000</td>
+            <td class="numeric">5000 TFLOPs (FP8)</td>
+            <td class="numeric">~5.00</td>
+            <td>Significant generational perf/watt gains.</td>
+          </tr>
+          <tr data-tdp="750" data-compute="2600" data-perf-watt="3.47">
+            <td>AMD MI300X</td>
+            <td>CDNA 3</td>
+            <td class="numeric">750</td>
+            <td class="numeric">2600 TOPS (INT8)</td>
+            <td class="numeric">3.47</td>
+            <td>Competitive in HPC and AI inference.</td>
+          </tr>
+          <tr data-tdp="900" data-compute="1472" data-perf-watt="1.63">
+            <td>Intel Gaudi 3</td>
+            <td>Custom ASIC</td>
+            <td class="numeric">~900</td>
+            <td class="numeric">1472 TOPS (INT8)</td>
+            <td class="numeric">~1.63</td>
+            <td class="special-note">
+              Claimed 40% better efficiency vs. unspecified competitor; TDP
+              includes system components for some configs.
+            </td>
+          </tr>
+          <tr data-tdp="300" data-compute="4614" data-perf-watt="15.38">
+            <!-- Estimated TDP for Ironwood to reach 2x Trillium. Trillium itself improved a lot. -->
+            <td>Google TPU v7 Ironwood</td>
+            <td>Custom ASIC</td>
+            <td class="numeric special-note">~300 (Est.)</td>
+            <td class="numeric">4614 TFLOPs (FP8)</td>
+            <td class="numeric special-note">~15.38 (Est.)</td>
+            <td class="special-note">
+              Claims 2x Perf/Watt vs TPUv6 (Trillium). Highly efficient
+              inference-first design. Actual TDP not public.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+
+      const table = document.getElementById("efficiency-table");
+      const headers = table.querySelectorAll("th[data-sort]");
+      const tbody = table.querySelector("tbody");
+
+      headers.forEach((header) => {
+        header.innerHTML += '<span class="sort-arrow"></span>'; // Add arrow placeholder
+        header.addEventListener("click", () => {
+          const sortType = header.dataset.sort;
+          const columnIndex = Array.from(header.parentNode.children).indexOf(
+            header
+          );
+          const currentSortOrder = header.classList.contains("sorted-asc")
+            ? "desc"
+            : "asc";
+
+          headers.forEach((h) => {
+            h.classList.remove("sorted-asc", "sorted-desc");
+            h.querySelector(".sort-arrow").textContent = "";
+          });
+          header.classList.add(
+            currentSortOrder === "asc" ? "sorted-asc" : "sorted-desc"
+          );
+          header.querySelector(".sort-arrow").textContent =
+            currentSortOrder === "asc" ? " ▲" : " ▼";
+
+          sortColumn(columnIndex, sortType, currentSortOrder);
+        });
+      });
+
+      function sortColumn(columnIndex, type, order) {
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const sortedRows = rows.sort((a, b) => {
+          let valA = a.children[columnIndex].textContent.trim();
+          let valB = b.children[columnIndex].textContent.trim();
+
+          if (type === "number") {
+            // Try to extract number from data attributes if cell text is messy
+            valA =
+              parseFloat(a.dataset[Object.keys(a.dataset)[columnIndex]]) ||
+              parseFloat(valA.replace(/[^0-9.-]+/g, "")) ||
+              0;
+            valB =
+              parseFloat(b.dataset[Object.keys(b.dataset)[columnIndex]]) ||
+              parseFloat(valB.replace(/[^0-9.-]+/g, "")) ||
+              0;
+          } else {
+            // string
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
+          }
+
+          if (valA < valB) return order === "asc" ? -1 : 1;
+          if (valA > valB) return order === "asc" ? 1 : -1;
+          return 0;
+        });
+
+        tbody.innerHTML = ""; // Clear existing rows
+        sortedRows.forEach((row) => tbody.appendChild(row));
+      }
+
+      // Populate data attributes for numeric sorting from table cell content if needed (or use pre-set data attributes)
+      // For this example, I've added data-attributes to the TRs for the numeric columns to simplify.
+      // If not using data-attributes, ensure numeric cells contain clean numbers.
+    </script>
+  </body>
+</html>

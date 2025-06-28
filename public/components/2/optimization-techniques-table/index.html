@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Enhanced table summarizing emerging software and hardware optimization techniques for AI accelerators like GPUs and TPUs, updated for Q2 2025, with examples."
+    />
+    <title>AI Accelerator Optimization Techniques (Q2 2025) - Enhanced</title>
+    <style>
+      :root {
+        --bg-color-light: #f0f8ff;
+        --text-color-light: #1a1a1a;
+        --surface-bg-light: rgba(255, 255, 255, 0.9);
+        --border-color-light: rgba(0, 0, 0, 0.12);
+        --glow-cyan-light: rgba(
+          0,
+          130,
+          150,
+          0.85
+        ); /* Cyan for optimization theme */
+        --table-header-bg-light: rgba(230, 230, 230, 0.8);
+        --table-row-bg-light: rgba(252, 252, 252, 0.75);
+        --table-row-hover-light: rgba(240, 245, 250, 0.95);
+        --link-color-light: #005f99;
+        --link-hover-light: #e64a19;
+        --tag-bg-light: #e0e0e0;
+        --tag-text-light: #333;
+
+        --bg-color-dark: #0e1014;
+        --text-color-dark: #e8e8e8;
+        --surface-bg-dark: rgba(28, 30, 35, 0.92);
+        --border-color-dark: rgba(255, 255, 255, 0.15);
+        --glow-cyan-dark: rgba(0, 220, 255, 0.9);
+        --table-header-bg-dark: rgba(48, 52, 60, 0.9);
+        --table-row-bg-dark: rgba(35, 38, 45, 0.8);
+        --table-row-hover-dark: rgba(58, 62, 70, 0.95);
+        --link-color-dark: #82c0ff;
+        --link-hover-dark: #ffab91;
+        --tag-bg-dark: #3a3f47;
+        --tag-text-dark: #c0c5ce;
+
+        --bg-color: var(--bg-color-dark);
+        --text-color: var(--text-color-dark);
+        --surface-bg: var(--surface-bg-dark);
+        --border-color: var(--border-color-dark);
+        --glow-cyan: var(--glow-cyan-dark);
+        --table-header-bg: var(--table-header-bg-dark);
+        --table-row-bg: var(--table-row-bg-dark);
+        --table-row-hover: var(--table-row-hover-dark);
+        --link-color: var(--link-color-dark);
+        --link-hover: var(--link-hover-dark);
+        --tag-bg: var(--tag-bg-dark);
+        --tag-text: var(--tag-text-dark);
+      }
+      body.light-mode {
+        --bg-color: var(--bg-color-light);
+        --text-color: var(--text-color-light);
+        --surface-bg: var(--surface-bg-light);
+        --border-color: var(--border-color-light);
+        --glow-cyan: var(--glow-cyan-light);
+        --table-header-bg: var(--table-header-bg-light);
+        --table-row-bg: var(--table-row-bg-light);
+        --table-row-hover: var(--table-row-hover-light);
+        --link-color: var(--link-color-light);
+        --link-hover: var(--link-hover-light);
+        --tag-bg: var(--tag-bg-light);
+        --tag-text: var(--tag-text-light);
+      }
+      html {
+        font-size: 16px;
+      }
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+        margin: 0;
+        padding: 0.8rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.55;
+        font-size: 0.8rem;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .table-container {
+        max-width: 100%;
+        overflow-x: auto;
+        background-color: var(--surface-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+        white-space: normal;
+      }
+      td:not(:last-child),
+      th:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      thead th:last-child,
+      tbody td:last-child {
+        border-right: none;
+      }
+      th {
+        background-color: var(--table-header-bg);
+        font-weight: 600;
+        color: var(--glow-cyan);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      tbody tr {
+        background-color: var(--table-row-bg);
+        transition: background-color 0.18s ease-in-out;
+      }
+      tbody tr:hover {
+        background-color: var(--table-row-hover);
+      }
+      a {
+        color: var(--link-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+        word-break: break-word;
+      }
+      a:hover,
+      a:focus {
+        color: var(--link-hover);
+        text-decoration: underline;
+      }
+      .hardware-tags span,
+      .benefit-tags span {
+        display: inline-block;
+        background-color: var(--tag-bg);
+        color: var(--tag-text);
+        padding: 0.15em 0.5em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        margin-right: 0.3em;
+        margin-bottom: 0.3em;
+      }
+      .description-cell {
+        min-width: 200px;
+      } /* Ensure description has enough space */
+      .example-cell {
+        min-width: 220px;
+      } /* Ensure example has enough space */
+    </style>
+  </head>
+  <body>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Technique Category</th>
+            <th class="description-cell">Description & Impact</th>
+            <th>Applicable Hardware</th>
+            <th>Primary Benefits</th>
+            <th class="example-cell">Example / Q2 2025 Advancement</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Low-Precision Formats</td>
+            <td class="description-cell">
+              Utilizing numerical formats with fewer bits (e.g., FP8, INT4, FP4)
+              than FP32/FP16 for weights and/or activations. Reduces model size
+              and compute needs, but requires careful accuracy validation.
+            </td>
+            <td class="hardware-tags">
+              <span>GPU</span><span>TPU</span><span>NPU</span>
+            </td>
+            <td class="benefit-tags">
+              <span>Memory ↓</span><span>Speed ↑</span><span>Energy ↓</span>
+            </td>
+            <td class="example-cell">
+              NVIDIA Blackwell (FP4 support in RTX 5060), Google TPUv7 Ironwood
+              (FP8 native), AMD RDNA 4 (INT4 sparse).
+            </td>
+          </tr>
+          <tr>
+            <td>Quantization</td>
+            <td class="description-cell">
+              Converting model parameters (weights, activations) to lower
+              precision, typically INT8. Can be Post-Training (PTQ) or
+              Quantization-Aware Training (QAT) for better accuracy.
+            </td>
+            <td class="hardware-tags">
+              <span>GPU</span><span>TPU</span><span>CPU</span><span>NPU</span>
+            </td>
+            <td class="benefit-tags">
+              <span>Inference Speed ↑↑</span><span>Model Size ↓↓</span>
+            </td>
+            <td class="example-cell">
+              NVIDIA TensorRT, PyTorch/TensorFlow quantization toolkits,
+              emerging tools for new FP4/FP8 hardware.
+            </td>
+          </tr>
+          <tr>
+            <td>Sparsity Exploitation</td>
+            <td class="description-cell">
+              Leveraging zero-valued weights or activations to skip computations
+              or reduce data movement. Can be structured (blocks) or
+              unstructured (individual elements).
+            </td>
+            <td class="hardware-tags">
+              <span>GPU (NVIDIA Ampere+)</span><span>TPU (SparseCore)</span>
+            </td>
+            <td class="benefit-tags">
+              <span>Compute Ops ↓</span><span>Memory BW ↓</span
+              ><span>Speed ↑ (HW dependent)</span>
+            </td>
+            <td class="example-cell">
+              Google TPUv7 Ironwood's enhanced SparseCore; NVIDIA Sparse Tensor
+              Cores in datacenter GPUs.
+            </td>
+          </tr>
+          <tr>
+            <td>Model Pruning & Compression</td>
+            <td class="description-cell">
+              Systematically removing less important weights, neurons, or entire
+              structures from a neural network. Techniques like magnitude
+              pruning, structured pruning.
+            </td>
+            <td class="hardware-tags">
+              <span>GPU</span><span>TPU</span><span>CPU</span><span>NPU</span>
+            </td>
+            <td class="benefit-tags">
+              <span>Model Size ↓</span><span>Inference Speed ↑</span
+              ><span>Memory Footprint ↓</span>
+            </td>
+            <td class="example-cell">
+              Ongoing research in automated and structured pruning for LLMs;
+              tools like
+              <a
+                href="https://pytorch.org/tutorials/intermediate/pruning_tutorial.html"
+                target="_blank"
+                rel="noopener"
+                >PyTorch Pruning</a
+              >.
+            </td>
+          </tr>
+          <tr>
+            <td>Compiler Optimizations (Kernel Fusion, etc.)</td>
+            <td class="description-cell">
+              Compilers (e.g., XLA, TensorRT) automatically fuse multiple small
+              operations (kernels) into larger ones, optimize memory layout, and
+              perform graph transformations.
+            </td>
+            <td class="hardware-tags"><span>GPU</span><span>TPU</span></td>
+            <td class="benefit-tags">
+              <span>Overhead ↓</span><span>Memory Locality ↑</span
+              ><span>Arithmetic Intensity ↑</span>
+            </td>
+            <td class="example-cell">
+              <a href="https://openxla.org/" target="_blank" rel="noopener"
+                >OpenXLA</a
+              >
+              (TPUs/GPUs), NVIDIA TensorRT,
+              <a
+                href="https://openai.com/research/triton"
+                target="_blank"
+                rel="noopener"
+                >Triton</a
+              >
+              language for custom kernels.
+            </td>
+          </tr>
+          <tr>
+            <td>Distributed Training</td>
+            <td class="description-cell">
+              Scaling training across multiple accelerators/nodes using
+              strategies like Data Parallelism, Tensor Parallelism, Pipeline
+              Parallelism, or Fully Sharded Data Parallel (FSDP/ZeRO).
+            </td>
+            <td class="hardware-tags"><span>GPU</span><span>TPU</span></td>
+            <td class="benefit-tags">
+              <span>Train XXL Models</span><span>Training Time ↓↓</span>
+            </td>
+            <td class="example-cell">
+              Google Pathways (Ironwood pods), PyTorch FSDP,
+              <a
+                href="https://www.deepspeed.ai/tutorials/zero/"
+                target="_blank"
+                rel="noopener"
+                >DeepSpeed ZeRO</a
+              >.
+            </td>
+          </tr>
+          <tr>
+            <td>High-Speed Interconnects</td>
+            <td class="description-cell">
+              Utilizing specialized, high-bandwidth, low-latency links (e.g.,
+              NVLink, InfiniBand, TPU ICI) for rapid communication between
+              accelerators in a cluster.
+            </td>
+            <td class="hardware-tags"><span>GPU</span><span>TPU</span></td>
+            <td class="benefit-tags">
+              <span>Distributed Perf. ↑</span><span>Comm. Bottleneck ↓</span>
+            </td>
+            <td class="example-cell">
+              NVIDIA NVLink Switch System & NVLink Fusion (3rd party); TPU ICI
+              (e.g., 7.37 TB/s per Ironwood chip).
+            </td>
+          </tr>
+          <tr>
+            <td>Advanced Inference Techniques</td>
+            <td class="description-cell">
+              Methods like Speculative Decoding (using a small model to draft
+              tokens for a large one), mixture of experts (MoE) routing, or
+              efficient attention mechanisms.
+            </td>
+            <td class="hardware-tags"><span>GPU</span><span>TPU</span></td>
+            <td class="benefit-tags">
+              <span>LLM Latency ↓</span><span>Inference Throughput ↑</span>
+            </td>
+            <td class="example-cell">
+              Widespread adoption in LLM inference servers (e.g.,
+              <a
+                href="https://github.com/vllm-project/vllm"
+                target="_blank"
+                rel="noopener"
+                >vLLM</a
+              >, TGI); hardware support for MoE.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </body>
+</html>

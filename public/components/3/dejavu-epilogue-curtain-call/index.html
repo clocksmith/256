@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mind's Final Curtain Call - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #080010; /* Deepest Purple/Black */
+        --text-color: #f8f0ff;
+        --curtain-color-1: #3b003b; /* Rich Velvet Purple */
+        --curtain-color-2: #1a001a; /* Darker Velvet for Folds */
+        --stage-light-color: #fff0a0; /* Pale Gold Light */
+        --stage-floor-color: #1f1a24; /* Dark, slightly purple stage */
+        --shadow-color: rgba(0,0,0,0.8);
+        --symbol-glow: rgba(255, 240, 160, 0.7);
+        --cat-color: #777; /* Simple grey cat */
+        --time-passage-overlay: rgba(0,0,0,0.3);
+      }
+      body.light-mode {
+        --bg-color: #fce8ff; /* Very Light Lavender background */
+        --text-color: #100020;
+        --curtain-color-1: #ad86cd; /* Lighter, more muted purple */
+        --curtain-color-2: #7a509a;
+        --stage-light-color: #ffe060;
+        --stage-floor-color: #ebd9fa;
+        --shadow-color: rgba(0,0,0,0.2);
+        --symbol-glow: rgba(255, 224, 96, 0.6);
+        --cat-color: #888;
+        --time-passage-overlay: rgba(255,255,255,0.2);
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: "Playfair Display", serif; /* Elegant, theatrical */ }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        position: relative; width: 100%; height: 100%;
+        background-color: var(--stage-floor-color);
+        overflow: hidden; border-radius: 10px;
+        box-shadow: 0 10px 30px var(--shadow-color);
+        perspective: 1000px;
+        cursor: pointer; /* For interaction */
+      }
+      .curtain { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+      .curtain-panel {
+        position: absolute; top: -3%; width: 53%; height: 106%;
+        background-image: linear-gradient( to right, 
+          var(--curtain-color-2) 0%, var(--curtain-color-1) 12%, var(--curtain-color-2) 22%,
+          var(--curtain-color-1) 35%, var(--curtain-color-2) 48%, var(--curtain-color-1) 60%,
+          var(--curtain-color-2) 73%, var(--curtain-color-1) 85%, var(--curtain-color-2) 100% );
+        box-shadow: inset 4px 0 20px rgba(0,0,0,0.5), 0 0 15px rgba(0,0,0,0.3);
+        transition: transform 3s cubic-bezier(0.65, 0, 0.35, 1); /* Grand, smooth motion */
+        will-change: transform;
+      }
+      .curtain-panel.left { left: 0; transform-origin: left center; }
+      .curtain-panel.right { right: 0; transform-origin: right center; }
+
+      .curtains-state-closed .curtain-panel.left { transform: scaleX(1) translateX(0%) rotateY(0deg); }
+      .curtains-state-closed .curtain-panel.right { transform: scaleX(1) translateX(0%) rotateY(0deg); }
+      .curtains-state-opening .curtain-panel.left { transform: scaleX(0.1) translateX(-70%) rotateY(30deg); }
+      .curtains-state-opening .curtain-panel.right { transform: scaleX(0.1) translateX(70%) rotateY(-30deg); }
+      .curtains-state-twitch .curtain-panel.left { animation: curtain-twitch-left 0.6s ease-in-out; }
+      .curtains-state-twitch .curtain-panel.right { animation: curtain-twitch-right 0.6s ease-in-out; }
+
+      .stage-content-wrapper {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        z-index: 1; display: flex; justify-content: center; align-items:center;
+        width: 80%; height: 60%;
+        opacity: 0; transition: opacity 1s ease-in-out;
+      }
+      .curtains-state-opening .stage-content-wrapper { opacity: 1; transition-delay: 1s; }
+      .curtains-state-closed .stage-content-wrapper { opacity: 0; transition-delay: 0s; }
+
+      .stage-elements-set { display: flex; gap: clamp(12px, 3.5vw, 25px); position:absolute; opacity:0; animation: content-fade-in-out 4s ease-in-out; }
+      .stage-elements-set.active { opacity:1; z-index: 2;}
+      
+      .stage-symbol { font-size: clamp(2rem, 6vh, 3rem); text-shadow: 0 0 12px var(--symbol-glow), 0 0 6px var(--symbol-glow); animation: symbol-gentle-pulse 4s infinite ease-in-out; }
+      .stage-symbol.glitched { animation: symbol-glitch-effect 0.3s steps(2, jump-none) infinite alternate; }
+
+      .spotlight-effect-svg { position: absolute; bottom: -15%; left: 50%; width: 300%; height: 130%; transform: translateX(-50%); pointer-events: none; z-index: 0; }
+      .spotlight-effect-svg svg { width: 100%; height: 100%; }
+      .spotlight-polygon-shape { opacity: 0; fill: url(#mainSpotlightGradient); transition: opacity 2s ease-in-out; }
+      .curtains-state-opening .spotlight-polygon-shape { opacity: 0.4; transition-delay: 0.5s; }
+      .curtains-state-closed .spotlight-polygon-shape { opacity: 0; transition-delay: 0s; }
+
+      .time-passage-indicator {
+        position: absolute; top: 10px; right: 10px; font-size: clamp(0.8em, 2vh, 1em);
+        padding: 3px 6px; background-color: var(--time-passage-overlay); border-radius: 3px;
+        opacity: 0; z-index: 5; font-family: "Orbitron", sans-serif;
+        animation: time-passage-fade 0.5s forwards;
+      }
+      .final-text-display {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        font-size: clamp(2.5rem, 10vh, 4.5rem); font-weight: bold;
+        opacity: 0; color: var(--stage-light-color);
+        text-shadow: 0 0 15px var(--stage-light-color), 0 0 30px var(--bg-color), 0 0 8px black;
+        z-index: 12; animation: final-text-reveal 3s ease-in-out forwards;
+      }
+      
+      @keyframes curtain-twitch-left { /* For Déjà Vu effect */
+        0%, 100% { transform: scaleX(1) translateX(0%) rotateY(0deg); }
+        50% { transform: scaleX(0.9) translateX(-5%) rotateY(5deg); }
+      }
+      @keyframes curtain-twitch-right {
+        0%, 100% { transform: scaleX(1) translateX(0%) rotateY(0deg); }
+        50% { transform: scaleX(0.9) translateX(5%) rotateY(-5deg); }
+      }
+      @keyframes content-fade-in-out {
+          0%, 100% { opacity: 0; } 10%, 90% { opacity: 1; }
+      }
+      @keyframes symbol-gentle-pulse { 0%, 100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+      @keyframes symbol-glitch-effect {
+        0% { filter: hue-rotate(0deg) saturate(1); transform: skewX(-2deg) scale(1.02); opacity: 0.8; }
+        100% { filter: hue-rotate(20deg) saturate(1.5); transform: skewX(2deg) scale(0.98); opacity: 1; }
+      }
+      @keyframes time-passage-fade { to { opacity: 0.7; } }
+      @keyframes final-text-reveal {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .curtain-panel, .stage-elements-set, .stage-symbol, .spotlight-polygon-shape, .final-text-display, .time-passage-indicator { animation: none !important; transition: opacity 0.5s ease !important; }
+        .curtains-state-closed .curtain-panel { transform: scaleX(1); }
+        .curtains-state-opening .curtain-panel { transform: scaleX(0.1); }
+        .curtains-state-opening .stage-content-wrapper { opacity: 1; }
+        .stage-elements-set.active { opacity:1; }
+        .curtains-state-opening .spotlight-polygon-shape { opacity: 0.4; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container curtains-state-closed" id="curtainStageContainer" role="img" aria-label="Interactive theatrical stage. Clicking triggers a sequence: curtains open revealing symbols (brain, scroll, lightbulb etc.). Curtains close, then 'twitch' open briefly showing glitched symbols (déjà vu). They reopen to a cat emoji and a 'Time x30' indicator. Curtains close, twitch again showing a glitched cat. Finally, 'Fin.' appears.">
+      <div class="spotlight-effect-svg">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs><radialGradient id="mainSpotlightGradient" cx="50%" cy="100%" r="90%" fx="50%" fy="115%">
+              <stop offset="0%" style="stop-color: var(--stage-light-color); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: var(--stage-light-color); stop-opacity: 0" />
+          </radialGradient></defs>
+          <polygon class="spotlight-polygon-shape" points="10,100 90,100 75,-10 25,-10" />
+        </svg>
+      </div>
+      <div class="stage-content-wrapper" id="stageContent">
+        <div class="stage-elements-set" id="set1">
+            <span class="stage-symbol">🧠</span><span class="stage-symbol">📜</span>
+            <span class="stage-symbol">💡</span><span class="stage-symbol">❓</span>
+            <span class="stage-symbol" style="font-size: clamp(1.5rem, 5vh, 2.2rem);">📊</span>
+        </div>
+        <div class="stage-elements-set" id="set2" style="font-size: clamp(3rem, 10vh, 5rem);">
+            <span class="stage-symbol">🐈</span>
+        </div>
+      </div>
+      <div class="curtain">
+        <div class="curtain-panel left"></div>
+        <div class="curtain-panel right"></div>
+      </div>
+      <div id="finalTextContainer" style="opacity:0;"></div>
+      <div id="timeIndicatorContainer"></div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") document.body.classList.add("light-mode");
+
+      const stage = document.getElementById('curtainStageContainer');
+      const stageContent = document.getElementById('stageContent');
+      const set1 = document.getElementById('set1');
+      const set2 = document.getElementById('set2');
+      const finalTextContainer = document.getElementById('finalTextContainer');
+      const timeIndicatorContainer = document.getElementById('timeIndicatorContainer');
+      let sceneState = 0; // 0: initial, 1: symbols shown, 2: cat shown, 3: final
+      let interactionAllowed = true;
+
+      function updateContentSet(activeSet) {
+          set1.classList.remove('active');
+          set2.classList.remove('active');
+          if (activeSet) activeSet.classList.add('active');
+      }
+
+      function showGlitchedContent(isCatScene) {
+          const currentSet = isCatScene ? set2 : set1;
+          currentSet.querySelectorAll('.stage-symbol').forEach(s => s.classList.add('glitched'));
+          setTimeout(() => {
+              currentSet.querySelectorAll('.stage-symbol').forEach(s => s.classList.remove('glitched'));
+          }, 600); // Duration of glitch
+      }
+      
+      function showTimePassage() {
+          const indicator = document.createElement('div');
+          indicator.className = 'time-passage-indicator';
+          indicator.textContent = 'Time x30 >>';
+          timeIndicatorContainer.appendChild(indicator);
+          setTimeout(() => {
+             if(indicator.parentNode) indicator.parentNode.removeChild(indicator);
+          }, 1800); // Show for 1.8s
+      }
+
+      function playScene() {
+        if (!interactionAllowed && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        interactionAllowed = false;
+
+        switch (sceneState) {
+          case 0: // Initial: Open to Set 1 (Symbols)
+            stage.className = 'visualization-container curtains-state-opening';
+            updateContentSet(set1);
+            setTimeout(() => { // Close after showing symbols
+              stage.className = 'visualization-container curtains-state-closed';
+              setTimeout(() => { // Twitch (Déjà Vu for Symbols)
+                stage.className = 'visualization-container curtains-state-twitch';
+                showGlitchedContent(false);
+                setTimeout(() => {
+                  stage.className = 'visualization-container curtains-state-closed'; // Fully close after twitch
+                  sceneState = 1; interactionAllowed = true;
+                }, 600);
+              }, 500);
+            }, 3500);
+            break;
+
+          case 1: // Open to Set 2 (Cat)
+            stage.className = 'visualization-container curtains-state-opening';
+            updateContentSet(set2);
+            showTimePassage(); // Show time passage with cat
+            setTimeout(() => { // Close after showing cat
+              stage.className = 'visualization-container curtains-state-closed';
+              setTimeout(() => { // Twitch (Déjà Vu for Cat)
+                stage.className = 'visualization-container curtains-state-twitch';
+                showGlitchedContent(true);
+                setTimeout(() => {
+                  stage.className = 'visualization-container curtains-state-closed'; // Fully close
+                  sceneState = 2; interactionAllowed = true;
+                }, 600);
+              }, 500);
+            }, 3500);
+            break;
+            
+          case 2: // Show "Fin."
+            finalTextContainer.innerHTML = '<div class="final-text-display">Fin.</div>';
+            finalTextContainer.style.opacity = '1'; // Trigger animation
+            // No more state changes, curtain remains closed.
+            sceneState = 3; // End state
+            interactionAllowed = false; // No more clicks
+            break;
+        }
+      }
+      
+      stage.addEventListener('click', playScene);
+      // Auto-start first scene if not reduced motion
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          setTimeout(playScene, 1000);
+      } else {
+        // Simplified static display for reduced motion if needed, or allow manual clicks.
+        // For now, just allow manual click to step through scenes.
+        stage.className = 'visualization-container curtains-state-closed';
+        updateContentSet(null); // Start with no set active
+      }
+    </script>
+  </body>
+</html>

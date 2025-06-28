@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dual Process Decoupling - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #0f0f0f;
+        --text-color: #eaeaea;
+        --border-color: #353535;
+        --process-bg: #222;
+        --process-border: #454545;
+        --familiarity-color: #ffb700; /* Gold/Yellow */
+        --recollection-color: #c700ff; /* Vibrant Purple */
+        --dejavu-outcome-bg: #ff4d4d; /* Reddish for dissonance */
+        --dejavu-outcome-text: #fff;
+        --arrow-glow: rgba(255,255,255,0.2);
+      }
+      body.light-mode {
+        --bg-color: #f9f9f9;
+        --text-color: #121212;
+        --border-color: #d5d5d5;
+        --process-bg: #eee;
+        --process-border: #c0c0c0;
+        --familiarity-color: #e6a300;
+        --recollection-color: #a500cc;
+        --dejavu-outcome-bg: #ff3333;
+        --dejavu-outcome-text: #fff;
+        --arrow-glow: rgba(0,0,0,0.15);
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: "Open Sans", sans-serif; }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        display: grid;
+        grid-template-areas:
+          "start start start"
+          "pathF pathVS pathR"
+          "nodeF nodeVS nodeR"
+          "pathOutF pathOutVS pathOutR"
+          "end end end";
+        grid-template-columns: 1fr auto 1fr; /* Central column for 'VS' symbol */
+        grid-template-rows: auto 1fr auto 1fr auto; 
+        gap: clamp(0.4rem, 1.5vh, 0.8rem);
+        padding: clamp(1rem, 3vh, 1.8rem);
+        border: 1px solid var(--border-color);
+        width: 100%; height: 100%; max-width: 500px; max-height: 420px;
+      }
+      .process-node {
+        background-color: var(--process-bg); border: 2.5px solid var(--process-border);
+        padding: clamp(0.5rem, 1.8vh, 0.8rem); border-radius: 10px;
+        text-align: center; font-size: clamp(0.65em, 1.7vh, 0.8em);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        z-index: 1; display: flex; flex-direction: column;
+        justify-content: center; align-items: center; min-height: 55px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer;
+      }
+      .process-node:hover { transform: translateY(-3px) scale(1.02); }
+      .node-start { grid-area: start; }
+      .node-familiarity { 
+        grid-area: nodeF; border-color: var(--familiarity-color);
+        animation: node-active-pulse 1.5s infinite alternate ease-in-out;
+      }
+      .node-recollection { 
+        grid-area: nodeR; border-color: var(--recollection-color);
+        animation: node-struggle-pulse 2s infinite alternate ease-in-out;
+        opacity: 0.75; /* Dimmer to show struggle */
+      }
+      .node-vs-symbol {
+        grid-area: nodeVS; font-size: clamp(1.2em, 4vh, 2em); font-weight: bold;
+        color: var(--text-color); display: flex; align-items: center; justify-content: center;
+        text-shadow: 0 0 5px var(--arrow-glow); animation: vs-pulse 2s infinite alternate;
+      }
+      .node-end { 
+        grid-area: end; background-color: var(--dejavu-outcome-bg);
+        color: var(--dejavu-outcome-text); font-weight: bold;
+        border-color: color-mix(in srgb, var(--dejavu-outcome-bg) 60%, black);
+        animation: outcome-appear 1s ease-out forwards 1s; opacity:0;
+      }
+      .path-segment-svg { width: 100%; height: 100%; overflow: visible; }
+      .pathF-area { grid-area: pathF; } .pathR-area { grid-area: pathR; }
+      .pathOutF-area { grid-area: pathOutF; } .pathOutR-area { grid-area: pathOutR; }
+      /* Middle paths (pathVS, pathOutVS) can be empty or hold connecting graphics */
+      .pathVS-area { grid-area: pathVS; } .pathOutVS-area { grid-area: pathOutVS; }
+
+      .path-line {
+        fill: none; stroke-width: 3.5px; stroke-linecap: round;
+        filter: drop-shadow(0 0 3px var(--arrow-glow));
+      }
+      .familiarity-flow { 
+        stroke: var(--familiarity-color); 
+        animation: path-flow-strong 1s ease-out infinite;
+      }
+      .recollection-flow { 
+        stroke: var(--recollection-color); stroke-dasharray: 7 5; 
+        opacity: 0.65; animation: path-flow-weak 2.5s linear infinite;
+      }
+      .recollection-flow.glitching { animation: path-flow-weak 2.5s linear infinite, path-glitch 0.3s steps(2, jump-none) infinite; }
+      .node-status-text { font-size: 0.85em; margin-top: 0.3em; font-style: italic;}
+
+      @keyframes node-active-pulse {
+        from { transform: scale(1); box-shadow: 0 0 10px currentColor, 0 4px 10px rgba(0,0,0,0.4); }
+        to { transform: scale(1.04); box-shadow: 0 0 18px currentColor, 0 4px 10px rgba(0,0,0,0.4); }
+      }
+      @keyframes node-struggle-pulse {
+        from { transform: scale(1) translateX(0); box-shadow: 0 0 7px currentColor, 0 4px 10px rgba(0,0,0,0.4); opacity: 0.7; }
+        to { transform: scale(0.98) translateX(1px); box-shadow: 0 0 12px currentColor, 0 4px 10px rgba(0,0,0,0.4); opacity: 0.85; }
+      }
+      @keyframes vs-pulse { from { opacity: 0.7; transform: scale(1); } to { opacity: 1; transform: scale(1.15); } }
+      @keyframes outcome-appear { to { opacity: 1; } }
+      @keyframes path-flow-strong { from { stroke-dashoffset: 50; } to { stroke-dashoffset: 0; } }
+      @keyframes path-flow-weak { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
+      @keyframes path-glitch {
+        0%, 100% { stroke: var(--recollection-color); opacity: 0.65; }
+        50% { stroke: var(--familiarity-color); opacity: 0.9; stroke-dasharray: 2 2; } /* Briefly mimics familiarity */
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .process-node, .familiarity-flow, .recollection-flow, .node-vs-symbol { animation: none !important; }
+        .node-recollection { opacity: 0.75; } .node-end { opacity: 1; }
+        .familiarity-flow, .recollection-flow { stroke-dashoffset: 0 !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" id="flowContainer" role="img" aria-label="Interactive flowchart of dual-process memory. Clicking 'Recollection' node makes its path glitch, visually showing a 'déjà vu' trigger where familiarity is strong but recollection falters, leading to a highlighted 'Mismatch' outcome.">
+      <div class="process-node node-start" id="nodeStart">Incoming Sensory Stimulus</div>
+      
+      <div class="pathF-area"><svg class="path-segment-svg" viewBox="0 0 20 50" preserveAspectRatio="xMidYMin meet">
+          <defs><marker id="arrowHeadF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--familiarity-color)"/></marker></defs>
+          <line class="path-line familiarity-flow" x1="10" y1="0" x2="10" y2="48" stroke-dasharray="50" marker-end="url(#arrowHeadF)"/>
+      </svg></div>
+      <div class="pathVS-area"></div>
+      <div class="pathR-area"><svg class="path-segment-svg" viewBox="0 0 20 50" preserveAspectRatio="xMidYMin meet">
+          <defs><marker id="arrowHeadR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--recollection-color)"/></marker></defs>
+          <line class="path-line recollection-flow" id="recollectionPathIn" x1="10" y1="0" x2="10" y2="48" stroke-dasharray="60" marker-end="url(#arrowHeadR)"/>
+      </svg></div>
+
+      <div class="process-node node-familiarity" id="nodeFamiliarity">
+        "Familiarity" (Perirhinal Cortex)<span class="node-status-text" style="color: var(--familiarity-color);">🚀 Fast & Strong</span>
+      </div>
+      <div class="node-vs-symbol">⚡️<br/>vs<br/>🧠</div>
+      <div class="process-node node-recollection" id="nodeRecollection">
+        "Recollection" (Hippocampus)<span class="node-status-text" style="color: var(--recollection-color);" id="recollectionStatus">🐢 Slow / 🚧 Error?</span>
+      </div>
+
+      <div class="pathOutF-area"><svg class="path-segment-svg" viewBox="0 0 20 50" preserveAspectRatio="xMidYMax meet">
+          <line class="path-line familiarity-flow" x1="10" y1="2" x2="10" y2="50" stroke-dasharray="50" marker-end="url(#arrowHeadF)" style="animation-delay:-0.2s"/>
+      </svg></div>
+      <div class="pathOutVS-area"></div>
+      <div class="pathOutR-area"><svg class="path-segment-svg" viewBox="0 0 20 50" preserveAspectRatio="xMidYMax meet">
+           <line class="path-line recollection-flow" id="recollectionPathOut" x1="10" y1="2" x2="10" y2="50" stroke-dasharray="60" marker-end="url(#arrowHeadR)" style="animation-delay:-0.4s"/>
+      </svg></div>
+      
+      <div class="process-node node-end" id="nodeEnd">Déjà Vu: Strong Familiarity + Failed Recollection = Mismatch!</div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") document.body.classList.add("light-mode");
+
+      const nodeRecollection = document.getElementById('nodeRecollection');
+      const recollectionPathIn = document.getElementById('recollectionPathIn');
+      const recollectionPathOut = document.getElementById('recollectionPathOut');
+      const recollectionStatus = document.getElementById('recollectionStatus');
+      const nodeEnd = document.getElementById('nodeEnd');
+
+      let isGlitched = false;
+      nodeRecollection.addEventListener('click', () => {
+        isGlitched = !isGlitched;
+        recollectionPathIn.classList.toggle('glitching', isGlitched);
+        recollectionPathOut.classList.toggle('glitching', isGlitched);
+        nodeRecollection.style.borderColor = isGlitched ? 'var(--familiarity-color)' : 'var(--recollection-color)'; // Mimic familiarity color bleed
+        recollectionStatus.textContent = isGlitched ? '🔗 ERROR - Path Glitch!' : '🐢 Slow / 🚧 Error?';
+        nodeEnd.style.backgroundColor = isGlitched ? 'var(--dejavu-outcome-bg)' : 'var(--process-bg)';
+        nodeEnd.style.color = isGlitched ? 'var(--dejavu-outcome-text)' : 'var(--text-color)';
+        nodeEnd.style.opacity = '0'; // Trigger re-animation
+        void nodeEnd.offsetWidth; // reflow
+        nodeEnd.style.opacity = '1';
+      });
+
+      // Simulate initial state or reset on container click
+      document.getElementById('flowContainer').addEventListener('click', (e) => {
+          if (e.target.id === 'flowContainer' || e.target.id === 'nodeStart') { // Click on bg or start node
+            isGlitched = false;
+            recollectionPathIn.classList.remove('glitching');
+            recollectionPathOut.classList.remove('glitching');
+            nodeRecollection.style.borderColor = 'var(--recollection-color)';
+            recollectionStatus.textContent = '🐢 Slow / 🚧 Error?';
+            nodeEnd.style.backgroundColor = 'var(--dejavu-outcome-bg)';
+            nodeEnd.style.color = 'var(--dejavu-outcome-text)';
+          }
+      });
+    </script>
+  </body>
+</html>

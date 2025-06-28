@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      The Price of Memory: An Interactive Report on LLM Attention Thrashing
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #fdfcfb;
+        color: #38332d;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 400px;
+        max-height: 50vh;
+      }
+      @media (max-width: 768px) {
+        .chart-container {
+          height: 350px;
+          max-height: 60vh;
+        }
+      }
+      .nav-link {
+        transition: color 0.3s, border-color 0.3s;
+      }
+      .nav-link.active {
+        color: #c2410c;
+        border-bottom-color: #c2410c;
+      }
+      .nav-link:not(.active):hover {
+        color: #ea580c;
+      }
+      .slider-thumb::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        background: #c2410c;
+        cursor: pointer;
+        border-radius: 50%;
+        margin-top: -8px;
+      }
+      .slider-thumb::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        background: #c2410c;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <header
+      class="bg-amber-50/80 backdrop-blur-md sticky top-0 z-50 border-b border-amber-200"
+    >
+      <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex-shrink-0">
+            <h1 class="text-lg font-bold text-orange-900">
+              LLM Attention Thrashing
+            </h1>
+          </div>
+          <div class="hidden md:block">
+            <div class="ml-10 flex items-baseline space-x-4">
+              <a
+                href="#problem"
+                class="nav-link px-3 py-2 rounded-md text-sm font-medium text-orange-800 border-b-2 border-transparent"
+                >The Problem</a
+              >
+              <a
+                href="#mechanism"
+                class="nav-link px-3 py-2 rounded-md text-sm font-medium text-orange-800 border-b-2 border-transparent"
+                >Mechanism</a
+              >
+              <a
+                href="#symptoms"
+                class="nav-link px-3 py-2 rounded-md text-sm font-medium text-orange-800 border-b-2 border-transparent"
+                >Symptoms</a
+              >
+              <a
+                href="#solutions"
+                class="nav-link px-3 py-2 rounded-md text-sm font-medium text-orange-800 border-b-2 border-transparent"
+                >Solutions</a
+              >
+              <a
+                href="#glossary"
+                class="nav-link px-3 py-2 rounded-md text-sm font-medium text-orange-800 border-b-2 border-transparent"
+                >Glossary</a
+              >
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section id="hero" class="py-20 sm:py-28 bg-amber-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2
+            class="text-4xl font-bold tracking-tight text-orange-900 sm:text-6xl"
+          >
+            The Price of Memory
+          </h2>
+          <p class="mt-6 text-lg leading-8 text-stone-700 max-w-3xl mx-auto">
+            LLMs promise infinite context, but at what cost? Explore "Attention
+            Thrashing"—a phenomenon where more information leads to slower
+            performance and wasted computation, much like CPU thrashing in
+            classic computing.
+          </p>
+          <div class="mt-10 flex items-center justify-center gap-x-6">
+            <a
+              href="#problem"
+              class="rounded-md bg-orange-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+              >Discover the Bottleneck</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section id="problem" class="py-20 sm:py-24">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="max-w-3xl mx-auto text-center">
+            <h3
+              class="text-3xl font-bold tracking-tight text-orange-900 sm:text-4xl"
+            >
+              The Quadratic Cliff
+            </h3>
+            <p class="mt-4 text-lg text-stone-600">
+              The core of the issue lies in the self-attention mechanism's O(N²)
+              complexity. As the context length (N) grows, the computational
+              cost and memory required don't just increase—they explode. This
+              section lets you visualize that explosion.
+            </p>
+          </div>
+
+          <div
+            class="mt-16 bg-white/50 p-6 md:p-8 rounded-2xl shadow-lg border border-amber-100"
+          >
+            <div class="text-center mb-8">
+              <label
+                for="context-slider"
+                class="block text-lg font-medium text-stone-700"
+                >Adjust Context Length (Tokens):
+                <span id="slider-value" class="font-bold text-orange-800"
+                  >4,096</span
+                ></label
+              >
+              <p class="text-sm text-stone-500 mt-1">
+                Drag the slider to see how resource costs scale.
+              </p>
+              <input
+                id="context-slider"
+                type="range"
+                min="0"
+                max="100"
+                value="20"
+                class="w-full max-w-lg h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer mt-4 slider-thumb"
+              />
+            </div>
+            <div class="chart-container">
+              <canvas id="scalingChart"></canvas>
+            </div>
+            <div
+              id="kpi-cards"
+              class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center"
+            >
+              <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                <h4 class="text-sm font-medium text-stone-600">
+                  Prefill Latency (ms)
+                </h4>
+                <p id="latency-kpi" class="text-2xl font-bold text-orange-900">
+                  0
+                </p>
+              </div>
+              <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                <h4 class="text-sm font-medium text-stone-600">
+                  FLOPs (Decode/token)
+                </h4>
+                <p id="flops-kpi" class="text-2xl font-bold text-orange-900">
+                  0 G
+                </p>
+              </div>
+              <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                <h4 class="text-sm font-medium text-stone-600">
+                  KV Cache Memory
+                </h4>
+                <p id="memory-kpi" class="text-2xl font-bold text-orange-900">
+                  0 GB
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="mechanism" class="py-20 sm:py-24 bg-amber-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="max-w-3xl mx-auto text-center">
+            <h3
+              class="text-3xl font-bold tracking-tight text-orange-900 sm:text-4xl"
+            >
+              How Attention Works (In Brief)
+            </h3>
+            <p class="mt-4 text-lg text-stone-600">
+              At its heart, self-attention allows a model to weigh the
+              importance of different words in a sentence. It does this by
+              creating three vectors for each token: a Query, a Key, and a
+              Value. This simple mechanism is what allows Transformers to
+              understand context so effectively.
+            </p>
+          </div>
+          <div
+            class="mt-16 flex flex-col md:flex-row items-center justify-center gap-8 text-center"
+          >
+            <div
+              class="flex flex-col items-center p-4 rounded-lg transition-transform hover:scale-105"
+            >
+              <div
+                class="w-24 h-24 bg-blue-100 border-2 border-blue-300 rounded-full flex items-center justify-center font-bold text-blue-800 text-3xl"
+              >
+                Q
+              </div>
+              <h4 class="mt-4 font-semibold text-stone-800">Query</h4>
+              <p class="text-sm text-stone-600 max-w-xs">
+                "What am I looking for?"<br />Represents the current word's
+                focus.
+              </p>
+            </div>
+            <div class="text-4xl text-amber-400 font-thin">+</div>
+            <div
+              class="flex flex-col items-center p-4 rounded-lg transition-transform hover:scale-105"
+            >
+              <div
+                class="w-24 h-24 bg-green-100 border-2 border-green-300 rounded-full flex items-center justify-center font-bold text-green-800 text-3xl"
+              >
+                K
+              </div>
+              <h4 class="mt-4 font-semibold text-stone-800">Key</h4>
+              <p class="text-sm text-stone-600 max-w-xs">
+                "What do I have?"<br />A label for each word in the context.
+              </p>
+            </div>
+            <div class="text-4xl text-amber-400 font-thin">=</div>
+            <div
+              class="flex flex-col items-center p-4 rounded-lg transition-transform hover:scale-105"
+            >
+              <div
+                class="w-24 h-24 bg-purple-100 border-2 border-purple-300 rounded-full flex items-center justify-center font-bold text-purple-800 text-xl"
+              >
+                Score
+              </div>
+              <h4 class="mt-4 font-semibold text-stone-800">Attention Score</h4>
+              <p class="text-sm text-stone-600 max-w-xs">
+                How relevant is a key to a query? A higher score means more
+                focus.
+              </p>
+            </div>
+            <div class="text-4xl text-amber-400 font-thin">&rarr;</div>
+            <div
+              class="flex flex-col items-center p-4 rounded-lg transition-transform hover:scale-105"
+            >
+              <div
+                class="w-24 h-24 bg-red-100 border-2 border-red-300 rounded-full flex items-center justify-center font-bold text-red-800 text-3xl"
+              >
+                V
+              </div>
+              <h4 class="mt-4 font-semibold text-stone-800">Value</h4>
+              <p class="text-sm text-stone-600 max-w-xs">
+                "What is my actual content?"<br />The substance of each word,
+                which gets passed on.
+              </p>
+            </div>
+          </div>
+          <p class="mt-12 text-center text-md text-stone-600 max-w-3xl mx-auto">
+            The final representation of a word is a weighted sum of all Value
+            vectors, where weights are determined by the attention scores. When
+            N is large, calculating scores between every Query and every Key
+            becomes the bottleneck.
+          </p>
+        </div>
+      </section>
+
+      <section id="symptoms" class="py-20 sm:py-24">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="max-w-3xl mx-auto text-center">
+            <h3
+              class="text-3xl font-bold tracking-tight text-orange-900 sm:text-4xl"
+            >
+              Symptom: Lost in the Middle
+            </h3>
+            <p class="mt-4 text-lg text-stone-600">
+              One of the clearest signs of attention inefficiency is the "Lost
+              in the Middle" phenomenon. Models are surprisingly better at
+              recalling information from the beginning or end of a long context.
+              Information in the middle gets... lost. This effect worsens as the
+              context grows.
+            </p>
+          </div>
+          <div
+            class="mt-16 bg-white/50 p-6 md:p-8 rounded-2xl shadow-lg border border-amber-100"
+          >
+            <div class="text-center mb-8">
+              <p class="text-lg font-medium text-stone-700">
+                Select a context length to see its impact on accuracy by
+                position:
+              </p>
+              <div
+                id="accuracy-controls"
+                class="mt-4 flex justify-center space-x-2"
+              >
+                <button
+                  class="accuracy-btn active bg-orange-800 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  data-context="short"
+                >
+                  Short (16K)
+                </button>
+                <button
+                  class="accuracy-btn bg-white text-orange-800 border border-orange-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-100"
+                  data-context="medium"
+                >
+                  Medium (128K)
+                </button>
+                <button
+                  class="accuracy-btn bg-white text-orange-800 border border-orange-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-100"
+                  data-context="long"
+                >
+                  Long (1M)
+                </button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="accuracyChart"></canvas>
+            </div>
+            <p
+              id="accuracy-summary"
+              class="mt-8 text-center text-md text-stone-600 max-w-3xl mx-auto"
+            >
+              In a short context, the model performs well across the board. As
+              you increase the context, notice the "U-shaped" curve becoming
+              more pronounced.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="solutions" class="py-20 sm:py-24 bg-amber-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="max-w-3xl mx-auto text-center">
+            <h3
+              class="text-3xl font-bold tracking-tight text-orange-900 sm:text-4xl"
+            >
+              The Path Forward: Mitigation Strategies
+            </h3>
+            <p class="mt-4 text-lg text-stone-600">
+              The research community is actively developing solutions to
+              overcome the attention bottleneck. These range from new
+              architectures to clever data handling techniques.
+            </p>
+          </div>
+          <div
+            class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            <div
+              class="bg-white p-6 rounded-lg shadow-md border border-amber-100"
+            >
+              <h4 class="font-bold text-lg text-orange-900">
+                Efficient Attention Architectures
+              </h4>
+              <p class="mt-2 text-stone-600">
+                Methods like
+                <span class="font-semibold">Sparse Attention</span> (BigBird,
+                Longformer) and
+                <span class="font-semibold">Linear Attention</span> (Linformer)
+                approximate full attention to reduce complexity from O(N²) to
+                near-linear O(N), trading perfect accuracy for massive
+                efficiency gains.
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-lg shadow-md border border-amber-100"
+            >
+              <h4 class="font-bold text-lg text-orange-900">
+                Hardware-Aware Implementations
+              </h4>
+              <p class="mt-2 text-stone-600">
+                <span class="font-semibold">FlashAttention</span> is a
+                game-changer. It doesn't approximate; it reorders the
+                computation to be I/O-aware, minimizing slow data transfers
+                between GPU memory levels. This makes exact attention much
+                faster without sacrificing accuracy.
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-lg shadow-md border border-amber-100"
+            >
+              <h4 class="font-bold text-lg text-orange-900">
+                Retrieval Augmented Generation (RAG)
+              </h4>
+              <p class="mt-2 text-stone-600">
+                Instead of stuffing everything into the context window, RAG
+                first retrieves only the most relevant snippets of information
+                from a knowledge base. This keeps the context short, focused,
+                and avoids thrashing altogether.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="glossary" class="py-20 sm:py-24">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="max-w-3xl mx-auto text-center">
+            <h3
+              class="text-3xl font-bold tracking-tight text-orange-900 sm:text-4xl"
+            >
+              Glossary of Terms
+            </h3>
+            <p class="mt-4 text-lg text-stone-600">
+              A quick reference for the key concepts discussed in this report.
+            </p>
+            <input
+              id="glossary-search"
+              type="text"
+              placeholder="Search terms..."
+              class="mt-8 w-full max-w-lg px-4 py-2 border border-stone-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
+            />
+          </div>
+          <div
+            id="glossary-list"
+            class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8"
+          ></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-orange-900 text-amber-200">
+      <div
+        class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-sm"
+      >
+        <p>
+          Interactive Report created to visualize the findings on LLM Attention
+          Efficiency.
+        </p>
+        <p class="mt-2">Based on the report dated June 2, 2025.</p>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const scalingChartData = {
+          labels: [],
+          datasets: [
+            {
+              label: "Prefill Latency (Quadratic)",
+              data: [],
+              borderColor: "#c2410c",
+              backgroundColor: "#c2410c20",
+              yAxisID: "y",
+              tension: 0.1,
+              fill: true,
+            },
+            {
+              label: "KV Cache Memory (Linear)",
+              data: [],
+              borderColor: "#1d4ed8",
+              backgroundColor: "#1d4ed820",
+              yAxisID: "y1",
+              tension: 0.1,
+              fill: true,
+            },
+          ],
+        };
+
+        const accuracyData = {
+          short: {
+            labels: ["Start", "Mid 1", "Mid 2", "Mid 3", "End"],
+            data: [98, 95, 94, 96, 99],
+            summary:
+              "With a short context, the model recalls information effectively from all positions, showing only a very slight dip in the middle.",
+          },
+          medium: {
+            labels: ["Start", "Mid 1", "Mid 2", "Mid 3", "End"],
+            data: [95, 75, 70, 78, 97],
+            summary:
+              "At a medium context length, the 'U-shaped' performance curve becomes clear. Accuracy in the middle drops significantly.",
+          },
+          long: {
+            labels: ["Start", "Mid 1", "Mid 2", "Mid 3", "End"],
+            data: [92, 55, 45, 60, 96],
+            summary:
+              "In a very long context, the model is severely 'lost in the middle.' Information at the boundaries is still accessible, but central facts are often missed.",
+          },
+        };
+
+        const glossaryTerms = [
+          {
+            term: "Attention Mechanism",
+            definition:
+              "A technique enabling a model to weigh the importance of different parts of an input sequence when processing information.",
+          },
+          {
+            term: "Attention Thrashing",
+            definition:
+              "A proposed state where the attention mechanism is overwhelmed by excessive context, leading to disproportionate resource use and degraded performance.",
+          },
+          {
+            term: "Context Window",
+            definition:
+              "The maximum amount of text (in tokens) an LLM can consider at one time.",
+          },
+          {
+            term: "FLOPs",
+            definition:
+              "Floating Point Operations, a measure of computational work. Higher FLOPs mean more computation is required.",
+          },
+          {
+            term: "KV Cache",
+            definition:
+              "A memory cache storing Key and Value vectors for previously processed tokens to speed up generation. Its size grows linearly with context length.",
+          },
+          {
+            term: "Lost in the Middle",
+            definition:
+              "The phenomenon where LLMs are less accurate at retrieving information from the middle of a long context compared to the beginning or end.",
+          },
+          {
+            term: "O(N²) Complexity",
+            definition:
+              "Quadratic complexity. If input size N doubles, the work required quadruples. The core issue with standard self-attention.",
+          },
+          {
+            term: "Perplexity (PPL)",
+            definition:
+              "A measure of how well a language model predicts a text sample. Lower is better.",
+          },
+          {
+            term: "RAG",
+            definition:
+              "Retrieval Augmented Generation. A technique that retrieves relevant information first, then feeds it to the LLM, avoiding large, unfocused contexts.",
+          },
+          {
+            term: "Tokenization",
+            definition:
+              "The process of breaking text down into smaller pieces (tokens) that the model can understand.",
+          },
+          {
+            term: "Transformer",
+            definition:
+              "The neural network architecture that underpins most modern LLMs, heavily relying on the self-attention mechanism.",
+          },
+        ];
+
+        let scalingChart, accuracyChart;
+
+        function formatNumber(num) {
+          if (num >= 1e12) return (num / 1e12).toFixed(1) + " T";
+          if (num >= 1e9) return (num / 1e9).toFixed(1) + " B";
+          if (num >= 1e6) return (num / 1e6).toFixed(1) + " M";
+          if (num >= 1e3) return (num / 1e3).toFixed(1) + " K";
+          return num.toFixed(0);
+        }
+
+        function updateScalingChart(value) {
+          const max_tokens = 2000000;
+          const tokens = Math.pow(value / 100, 3) * max_tokens;
+
+          document.getElementById("slider-value").textContent =
+            formatNumber(tokens);
+
+          const labels = [];
+          const latencyData = [];
+          const memoryData = [];
+          const steps = 20;
+
+          for (let i = 0; i <= steps; i++) {
+            const current_tokens = (tokens / steps) * i;
+            labels.push(formatNumber(current_tokens));
+
+            const latency =
+              Math.pow(current_tokens / 1000, 2) * 0.05 +
+              current_tokens * 0.001;
+            latencyData.push(latency);
+
+            const memory = (current_tokens * 128) / 1000000;
+            memoryData.push(memory);
+          }
+
+          scalingChart.data.labels = labels;
+          scalingChart.data.datasets[0].data = latencyData;
+          scalingChart.data.datasets[1].data = memoryData;
+          scalingChart.update();
+
+          const finalLatency = latencyData[latencyData.length - 1];
+          const finalMemory = memoryData[memoryData.length - 1];
+          const flops = tokens * 0.0001;
+
+          document.getElementById("latency-kpi").textContent =
+            finalLatency.toFixed(2);
+          document.getElementById("flops-kpi").textContent =
+            formatNumber(flops * 1e9) + "FLOPs";
+          document.getElementById("memory-kpi").textContent =
+            finalMemory.toFixed(2) + " GB";
+        }
+
+        function initScalingChart() {
+          const ctx = document.getElementById("scalingChart").getContext("2d");
+          scalingChart = new Chart(ctx, {
+            type: "line",
+            data: scalingChartData,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: {
+                mode: "index",
+                intersect: false,
+              },
+              scales: {
+                x: {
+                  title: { display: true, text: "Context Length (Tokens)" },
+                  ticks: {
+                    maxRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 7,
+                  },
+                },
+                y: {
+                  type: "linear",
+                  display: true,
+                  position: "left",
+                  title: { display: true, text: "Latency (ms)" },
+                },
+                y1: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: { display: true, text: "KV Cache (GB)" },
+                  grid: { drawOnChartArea: false },
+                },
+              },
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    title: (context) => `Context: ${context[0].label} Tokens`,
+                  },
+                },
+              },
+            },
+          });
+          updateScalingChart(20);
+        }
+
+        function initAccuracyChart() {
+          const ctx = document.getElementById("accuracyChart").getContext("2d");
+          const initialData = accuracyData.short;
+          accuracyChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: initialData.labels,
+              datasets: [
+                {
+                  label: "Retrieval Accuracy",
+                  data: initialData.data,
+                  backgroundColor: "#fb923c",
+                  borderColor: "#c2410c",
+                  borderWidth: 2,
+                  borderRadius: 5,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 100,
+                  title: { display: true, text: "Accuracy (%)" },
+                },
+                x: {
+                  title: { display: true, text: "Position in Context" },
+                },
+              },
+              plugins: {
+                legend: { display: false },
+              },
+            },
+          });
+        }
+
+        function updateAccuracyChart(contextType) {
+          const data = accuracyData[contextType];
+          accuracyChart.data.labels = data.labels;
+          accuracyChart.data.datasets[0].data = data.data;
+          accuracyChart.update();
+          document.getElementById("accuracy-summary").textContent =
+            data.summary;
+        }
+
+        function populateGlossary(filter = "") {
+          const list = document.getElementById("glossary-list");
+          list.innerHTML = "";
+          const lowerCaseFilter = filter.toLowerCase();
+
+          glossaryTerms
+            .filter((item) => item.term.toLowerCase().includes(lowerCaseFilter))
+            .forEach((item) => {
+              const div = document.createElement("div");
+              div.className =
+                "bg-white p-6 rounded-lg shadow-sm border border-amber-100";
+              div.innerHTML = `
+                            <h4 class="font-bold text-lg text-orange-900">${item.term}</h4>
+                            <p class="mt-2 text-stone-600">${item.definition}</p>
+                        `;
+              list.appendChild(div);
+            });
+        }
+
+        document
+          .getElementById("context-slider")
+          .addEventListener("input", (e) => {
+            updateScalingChart(e.target.value);
+          });
+
+        document.querySelectorAll(".accuracy-btn").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            document.querySelectorAll(".accuracy-btn").forEach((btn) => {
+              btn.classList.remove("active", "bg-orange-800", "text-white");
+              btn.classList.add(
+                "bg-white",
+                "text-orange-800",
+                "border",
+                "border-orange-700",
+                "hover:bg-orange-100"
+              );
+            });
+            e.target.classList.add("active", "bg-orange-800", "text-white");
+            e.target.classList.remove(
+              "bg-white",
+              "text-orange-800",
+              "border",
+              "border-orange-700",
+              "hover:bg-orange-100"
+            );
+            updateAccuracyChart(e.target.dataset.context);
+          });
+        });
+
+        document
+          .getElementById("glossary-search")
+          .addEventListener("input", (e) => {
+            populateGlossary(e.target.value);
+          });
+
+        const navLinks = document.querySelectorAll(".nav-link");
+        const sections = document.querySelectorAll("main section");
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                navLinks.forEach((link) => {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href").substring(1) === entry.target.id
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-50% 0px -50% 0px" }
+        );
+
+        sections.forEach((section) => observer.observe(section));
+
+        initScalingChart();
+        initAccuracyChart();
+        populateGlossary();
+      });
+    </script>
+  </body>
+</html>

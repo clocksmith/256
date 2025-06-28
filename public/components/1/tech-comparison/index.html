@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Waymo vs Tesla Technology Comparison (Enhanced)</title>
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --header-bg: #e9ecef;
+        --padding: 0.8rem;
+        --waymo-color: #4285f4;
+        --tesla-color: #8b00cc;
+        --overlap-color: #6c757d; /* Neutral overlap */
+        --column-bg: #fff;
+        --item-hover-bg: #f1f3f5;
+      }
+      body.dark-mode {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --header-bg: #333;
+        --waymo-color: #8ab4f8;
+        --tesla-color: #e086ff; /* Lighter purple for dark mode */
+        --overlap-color: #adb5bd; /* Lighter grey for dark mode */
+        --column-bg: #2a2a2a;
+        --item-hover-bg: #383838;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: var(--padding);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 0.9rem;
+        line-height: 1.6; /* Improved readability */
+      }
+      .comparison-container {
+        display: grid; /* Using grid for responsiveness */
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(220px, 1fr)
+        ); /* Responsive columns */
+        gap: var(--padding);
+      }
+      .column {
+        background-color: var(--column-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 6px; /* Softer corners */
+        padding: var(--padding);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .column h3 {
+        margin: 0 0 0.8rem 0; /* More space below heading */
+        padding-bottom: 0.5rem; /* Underline effect space */
+        border-bottom: 3px solid; /* Thicker underline */
+        font-size: 1.05rem; /* Slightly larger heading */
+        display: flex; /* For icon alignment */
+        align-items: center;
+        gap: 0.4rem; /* Space between icon and text */
+      }
+      .waymo-col h3 {
+        border-color: var(--waymo-color);
+        color: var(--waymo-color);
+      }
+      .tesla-col h3 {
+        border-color: var(--tesla-color);
+        color: var(--tesla-color);
+      }
+      .overlap-col h3 {
+        border-color: var(--overlap-color);
+        color: var(--overlap-color);
+      }
+
+      .column h3::before {
+        /* Adding icons */
+        content: "";
+        display: inline-block;
+        width: 1.2em;
+        height: 1.2em;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      .waymo-col h3::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238ab4f8'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E");
+      }
+      body.light-mode .waymo-col h3::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234285f4'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E");
+      }
+      .tesla-col h3::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e086ff'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zm0 11.5L4.5 10.25l7.5 3.75 7.5-3.75L12 13.5zm0 3.5L4.5 13.75l7.5 3.75 7.5-3.75L12 17z'/%3E%3C/svg%3E");
+      }
+      body.light-mode .tesla-col h3::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b00cc'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zm0 11.5L4.5 10.25l7.5 3.75 7.5-3.75L12 13.5zm0 3.5L4.5 13.75l7.5 3.75 7.5-3.75L12 17z'/%3E%3C/svg%3E");
+      }
+      .overlap-col h3::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23adb5bd'%3E%3Cpath d='M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zM4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8-8-3.59-8-8zm14.83.67L17.5 10.5l-1.33 2.17 1.33 2.17 1.33-2.17zM6.5 10.5l1.33 2.17-1.33 2.17-1.33-2.17 1.33-2.17z'/%3E%3C/svg%3E");
+      }
+      body.light-mode .overlap-col h3::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c757d'%3E%3Cpath d='M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zM4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8-8-3.59-8-8zm14.83.67L17.5 10.5l-1.33 2.17 1.33 2.17 1.33-2.17zM6.5 10.5l1.33 2.17-1.33 2.17-1.33-2.17 1.33-2.17z'/%3E%3C/svg%3E");
+      }
+
+      .column ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.85rem;
+      }
+      .column li {
+        margin-bottom: 0.5rem; /* More space between items */
+        padding-left: 1.2rem; /* Space for custom bullet */
+        position: relative;
+        transition: background-color 0.2s ease;
+      }
+      .column li:hover {
+        background-color: var(--item-hover-bg);
+        border-radius: 3px; /* Slight rounding on hover */
+      }
+      .column li::before {
+        /* Custom bullets */
+        content: "▹"; /* Triangle bullet */
+        position: absolute;
+        left: 0;
+        top: 1px; /* Adjust vertical alignment */
+        font-weight: bold;
+      }
+      .waymo-col li::before {
+        color: var(--waymo-color);
+      }
+      .tesla-col li::before {
+        color: var(--tesla-color);
+      }
+      .overlap-col li::before {
+        color: var(--overlap-color);
+      }
+      .highlight {
+        /* For key differentiating terms */
+        font-weight: 500;
+        color: var(--text-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="comparison-container">
+      <div class="column waymo-col">
+        <h3>Waymo Approach</h3>
+        <ul>
+          <li>
+            <span class="highlight">Sensor Suite:</span> Lidar (Multiple),
+            Radar, Cameras (360°), Microphones
+          </li>
+          <li>
+            <span class="highlight">Mapping:</span> High-Definition Maps
+            (Pre-mapped ODD critical)
+          </li>
+          <li>
+            <span class="highlight">Core AI:</span> Advanced Sensor Fusion,
+            Predictive Behavior Modeling
+          </li>
+          <li>
+            <span class="highlight">Redundancy:</span> Emphasis on multiple
+            sensor types & compute paths
+          </li>
+          <li>
+            <span class="highlight">Operational Domain:</span> Geofenced (Proven
+            L4 within these zones)
+          </li>
+          <li>
+            <span class="highlight">Hardware Cost:</span> Historically higher
+            due to comprehensive sensor suite
+          </li>
+          <li>
+            <span class="highlight">Data Source:</span> Dedicated test fleet,
+            millions of autonomous miles
+          </li>
+        </ul>
+      </div>
+      <div class="column tesla-col">
+        <h3>Tesla Approach</h3>
+        <ul>
+          <li>
+            <span class="highlight">Sensor Suite:</span> Cameras Only ("Tesla
+            Vision")
+          </li>
+          <li>
+            <span class="highlight">Mapping:</span> Relies on vision-based
+            localization, no HD Lidar maps
+          </li>
+          <li>
+            <span class="highlight">Core AI:</span> End-to-End Neural Networks,
+            Vast Fleet Learning
+          </li>
+          <li>
+            <span class="highlight">Redundancy:</span> Primarily through camera
+            overlap and AI interpretation
+          </li>
+          <li>
+            <span class="highlight">Operational Domain:</span> Aims for wider
+            ODD (unmapped areas, L2+ supervised)
+          </li>
+          <li>
+            <span class="highlight">Hardware Cost:</span> Lower sensor hardware
+            cost (cameras are cheaper)
+          </li>
+          <li>
+            <span class="highlight">Data Source:</span> Massive consumer vehicle
+            fleet (FSD Beta program)
+          </li>
+        </ul>
+      </div>
+      <div class="column overlap-col">
+        <h3>Shared Elements / Tools</h3>
+        <ul>
+          <li>
+            <span class="highlight">Core Tech:</span> AI / Machine Learning
+            fundamental to perception & decision
+          </li>
+          <li>
+            <span class="highlight">Development:</span> Extensive Simulation
+            Testing for edge cases & training
+          </li>
+          <li>
+            <span class="highlight">Updates:</span> Over-the-Air (OTA) Software
+            Updates for improvements
+          </li>
+          <li>
+            <span class="highlight">Processing:</span> Significant onboard
+            Compute Hardware (custom SoCs often)
+          </li>
+          <li>
+            <span class="highlight">Data Handling:</span> Sophisticated Data
+            Annotation & Labeling pipelines
+          </li>
+          <li>
+            <span class="highlight">Goal:</span> Achieving safe and reliable
+            autonomous navigation
+          </li>
+          <li>
+            <span class="highlight">Basic ADAS:</span> Both offer ADAS (ACC,
+            LKA), though underlying tech differs
+          </li>
+        </ul>
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </body>
+</html>

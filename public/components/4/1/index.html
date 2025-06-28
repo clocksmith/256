@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Storm Within: An LLM's Cognitive Battlefield</title>
+    <!-- CONFIRMATION: No external JS libraries for the visualization are used. -->
+    <style>
+        :root {
+            --bg-calm: #e0f7fa;
+            --bg-stormy: #011F4B;
+            --orb-color: #4dd0e1;
+            --orb-glow: #ffffff;
+            --cloud-color: #b0bec5;
+            --intrusive-color: #ff5252;
+            --particle-color: #ffffff;
+            --meter-bg: #455a64;
+            --meter-fill-low: #66bb6a;
+            --meter-fill-med: #fdd835;
+            --meter-fill-high: #ef5350;
+            --text-color-dark: #e0e0e0;
+            --text-color-light: #212121;
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+            transition: background-color 1s ease;
+        }
+        .light-mode {
+            --bg-calm: #e0f7fa;
+            --bg-stormy: #90a4ae;
+            --orb-color: #00838f;
+            --orb-glow: #000000;
+            --cloud-color: #78909c;
+            --intrusive-color: #d32f2f;
+            --particle-color: #424242;
+        }
+        #simulation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-calm);
+            transition: background-color 1s ease;
+        }
+        #focus-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            background-color: var(--orb-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            box-shadow: 0 0 15px 5px var(--orb-color), 0 0 30px 10px rgba(255,255,255,0.3);
+            animation: pulse 4s infinite ease-in-out;
+            transition: transform 0.5s ease, box-shadow 0.5s ease, background-color 0.5s ease, width 0.5s ease, height 0.5s ease;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+        .cloud {
+            position: absolute;
+            background-color: var(--cloud-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: fadeInAndDrift 20s linear infinite;
+            filter: blur(10px);
+        }
+        .intrusive-thought {
+            position: absolute;
+            color: var(--intrusive-color);
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0;
+            animation: intrusive-pop 15s linear infinite;
+            text-shadow: 0 0 8px var(--intrusive-color);
+            cursor: pointer;
+            user-select: none;
+        }
+        @keyframes fadeInAndDrift {
+            0% { opacity: 0; transform: translateX(-100px); }
+            20% { opacity: 0.3; }
+            80% { opacity: 0.3; }
+            100% { opacity: 0; transform: translateX(calc(100vw + 100px)); }
+        }
+        @keyframes intrusive-pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            10% { transform: scale(1.2); opacity: 0.9; }
+            90% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(0.5); opacity: 0; }
+        }
+        .ui-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background-color: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+        .meter {
+            width: 250px;
+            height: 20px;
+            background-color: var(--meter-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .meter-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--meter-fill-low);
+            transition: width 0.5s ease, background-color 0.5s ease;
+            border-radius: 10px 0 0 10px;
+        }
+        label, button {
+            color: var(--text-color-dark);
+            background-color: transparent;
+            border: 1px solid var(--text-color-dark);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        body.light-mode label, body.light-mode button {
+            color: var(--text-color-light);
+            border-color: var(--text-color-light);
+        }
+    </style>
+</head>
+<body>
+    <div id="simulation-container">
+        <div id="focus-orb"></div>
+    </div>
+    <div class="ui-container">
+        <label for="complexity-slider">Context Complexity</label>
+        <input type="range" id="complexity-slider" min="0" max="100" value="0" style="width: 250px;">
+        <div class="meter">
+            <div id="load-meter-bar" class="meter-bar"></div>
+        </div>
+        <button id="clarity-button">Moment of Clarity</button>
+    </div>
+
+    <script>
+        const theme = new URLSearchParams(window.location.search).get('theme') || 'dark';
+        document.body.classList.add(theme === 'light' ? 'light-mode' : 'dark-mode');
+
+        const container = document.getElementById('simulation-container');
+        const orb = document.getElementById('focus-orb');
+        const slider = document.getElementById('complexity-slider');
+        const loadMeterBar = document.getElementById('load-meter-bar');
+        const clarityButton = document.getElementById('clarity-button');
+
+        const symbols = ['?', '!', '§', '#', '@', '...', '🔥'];
+
+        function createCloud() {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.width = `${Math.random() * 150 + 50}px`;
+            cloud.style.height = `${Math.random() * 80 + 40}px`;
+            cloud.style.top = `${Math.random() * 100}vh`;
+            cloud.style.animationDuration = `${Math.random() * 20 + 15}s`;
+            cloud.style.animationDelay = `${Math.random() * 5}s`;
+            return cloud;
+        }
+
+        function createIntrusiveThought() {
+            const thought = document.createElement('div');
+            thought.className = 'intrusive-thought';
+            thought.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            thought.style.top = `${Math.random() * 90}vh`;
+            thought.style.left = `${Math.random() * 90}vw`;
+            thought.style.animationDuration = `${Math.random() * 10 + 8}s`;
+            thought.style.animationDelay = `${Math.random() * 3}s`;
+            thought.addEventListener('click', () => {
+                thought.style.opacity = '0';
+                const currentLoad = parseFloat(loadMeterBar.style.width) || 0;
+                loadMeterBar.style.width = Math.min(100, currentLoad + 2) + '%';
+                setTimeout(() => thought.remove(), 500);
+            });
+            return thought;
+        }
+
+        slider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            
+            // Update Cognitive Load Meter
+            loadMeterBar.style.width = value + '%';
+            if (value > 75) {
+                loadMeterBar.style.backgroundColor = 'var(--meter-fill-high)';
+            } else if (value > 40) {
+                loadMeterBar.style.backgroundColor = 'var(--meter-fill-med)';
+            } else {
+                loadMeterBar.style.backgroundColor = 'var(--meter-fill-low)';
+            }
+            
+            // Update Orb
+            const scale = 1 - (value / 200);
+            orb.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            const orbOpacity = 1 - (value / 150);
+            orb.style.boxShadow = `0 0 ${15 * orbOpacity}px 5px var(--orb-color), 0 0 ${30 * orbOpacity}px 10px rgba(255,255,255,0.3)`;
+            orb.style.animationPlayState = value > 50 ? 'paused' : 'running';
+
+            // Update Background Storm
+            container.style.backgroundColor = `color-mix(in srgb, var(--bg-calm) ${100-value}%, var(--bg-stormy))`;
+
+            // Add/Remove elements
+            const existingClouds = document.querySelectorAll('.cloud').length;
+            const targetClouds = Math.floor(value / 10);
+            if (existingClouds < targetClouds) {
+                for (let i = 0; i < targetClouds - existingClouds; i++) {
+                    container.appendChild(createCloud());
+                }
+            }
+            
+            const existingThoughts = document.querySelectorAll('.intrusive-thought').length;
+            const targetThoughts = Math.floor(value / 5);
+            if (existingThoughts < targetThoughts) {
+                 for (let i = 0; i < targetThoughts - existingThoughts; i++) {
+                    container.appendChild(createIntrusiveThought());
+                }
+            }
+        });
+        
+        clarityButton.addEventListener('click', () => {
+             container.style.transition = 'background-color 0.2s ease';
+             container.style.backgroundColor = 'var(--bg-calm)';
+             document.querySelectorAll('.intrusive-thought, .cloud').forEach(el => el.style.opacity = '0');
+             orb.style.transform = 'translate(-50%, -50%) scale(1.2)';
+             orb.style.boxShadow = `0 0 25px 10px var(--orb-color), 0 0 50px 20px rgba(255,255,255,0.5)`;
+
+             setTimeout(() => {
+                 slider.value = 10;
+                 slider.dispatchEvent(new Event('input'));
+                 container.style.transition = 'background-color 1s ease';
+             }, 1000);
+             setTimeout(() => {
+                 document.querySelectorAll('.intrusive-thought, .cloud').forEach(el => el.remove());
+             }, 500);
+        });
+    </script>
+</body>
+</html>

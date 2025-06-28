@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Detailed specifications table comparing different generations of Google's Tensor Processing Units (TPUs), from v1 to v7 Ironwood, updated for Q2 2025."
+    />
+    <title>TPU Generations Specifications (Q2 2025) - Enhanced</title>
+    <style>
+      :root {
+        --bg-color-light: #f0f8ff;
+        --text-color-light: #1a1a1a;
+        --surface-bg-light: rgba(255, 255, 255, 0.9);
+        --border-color-light: rgba(0, 0, 0, 0.12);
+        --glow-blue-light: rgba(0, 100, 200, 0.75); /* Google Blue-like */
+        --table-header-bg-light: rgba(230, 230, 230, 0.8);
+        --table-row-bg-light: rgba(252, 252, 252, 0.75);
+        --table-row-hover-light: rgba(240, 245, 250, 0.95);
+
+        --bg-color-dark: #0e1014;
+        --text-color-dark: #e8e8e8;
+        --surface-bg-dark: rgba(28, 30, 35, 0.92);
+        --border-color-dark: rgba(255, 255, 255, 0.15);
+        --glow-blue-dark: rgba(100, 180, 255, 0.85);
+        --table-header-bg-dark: rgba(48, 52, 60, 0.9);
+        --table-row-bg-dark: rgba(35, 38, 45, 0.8);
+        --table-row-hover-dark: rgba(58, 62, 70, 0.95);
+
+        --bg-color: var(--bg-color-dark);
+        --text-color: var(--text-color-dark);
+        --surface-bg: var(--surface-bg-dark);
+        --border-color: var(--border-color-dark);
+        --glow-blue: var(--glow-blue-dark);
+        --table-header-bg: var(--table-header-bg-dark);
+        --table-row-bg: var(--table-row-bg-dark);
+        --table-row-hover: var(--table-row-hover-dark);
+      }
+      body.light-mode {
+        --bg-color: var(--bg-color-light);
+        --text-color: var(--text-color-light);
+        --surface-bg: var(--surface-bg-light);
+        --border-color: var(--border-color-light);
+        --glow-blue: var(--glow-blue-light);
+        --table-header-bg: var(--table-header-bg-light);
+        --table-row-bg: var(--table-row-bg-light);
+        --table-row-hover: var(--table-row-hover-light);
+      }
+      html {
+        font-size: 16px;
+      }
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+        margin: 0;
+        padding: 0.7rem; /* Reduced padding */
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.5;
+        font-size: 0.75rem; /* Very small base font for extreme density */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .table-container {
+        max-width: 100%;
+        overflow-x: auto;
+        background-color: var(--surface-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 6px; /* Smaller radius */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 5px 7px; /* Tightest padding */
+        text-align: left;
+        vertical-align: top;
+        white-space: nowrap;
+      }
+      td:not(:last-child),
+      th:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      thead th:last-child,
+      tbody td:last-child {
+        border-right: none;
+      }
+      th {
+        background-color: var(--table-header-bg);
+        font-weight: 600;
+        color: var(--glow-blue);
+        font-size: 0.65rem; /* Smallest header */
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      tbody tr {
+        background-color: var(--table-row-bg);
+        transition: background-color 0.15s ease-in-out;
+      }
+      tbody tr:hover {
+        background-color: var(--table-row-hover);
+      }
+      td.numeric {
+        text-align: right;
+      }
+      .note {
+        font-size: 0.9em;
+        opacity: 0.8;
+        display: block;
+        margin-top: 3px;
+      }
+      .special-note {
+        color: color-mix(in srgb, var(--text-color) 65%, transparent);
+        font-style: italic;
+      }
+      td:empty::after {
+        content: "–";
+        color: color-mix(in srgb, var(--text-color) 55%, transparent);
+      }
+      .tooltip {
+        position: relative;
+        cursor: help;
+      }
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 140px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 4px;
+        position: absolute;
+        z-index: 10;
+        bottom: 115%;
+        left: 50%;
+        margin-left: -70px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        font-size: 0.9em;
+        white-space: normal;
+      }
+      body.light-mode .tooltip .tooltiptext {
+        background-color: #f0f0f0;
+        color: #111;
+        border: 1px solid #ccc;
+      }
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 0.95;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>TPU v1 <span class="note">(2015)</span></th>
+            <th>TPU v2 <span class="note">(2017)</span></th>
+            <th>TPU v3 <span class="note">(2018)</span></th>
+            <th>TPU v4 <span class="note">(2021)</span></th>
+            <th>TPU v5e <span class="note">(2023)</span></th>
+            <th>TPU v5p <span class="note">(2023)</span></th>
+            <th class="tooltip">
+              v6e (Trillium) <span class="note">(2024)</span
+              ><span class="tooltiptext">4.7x Perf/chip vs v5e.</span>
+            </th>
+            <th class="tooltip">
+              v7 (Ironwood) <span class="note">(2025)</span
+              ><span class="tooltiptext"
+                >Inference-first. 2x Perf/Watt vs v6e.</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Peak Perf.<sup>1</sup></td>
+            <td class="numeric">92 TOPS</td>
+            <td class="numeric">45 TFLOPs</td>
+            <td class="numeric">123 TFLOPs</td>
+            <td class="numeric">275 TFLOPs</td>
+            <td class="numeric">
+              197 TFLOPs <span class="note">393 INT8 TOPS</span>
+            </td>
+            <td class="numeric">
+              459 TFLOPs <span class="note">918 INT8 TOPS</span>
+            </td>
+            <td class="numeric">
+              ~918 TFLOPs <span class="note">~1836 INT8 TOPS</span>
+            </td>
+            <td class="numeric">4614 TFLOPs (FP8)</td>
+          </tr>
+          <tr>
+            <td>Memory Type</td>
+            <td>DDR3</td>
+            <td>HBM</td>
+            <td>HBM</td>
+            <td>HBM2</td>
+            <td>HBM</td>
+            <td>HBM3</td>
+            <td>HBM (Enhanced)</td>
+            <td>HBM3 (High Capacity)</td>
+          </tr>
+          <tr>
+            <td>Mem. Capacity (GB/chip)</td>
+            <td class="numeric">8</td>
+            <td class="numeric">16</td>
+            <td class="numeric">16 <span class="note">(32/board)</span></td>
+            <td class="numeric">32</td>
+            <td class="numeric">16</td>
+            <td class="numeric special-note">
+              ~24 <span class="note">(95/device)</span>
+            </td>
+            <td class="numeric">32 <span class="note">(2x v5e)</span></td>
+            <td class="numeric">192</td>
+          </tr>
+          <tr>
+            <td>Mem. BW (GB/s/chip)</td>
+            <td class="numeric">34</td>
+            <td class="numeric">600</td>
+            <td class="numeric">900</td>
+            <td class="numeric">1200</td>
+            <td class="numeric">819</td>
+            <td class="numeric special-note">
+              ~700 <span class="note">(2765/device)</span>
+            </td>
+            <td class="numeric">1640 <span class="note">(2x v5e)</span></td>
+            <td class="numeric">7370</td>
+          </tr>
+          <tr>
+            <td>MXU Size<sup>2</sup></td>
+            <td>256x256 (INT8)</td>
+            <td>128x128</td>
+            <td>128x128</td>
+            <td>128x128</td>
+            <td>128x128</td>
+            <td>128x128</td>
+            <td class="tooltip">
+              256x256<span class="tooltiptext"
+                >Enhanced Dense & Sparse Cores.</span
+              >
+            </td>
+            <td class="tooltip">
+              256x256<span class="tooltiptext"
+                >Optimized for FP8, Enhanced SparseCore.</span
+              >
+            </td>
+          </tr>
+          <tr>
+            <td>Precisions</td>
+            <td>INT8</td>
+            <td>BF16, FP32</td>
+            <td>BF16, FP32</td>
+            <td>BF16, FP32, INT8</td>
+            <td>BF16, FP32, INT8</td>
+            <td>BF16, FP32, INT8</td>
+            <td>FP8, BF16, FP32, INT8</td>
+            <td>FP8, BF16, INT8</td>
+          </tr>
+          <tr>
+            <td>Interconnect BW (Gbps/chip/dim)</td>
+            <td class="special-note">PCIe</td>
+            <td class="numeric">600</td>
+            <td class="numeric">600</td>
+            <td class="numeric">~800</td>
+            <td class="numeric">400</td>
+            <td class="numeric">400</td>
+            <td class="special-note">Enhanced ICI</td>
+            <td class="special-note">Next-gen ICI</td>
+          </tr>
+          <tr>
+            <td>Power (W/chip, Approx)</td>
+            <td class="numeric">~40-75</td>
+            <td class="numeric">~200-280</td>
+            <td class="numeric">~200-220</td>
+            <td class="numeric">~170-190</td>
+            <td class="numeric special-note">~120-150</td>
+            <td class="special-note">Not Public</td>
+            <td class="special-note">Not Public</td>
+            <td class="special-note">Not Public</td>
+          </tr>
+        </tbody>
+      </table>
+      <p
+        style="
+          font-size: 0.9em;
+          opacity: 0.85;
+          margin-top: 4px;
+          padding-left: 5px;
+        "
+      >
+        <sup>1</sup> Performance generally BF16 TFLOPs / INT8 TOPS per chip,
+        unless noted. <sup>2</sup> Matrix Multiply Unit dimensions (BF16/FP16
+        unless noted).
+        <span class="special-note"
+          >"Device" refers to multi-chip module for v5p. Some v6e/v7 specs
+          inferred from Perf/Watt claims.</span
+        >
+      </p>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </body>
+</html>

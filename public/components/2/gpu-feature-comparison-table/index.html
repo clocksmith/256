@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Detailed comparison table highlighting key architectural and feature differences between NVIDIA and AMD GPUs, with Q2 2025 updates and interactive elements."
+    />
+    <title>GPU Feature Comparison (NVIDIA vs. AMD) Q2 2025 - Enhanced</title>
+    <style>
+      :root {
+        --bg-color-light: #f0f8ff;
+        --text-color-light: #1a1a1a;
+        --surface-bg-light: rgba(255, 255, 255, 0.9);
+        --border-color-light: rgba(0, 0, 0, 0.12);
+        --glow-orange-light: rgba(255, 100, 0, 0.75);
+        --table-header-bg-light: rgba(230, 230, 230, 0.8);
+        --table-row-bg-light: rgba(252, 252, 252, 0.75);
+        --table-row-hover-light: rgba(240, 245, 250, 0.95);
+        --nvidia-color-light: #76b900; /* NVIDIA Green */
+        --amd-color-light: #ed1c24; /* AMD Red */
+
+        --bg-color-dark: #0e1014;
+        --text-color-dark: #e8e8e8;
+        --surface-bg-dark: rgba(28, 30, 35, 0.92);
+        --border-color-dark: rgba(255, 255, 255, 0.15);
+        --glow-orange-dark: rgba(255, 160, 40, 0.85);
+        --table-header-bg-dark: rgba(48, 52, 60, 0.9);
+        --table-row-bg-dark: rgba(35, 38, 45, 0.8);
+        --table-row-hover-dark: rgba(58, 62, 70, 0.95);
+        --nvidia-color-dark: #a0e040; /* Lighter NVIDIA Green */
+        --amd-color-dark: #ff5c5c; /* Lighter AMD Red */
+
+        --bg-color: var(--bg-color-dark);
+        --text-color: var(--text-color-dark);
+        --surface-bg: var(--surface-bg-dark);
+        --border-color: var(--border-color-dark);
+        --glow-orange: var(--glow-orange-dark);
+        --table-header-bg: var(--table-header-bg-dark);
+        --table-row-bg: var(--table-row-bg-dark);
+        --table-row-hover: var(--table-row-hover-dark);
+        --nvidia-color: var(--nvidia-color-dark);
+        --amd-color: var(--amd-color-dark);
+      }
+      body.light-mode {
+        --bg-color: var(--bg-color-light);
+        --text-color: var(--text-color-light);
+        --surface-bg: var(--surface-bg-light);
+        --border-color: var(--border-color-light);
+        --glow-orange: var(--glow-orange-light);
+        --table-header-bg: var(--table-header-bg-light);
+        --table-row-bg: var(--table-row-bg-light);
+        --table-row-hover: var(--table-row-hover-light);
+        --nvidia-color: var(--nvidia-color-light);
+        --amd-color: var(--amd-color-light);
+      }
+      html {
+        font-size: 16px;
+      }
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+        margin: 0;
+        padding: 0.8rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.55;
+        font-size: 0.8rem;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .table-container {
+        max-width: 100%;
+        overflow-x: auto;
+        background-color: var(--surface-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 9px 11px; /* Consistent padding */
+        text-align: left;
+        vertical-align: top;
+        white-space: normal;
+      }
+      td:not(:last-child),
+      th:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      thead th:last-child,
+      tbody td:last-child {
+        border-right: none;
+      }
+      th {
+        background-color: var(--table-header-bg);
+        font-weight: 600;
+        color: var(--glow-orange);
+        font-size: 0.75rem; /* Adjusted header size */
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      tbody tr {
+        background-color: var(--table-row-bg);
+        transition: background-color 0.18s ease-in-out;
+      }
+      tbody tr:hover {
+        background-color: var(--table-row-hover);
+      }
+      .feature-name {
+        font-weight: 500;
+        color: var(--text-color);
+      }
+      .nvidia-text {
+        color: var(--nvidia-color);
+        font-weight: 500;
+      }
+      .amd-text {
+        color: var(--amd-color);
+        font-weight: 500;
+      }
+      ul {
+        margin: 0;
+        padding-left: 1.1em;
+      }
+      li {
+        margin-bottom: 0.25em;
+      }
+      li:last-child {
+        margin-bottom: 0;
+      }
+      .highlight-feature {
+        background-color: color-mix(
+          in srgb,
+          var(--glow-orange) 15%,
+          transparent
+        );
+        padding: 0.1em 0.3em;
+        border-radius: 3px;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature Aspect</th>
+            <th class="nvidia-text">NVIDIA (Blackwell & RTX 5000)</th>
+            <th class="amd-text">AMD (RDNA 4 & CDNA 3 / UDNA)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feature-name">Core Processing Units</td>
+            <td>
+              <ul>
+                <li>CUDA Cores (General Parallel)</li>
+                <li>5th Gen Tensor Cores (AI, Matrix Math, FP4/FP8)</li>
+                <li>3rd Gen RT Cores (Ray Tracing)</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>Stream Processors (General Parallel)</li>
+                <li>2nd Gen AI Accelerators (AI, Matrix Math, INT4s)</li>
+                <li>3rd Gen Ray Accelerators (Ray Tracing)</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">Microarchitecture Org.</td>
+            <td>
+              Streaming Multiprocessor (SM) based: GPC → TPC → SM.
+              <span class="highlight-feature">Modular GPC/TPC</span> design.
+            </td>
+            <td>
+              Compute Unit (CU) based. Evolving towards
+              <span class="highlight-feature">Unified DNA (UDNA)</span>
+              combining RDNA/CDNA strengths.
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">Memory System</td>
+            <td>
+              <ul>
+                <li>Client: GDDR7 (e.g., RTX 5000 series)</li>
+                <li>Data Center: HBM3/HBM3e (e.g., B200 w/ 192GB HBM3e)</li>
+                <li>Large L2 Cache common.</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>
+                  Client/Workstation: GDDR6 (e.g., RDNA 4, Radeon AI Pro R9700
+                  w/ 32GB)
+                </li>
+                <li>Data Center: HBM3 (e.g., MI300X w/ 192GB HBM3)</li>
+                <li>
+                  <span class="highlight-feature">Infinity Cache</span> (Large
+                  L3 cache on many GPUs)
+                </li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">GPU-to-GPU Interconnect</td>
+            <td>
+              NVLink (High-speed, proprietary).
+              <span class="highlight-feature">NVLink Fusion</span> for 3rd-party
+              CPU/XPU integration.
+            </td>
+            <td>
+              Infinity Fabric (High-speed, coherent for GPU-GPU & CPU-GPU).
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">SIMT Execution Unit</td>
+            <td>Warp (Typically 32 threads)</td>
+            <td>Wavefront (Typically 64 threads)</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Software & Ecosystem</td>
+            <td>
+              <ul>
+                <li>
+                  <span class="highlight-feature">CUDA</span> (Dominant GPGPU
+                  platform)
+                </li>
+                <li>TensorRT (Inference Optimization), cuDNN, NCCL</li>
+                <li>DLSS 4 (AI Upscaling), Omniverse</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>
+                  <span class="highlight-feature">ROCm</span> (Open-source GPGPU
+                  platform, HIP for CUDA porting)
+                </li>
+                <li>MIGraphX, rocBLAS, RCCL</li>
+                <li>FidelityFX Super Resolution (FSR 4), Radeon Rays</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">Key Supported Precisions</td>
+            <td>
+              FP64, FP32, TF32, FP16, BF16,
+              <span class="highlight-feature">FP8, INT8, FP4</span> (Blackwell)
+            </td>
+            <td>
+              FP64, FP32, FP16, BF16, INT8,
+              <span class="highlight-feature">INT4 sparse</span> (RDNA 4 Pro)
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">Primary Market Segments</td>
+            <td>
+              Gaming, Professional Visualization, AI/ML (Training & Inference),
+              High-Performance Computing (HPC).
+            </td>
+            <td>
+              Gaming, Professional Visualization, AI/ML (Training & Inference),
+              High-Performance Computing (HPC).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </body>
+</html>

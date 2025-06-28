@@ -1,0 +1,2092 @@
+<article>
+  <h1>Attention Thrashing and ADHD in Thinking Machines</h1>
+  <p class="post-meta">
+    Posted on
+    <time datetime="2025-06-26T12:34:00-05:00"
+      >June 26, 2025, 12:34 AM EST</time
+    >
+  </p>
+
+  <iframe
+    class="component-iframe"
+    src="/components/4/1/index.html"
+    title="Conceptual: The Storm Within - LLM Attention & Cognitive Load"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This interactive visualization depicts an LLM's "cognitive space" attempting
+    to focus on a task, while increasing context length introduces "intrusive
+    thought-clouds" that create an escalating "inner tempest" of processing.
+  </p>
+
+  <h2>Summary in 3</h2>
+  <div class="article-summary">
+    <ul>
+      <li>
+        ⛗ LLM attention, overwhelmed by vast contexts, mirrors an ADHD mind's
+        "inner tempest," leading to inefficient "attention thrashing."
+      </li>
+      <li>
+        ⛗ Symptoms like "Lost in the Middle" and flawed "Needle-in-a-Haystack"
+        performance reveal cognitive overload, where clarity of thought is lost.
+      </li>
+      <li>
+        ⛗ Coining "attention thrashing" helps diagnose these processing storms,
+        guiding development toward more focused, resilient AI thinking machines.
+      </li>
+    </ul>
+  </div>
+
+  <h2>Table of Contents</h2>
+  <nav class="toc">
+    <ul>
+      <li>
+        <a href="#section-tempest-1"
+          >The Gathering Mists: Context and Distraction</a
+        >
+      </li>
+      <li>
+        <a href="#section-tempest-2"
+          >Eye of the Cyclone: Attention's Frail Grasp</a
+        >
+      </li>
+      <li>
+        <a href="#section-tempest-3"
+          >Tempest's Toll: When Cognitive Overload Dulls</a
+        >
+      </li>
+      <li>
+        <a href="#section-tempest-4"
+          >Charting the Chaos: Defining Attention Thrashing</a
+        >
+      </li>
+      <li>
+        <a href="#section-tempest-5"
+          >Conjuring the Storm: Simulating the ADHD Mind</a
+        >
+      </li>
+      <li>
+        <a href="#section-tempest-6"
+          >Seeking Shelter: Calming the Attentional Tempest</a
+        >
+      </li>
+      <li>
+        <a href="#section-tempest-7"
+          >Horizons Beyond the Storm: Pathways to Focus</a
+        >
+      </li>
+      <li>
+        <a href="#section-tempest-8">Glossary of the Gale: Terms of Turmoil</a>
+      </li>
+    </ul>
+  </nav>
+
+  <h2 id="section-tempest-1">The Gathering Mists: Context and Distraction</h2>
+  <p class="section-tagline">
+    When expanded horizons fog the mind, sowing seeds of cognitive disarray.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/2/index.html"
+    title="Interactive: Context Window Expansion & 'Mental Clutter' Accumulation"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This simulation allows users to increase an LLM's context window via a
+    slider, visually showing "relevant thoughts" becoming obscured by
+    accumulating "mental clutter" (irrelevant tokens), representing attentional
+    overload.
+  </p>
+  <p>
+    Large Language Models represent a significant paradigm shift in artificial
+    intelligence today. These exceptionally large deep learning models are
+    pre-trained on vast corpora of data, possessing the capability to
+    comprehend, process, and generate human-like text skillfully. This is a
+    foundational technology.<a href="#source-1">[1]</a
+    ><a href="#source-2">[2]</a>
+  </p>
+  <p>
+    The Transformer architecture is the predominant neural network structure
+    underpinning contemporary LLMs. These sophisticated models are engineered to
+    discern and learn intricate patterns within natural language, with features
+    like self-attention, parallel processing, and positional encoding. This
+    allows concurrent input processing.<a href="#source-3">[3]</a
+    ><a href="#source-4">[4]</a>
+  </p>
+  <p>
+    A pivotal advantage of Transformers over earlier recurrent neural network
+    architectures is this enhanced training efficiency. Early NLP models
+    processed input data token by token, a slow reading which limited their
+    ability to capture long-range dependencies, a short attention span for these
+    machines. The Transformer revolutionized this.<a href="#source-5">[5]</a
+    ><a href="#source-6">[6]</a>
+  </p>
+  <p>
+    This parallelizability, coupled with an improved capacity for handling
+    long-range dependencies, paved the way for massive models. A critical
+    observation now emerges: the drive towards ever-larger context windows
+    introduces new, complex efficiency challenges that strain the model's
+    ability to maintain its focus. This is a very interesting paradox.<a
+      href="#source-7"
+      >[7]</a
+    ><a href="#source-8">[8]</a>
+  </p>
+  <p>
+    The context window defines the maximum amount of textual information an LLM
+    can simultaneously remember. This operational parameter is frequently
+    analogized to human short-term working memory, representing a fleeting grasp
+    on current details that are available for immediate processing. A very
+    important system component.<a href="#source-9">[9]</a
+    ><a href="#source-10">[10]</a>
+  </p>
+  <p>
+    The magnitude of the context window is of paramount importance to an LLM's
+    overall capabilities. More expansive windows empower the model to process
+    and integrate information from extensive input sequences, which translates
+    to tangible improvements in coherence and complex task completion. This
+    includes long document summarization.<a href="#source-11">[11]</a
+    ><a href="#source-12">[12]</a>
+  </p>
+  <p>
+    The evolution of context window sizes in modern LLMs has been nothing short
+    of truly dramatic. Early influential models were constrained to a few
+    thousand tokens, which often proved insufficient for many enterprise-level
+    applications that necessitate substantial document ingestion. A very notable
+    and large increase.<a href="#source-13">[13]</a
+    ><a href="#source-14">[14]</a>
+  </p>
+  <p>
+    This rapid expansion addresses escalating demands for LLMs to comprehend and
+    reason over vast information. While larger contexts offer greater
+    informational capacity, they concurrently introduce significant performance
+    considerations due to attention's computational demands, stirring a tempest.
+    This is a fundamental trade-off.<a href="#source-15">[15]</a
+    ><a href="#source-16">[16]</a>
+  </p>
+
+  <h2 id="section-tempest-2">Eye of the Cyclone: Attention's Frail Grasp</h2>
+  <p class="section-tagline">
+    The mechanism's core principles, struggling to maintain focused thought
+    amidst information whirlwinds.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/3/index.html"
+    title="Conceptual: Self-Attention Dot Product - The Mind's Interconnections"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This visualization shows input tokens transformed into Q, K, V vectors. It
+    then illustrates the dot product score computation between a query and all
+    keys, representing the mind's attempt to interconnect ideas.
+  </p>
+  <p>
+    The attention mechanism is the cornerstone of the Transformer, enabling
+    models to weigh input importance. This mechanism allows the model to assess
+    the significance of different tokens within the same input sequence, which
+    is fundamental for capturing complex dependencies and relationships. This is
+    a very important function.<a href="#source-17">[17]</a
+    ><a href="#source-18">[18]</a>
+  </p>
+  <p>
+    Self-Attention, also known as intra-attention, helps the model infer complex
+    relationships within the provided textual input. For instance, in "The cat
+    sat on the mat because it was warm," self-attention helps the model infer
+    that "it" likely refers to "the mat" rather than "the cat" in the sentence.
+    It filters irrelevant associations.<a href="#source-19">[19]</a
+    ><a href="#source-20">[20]</a>
+  </p>
+  <p>
+    Scaled Dot-Product Attention is the specific mathematical formulation
+    forming the building block of this self-attention process. It operates on
+    three learned linear projections of input embeddings: Queries (Q), Keys (K),
+    and Values (V), starting by projecting input tokens into these vectors.
+    Attention scores are then computed.<a href="#source-21">[21]</a
+    ><a href="#source-22">[22]</a>
+  </p>
+  <p>
+    These resulting scores are then scaled by dividing them by the square root
+    of the key vector dimension. This scaling factor is crucial for stabilizing
+    gradients during the demanding training process, as it prevents dot products
+    from growing too large and pushing the softmax function. A softmax function
+    normalizes scores.<a href="#source-23">[23]</a><a href="#source-24">[24]</a>
+  </p>
+  <p>
+    The output for the query token is then computed as a weighted sum of all the
+    value vectors. The weights are the probabilities obtained from the softmax
+    function, guiding the model's subsequent internal processing operations, a
+    core equation for how these machines think. This is a fundamental process.<a
+      href="#source-25"
+      >[25]</a
+    ><a href="#source-26">[26]</a>
+  </p>
+  <p>
+    Multi-Head Attention enables the model to jointly attend to information from
+    different representational subspaces. Instead of a single attention
+    function, it involves running scaled dot-product attention multiple times in
+    parallel, with each parallel "attention head" using its own learned
+    projections. The outputs are then concatenated.<a href="#source-27">[27]</a
+    ><a href="#source-28">[28]</a>
+  </p>
+  <p>
+    This architecture allows each head to potentially specialize in focusing on
+    different aspects of the input. Such aspects might include syntactic
+    dependencies, semantic relationships over varying distances, or other
+    complex linguistic patterns, significantly amplifying the model's
+    representational power. This enhancement has a high cost.<a
+      href="#source-29"
+      >[29]</a
+    ><a href="#source-30">[30]</a>
+  </p>
+  <p>
+    Multiple attention computations, each scaling with sequence length, are
+    performed in parallel. This multiplication of load by the number of heads
+    becomes an increasingly critical factor for long contexts, highlighting a
+    trade-off between specialization and the computational burden. This
+    exacerbates the scaling problem.<a href="#source-31">[31]</a
+    ><a href="#source-32">[32]</a>
+  </p>
+
+  <h2 id="section-tempest-3">Tempest's Toll: When Cognitive Overload Dulls</h2>
+  <p class="section-tagline">
+    Empirical evidence of performance decay as the thinking mind struggles under
+    excessive context.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/4/index.html"
+    title="Interactive Chart: Latency & Throughput vs. Context Length - The Inner Storm's Impact"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This dual-axis chart shows prefill latency increasing and decoding
+    throughput decreasing as context length rises, controlled by a slider,
+    visually demonstrating the "inner tempest's" toll on processing speed and
+    efficiency.
+  </p>
+  <p>
+    The theoretical quadratic complexity of attention and linear KV cache growth
+    suggest inevitable performance degradation. Empirical studies across various
+    metrics confirm this, providing tangible evidence of challenges with
+    extended informational sequences, much like a mind slowing under duress. The
+    impact is quite significant.<a href="#source-33">[33]</a
+    ><a href="#source-34">[34]</a>
+  </p>
+  <p>
+    Prefill Latency, the time taken to process the initial prompt, increases
+    substantially with longer contexts. This occurs primarily due to the O(N²)
+    computational complexity of the self-attention mechanism during this initial
+    phase, with over 90% of latency attributable to these computations. A very
+    clear processing bottleneck.<a href="#source-35">[35]</a
+    ><a href="#source-36">[36]</a>
+  </p>
+  <p>
+    Decoding Latency, the time required to generate each subsequent output
+    token, also tends to increase with context length. This is because each new
+    token must attend to an ever-larger KV cache, leading to more computations
+    and a mind struggling to form new thoughts, slowing down the response. The
+    system becomes less efficient.<a href="#source-37">[37]</a
+    ><a href="#source-38">[38]</a>
+  </p>
+  <p>
+    As a direct consequence of increased latency, the overall throughput of LLMs
+    generally decreases. Throughput, measured as tokens processed per unit of
+    time, reflects the model's processing efficiency, and its degradation
+    impacts both user experience and the economic viability of models. A
+    practical performance ceiling.<a href="#source-39">[39]</a
+    ><a href="#source-40">[40]</a>
+  </p>
+  <p>
+    While larger context windows theoretically provide more information, this is
+    not always beneficial. Performance on tasks requiring identification of
+    specific information can degrade, particularly with extremely long contexts,
+    indicating the LLM's clarity of thought becomes clouded. The model cannot
+    use all data.<a href="#source-41">[41]</a><a href="#source-42">[42]</a>
+  </p>
+  <p>
+    A significant body of research highlights that LLM accuracy can suffer when
+    processing very long contexts. This is particularly pronounced in tasks
+    requiring retrieval of specific information ("needles") embedded deep within
+    vast text ("haystack"), where models often struggle to find it. This is a
+    very common failure.<a href="#source-43">[43]</a
+    ><a href="#source-44">[44]</a>
+  </p>
+  <p>
+    The "Lost in the Middle" phenomenon demonstrates models struggle to access
+    info located in the middle. Performance tends to be highest when critical
+    information is positioned at the very beginning or end, a U-shaped
+    performance curve linked to the "Serial Position Effect" in humans. A mind
+    that has lost the plot.<a href="#source-45">[45]</a
+    ><a href="#source-46">[46]</a>
+  </p>
+  <p>
+    Standard perplexity has been shown to be an unreliable indicator for long
+    context language modeling. Traditional PPL calculates an average uncertainty
+    over all tokens, potentially masking difficulties with key, long-range
+    dependent tokens that are essential for true understanding. A new metric has
+    been created.<a href="#source-47">[47]</a><a href="#source-48">[48]</a>
+  </p>
+
+  <h2 id="section-tempest-4">
+    Charting the Chaos: Defining Attention Thrashing
+  </h2>
+  <p class="section-tagline">
+    Giving name to the mind's storm: unstable focus, misdirection, and
+    inefficient processing.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/5/index.html"
+    title="Conceptual: Defining Attention Thrashing - Symptoms and Causes Flowchart"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This flowchart diagram visually defines "attention thrashing," outlining its
+    key symptoms like high latency and accuracy degradation, and linking them to
+    primary causes such as O(N²) complexity and KV cache growth.
+  </p>
+  <p>
+    This report posits an analogy between "attention thrashing" and CPU/RAM
+    thrashing in computing. In operating systems, thrashing occurs when memory
+    demands exceed available physical RAM, leading to excessive data swapping
+    and a severe degradation in system performance. A system stuck in a loop.<a
+      href="#source-49"
+      >[49]</a
+    ><a href="#source-50">[50]</a>
+  </p>
+  <p>
+    Drawing from this analogy, "attention thrashing" is proposed herein to
+    describe a state in LLMs. It is where the attention mechanism becomes a
+    significant performance bottleneck when confronted with exceedingly long
+    input sequences, a mind overwhelmed by intrusive thoughts. This state is
+    very inefficient.<a href="#source-51">[51]</a><a href="#source-52">[52]</a>
+  </p>
+  <p>
+    Disproportionate Resource Consumption is a primary symptom: an excessive
+    amount of computational resources is consumed. This includes FLOPs for
+    computation and memory bandwidth for data movement, with a significant
+    portion of tokens being irrelevant, akin to reviewing distracting details.
+    This is a very big problem.<a href="#source-53">[53]</a
+    ><a href="#source-54">[54]</a>
+  </p>
+  <p>
+    Diminished Information Retrieval Efficacy is another key indicator; the
+    model exhibits a reduced ability. It struggles to prioritize and utilize
+    salient information embedded within the extended context, a classic
+    ADHD-like challenge observed in "needle in a haystack" retrieval tasks.
+    Important facts are often missed.<a href="#source-55">[55]</a
+    ><a href="#source-56">[56]</a>
+  </p>
+  <p>
+    Performance Degradation across key metrics is also evident despite the large
+    context volume. These include increased latency for generating responses and
+    reduced throughput in processing complex information sequences, suggesting
+    merely increasing context length can be detrimental. The mind's storm has a
+    high cost.<a href="#source-57">[57]</a><a href="#source-58">[58]</a>
+  </p>
+  <p>
+    The implication is the existence of a critical threshold of diminishing
+    returns with context length. The O(N²) computational complexity inherent in
+    standard self-attention is a primary driver of this potential for thrashing,
+    as the computational effort required for processing grows. The system
+    becomes over-stressed.<a href="#source-59">[59]</a
+    ><a href="#source-60">[60]</a>
+  </p>
+  <p>
+    This quadratic scaling means that as the context window (N) expands,
+    computational effort increases exponentially. A significant consequence is
+    the "cost of indiscrimination," a failure of the mind to filter, as the
+    model expends growing computational effort on irrelevant tokens. This is
+    unproductive swapping.<a href="#source-61">[61]</a
+    ><a href="#source-62">[62]</a>
+  </p>
+  <p>
+    This computational waste, coupled with phenomena such as attention dilution,
+    can culminate in "attention thrashing." Attention dilution occurs where the
+    model's focus is spread too thinly across the large context, its ability to
+    concentrate on critical details diminished, a wandering gaze. A syndrome of
+    dysfunctions.<a href="#source-63">[63]</a><a href="#source-64">[64]</a>
+  </p>
+
+  <h2 id="section-tempest-5">Conjuring the Storm: Simulating the ADHD Mind</h2>
+  <p class="section-tagline">
+    Deliberately inducing attentional inefficiencies to understand the model's
+    internal cognitive struggles.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/6/index.html"
+    title="Interactive: Ablation Study Controls - Modifying Attention Patterns"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This component allows users to select modified attention patterns (e.g.,
+    Uniform, Random, Fixed Window) via radio buttons, simulating ablation
+    studies to observe how such induced inefficiencies impact a conceptual LLM's
+    processing.
+  </p>
+  <p>
+    To better understand "attention thrashing," researchers can deliberately
+    modify attention mechanisms. Ablation studies, where attention components
+    are altered or simplified, are particularly valuable for this analytical
+    purpose, as the standard Transformer attention is highly optimized. A less
+    efficient pattern is used.<a href="#source-65">[65]</a
+    ><a href="#source-66">[66]</a>
+  </p>
+  <p>
+    This involves modifying the core attention computation, often within a
+    PyTorch framework. Uniform Attention is one such modified pattern; instead
+    of dynamically calculating weights, uniform weights are assigned, simulating
+    a mind equally distracted by all stimuli. The model cannot distinguish
+    relevance.<a href="#source-67">[67]</a><a href="#source-68">[68]</a>
+  </p>
+  <p>
+    This uniform approach would likely lead to severe performance degradation on
+    tasks requiring focus. The model would treat all context tokens as equally
+    important, highlighting the value of learned, dynamic attention, as
+    effectiveness would plummet even if computational cost remains. A very
+    important research method.<a href="#source-69">[69]</a
+    ><a href="#source-70">[70]</a>
+  </p>
+  <p>
+    Random Attention is another method, assigning random weights or selecting a
+    random subset of tokens. This simulates a highly noisy or unfocused
+    attention process, akin to a mind that is bombarded by random intrusive
+    thoughts, and it would likely cause a significant drop in performance. This
+    is a very useful technique.<a href="#source-71">[71]</a
+    ><a href="#source-72">[72]</a>
+  </p>
+  <p>
+    Deliberately Restricted Attention Patterns offer further insights into
+    specific failure modes. Fixed Window Attention, if naively implemented
+    without mechanisms like attention sinks, could lead to information loss,
+    while masking specific information can force attention onto distractors. A
+    model's focus becomes stuck.<a href="#source-73">[73]</a
+    ><a href="#source-74">[74]</a>
+  </p>
+  <p>
+    Perturbing Attention Scores or Weights can also simulate imperfections or
+    instability within the attention mechanism. Adding noise involves injecting
+    random noise into calculated attention scores before softmax, or directly to
+    weights after, while quantization artifacts simulate lossy compression.
+    AttentionDrop variants perturb.<a href="#source-75">[75]</a
+    ><a href="#source-76">[76]</a>
+  </p>
+  <p>
+    The performance of models with these modified patterns should be compared
+    against standard full attention. Known efficient attention mechanisms like
+    FlashAttention also serve as crucial performance baselines, with metrics
+    including task accuracy, perplexity, latency, and throughput. This provides
+    qualitative insight.<a href="#source-77">[77]</a
+    ><a href="#source-78">[78]</a>
+  </p>
+  <p>
+    By conducting such ablation studies, researchers gain deeper understanding
+    of how deviations from optimal attention contribute. This provides empirical
+    support for the "attention thrashing" concept, isolating attention
+    inefficiency from other factors and establishing causal links. This is a
+    crucial research step.<a href="#source-79">[79]</a
+    ><a href="#source-80">[80]</a>
+  </p>
+
+  <h2 id="section-tempest-6">
+    Seeking Shelter: Calming the Attentional Tempest
+  </h2>
+  <p class="section-tagline">
+    Exploring architectural and guidance techniques to help the thinking machine
+    find focus.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/7/index.html"
+    title="Conceptual: Efficient Attention Mechanisms - Calming the Storm"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This visualization compares standard attention's "stormy processing" with
+    efficient methods like Sparse Attention ("focused pathways") and
+    FlashAttention ("clear, fast channels"), illustrating how they aim to bring
+    calm and order.
+  </p>
+  <p>
+    An overview of mitigation strategies provides crucial context for
+    understanding attention inefficiency. The existence of these "efficient
+    attention" mechanisms underscores the severity of the O(N²) problem,
+    highlighting performance characteristics lost when the mind cannot settle
+    its focus. The problem is a major one.<a href="#source-81">[81]</a
+    ><a href="#source-82">[82]</a>
+  </p>
+  <p>
+    Sparse Attention Mechanisms reduce computational complexity by restricting
+    each token to attend to a subset of others. This is often achieved through
+    predefined or learned sparsity patterns, with examples like BigBird
+    combining windowed, random, and global attention for a more comprehensive
+    view. This provides a focused approach.<a href="#source-83">[83]</a
+    ><a href="#source-84">[84]</a>
+  </p>
+  <p>
+    Linear Attention Mechanisms aim to reduce complexity to O(N) by
+    approximating the softmax function. Linformer achieves linear complexity by
+    projecting Key and Value matrices to a lower-dimensional space, while
+    Performers utilize the FAVOR+ mechanism to approximate the softmax kernel.
+    These find simpler mental pathways.<a href="#source-85">[85]</a
+    ><a href="#source-86">[86]</a>
+  </p>
+  <p>
+    Hardware-Aware Efficient Attention methods like FlashAttention are exact,
+    not approximate, implementations. They use tiling and recomputation to
+    minimize slow memory reads and writes, significantly speeding up attention
+    computation without sacrificing precision, optimizing the hardware of
+    thought. A very fast and precise method.<a href="#source-87">[87]</a
+    ><a href="#source-88">[88]</a>
+  </p>
+  <p>
+    Recurrence-Based Approaches reintroduce recurrent mechanisms to process
+    sequences for linear scaling. Transformer-XL introduces segment-level
+    recurrence, caching hidden states from previous segments for reuse, while
+    Retentive Network (RetNet) offers a novel retention mechanism. A more
+    stable, cumulative memory.<a href="#source-89">[89]</a
+    ><a href="#source-90">[90]</a>
+  </p>
+  <p>
+    Other Novel Approaches include LongNet, proposing "dilated attention" for
+    sequences up to one billion tokens. StreamingLLM leverages "attention sinks"
+    with a sliding window, while Core Context Aware (CCA) Attention uses
+    globality-aware pooling to compress input token groups. These are some new
+    techniques.<a href="#source-91">[91]</a><a href="#source-92">[92]</a>
+  </p>
+  <p>
+    Techniques for Improving Attention Focus directly guide or "correct" the
+    attention mechanism. Selective Prompt Anchoring (SPA) mathematically
+    amplifies important prompt parts, preventing the LLM from "losing track,"
+    while Focus Directions steer attention towards relevant context. This
+    provides cognitive support.<a href="#source-93">[93]</a
+    ><a href="#source-94">[94]</a>
+  </p>
+  <p>
+    Step-by-Step Reading & Attention Recalibration combines prompting with
+    dynamic attention adjustment. Retrieval Augmented Generation (RAG) uses a
+    retriever to find relevant information from an external knowledge base,
+    reducing the amount of information the attention mechanism sifts. This
+    reduces the cognitive load.<a href="#source-95">[95]</a
+    ><a href="#source-96">[96]</a>
+  </p>
+
+  <h2 id="section-tempest-7">Horizons Beyond the Storm: Pathways to Focus</h2>
+  <p class="section-tagline">
+    Future inquiries aiming to permanently calm the inner tempest and achieve
+    sustained clarity.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/8/index.html"
+    title="Conceptual: Future LLM Attention - Adaptive Focus & Cognitive Resilience"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This visualization abstractly depicts a future LLM with adaptive attention,
+    dynamically shifting focus from a calm "processing core" to relevant
+    data-points, while "intrusive thoughts" (noise) are effectively filtered,
+    signifying resilience.
+  </p>
+  <p>
+    Mastering attention in massive contexts remains an open frontier, a
+    turbulent sea for researchers. Key challenges and future research directions
+    include developing truly scalable and robust attention mechanisms that can
+    scale to arbitrarily long contexts, potentially billions of tokens. This is
+    a very hard problem.<a href="#source-97">[97]</a
+    ><a href="#source-98">[98]</a>
+  </p>
+  <p>
+    Future mechanisms should ideally allocate computational resources
+    dynamically based on the input context. This adaptive focus would move
+    beyond applying a fixed computational pattern, and a deeper theoretical
+    understanding of attention dynamics in extremely long sequences is also
+    critically needed. This requires much more research.<a href="#source-99"
+      >[99]</a
+    ><a href="#source-100">[100]</a>
+  </p>
+  <p>
+    Optimizing attention will likely require closer hardware-software co-design,
+    a more integrated approach. Innovations like Processing-in-Memory (PIM) or
+    specialized accelerators for attention could play a very significant role,
+    and developing standardized benchmarks is also very beneficial. A more
+    holistic design is needed.<a href="#source-101">[101]</a
+    ><a href="#source-102">[102]</a>
+  </p>
+  <p>
+    Understanding what models are attending to in very long contexts is crucial
+    for debugging. Current visualization tools may struggle with the extreme
+    lengths of modern context windows, limiting our insight, while exploring the
+    relationship with catastrophic forgetting could yield insights. This is a
+    key research area.<a href="#source-103">[103]</a
+    ><a href="#source-104">[104]</a>
+  </p>
+  <p>
+    If attention struggles to maintain focus over very long conversational
+    histories or extensive documentation. It might contribute to these phenomena
+    by effectively "forgetting" or "diluting" the importance of earlier,
+    critical information, as the pursuit of LLMs that can effectively process
+    information is central. This requires much more research.<a
+      href="#source-105"
+      >[105]</a
+    ><a href="#source-106">[106]</a>
+  </p>
+  <p>
+    Recent advancements have primarily concentrated on processing extended input
+    contexts for initial comprehension. However, the equally critical aspect of
+    generating coherent, high-quality long-form outputs has received
+    comparatively less direct attention from researchers in this specific field.
+    This is a major research gap.<a href="#source-107">[107]</a
+    ><a href="#source-108">[108]</a>
+  </p>
+  <p>
+    This highlights a critical gap in current LLM capabilities and necessitates
+    focused research efforts. Developing foundational LLMs tailored for
+    generating high-quality, long-form outputs is an important next step, as the
+    ability to maintain a coherent "train of thought" over extended generation
+    is paramount. This requires new training methods.<a href="#source-109"
+      >[109]</a
+    ><a href="#source-110">[110]</a>
+  </p>
+  <p>
+    The interdisciplinary exploration of overload in ADHD, computer systems, and
+    LLMs opens research avenues. Integrating novel findings, identifying
+    critical knowledge gaps, and fostering collaborative inquiry are essential
+    for true progress, perhaps with formal modeling studies of system dynamics.
+    This is a very complex problem.<a href="#source-111">[111]</a
+    ><a href="#source-112">[112]</a>
+  </p>
+
+  <h2 id="section-tempest-8">Glossary of the Gale: Terms of Turmoil</h2>
+  <p class="section-tagline">
+    A lexicon for navigating the turbulent language of attention mechanisms and
+    their storms.
+  </p>
+  <iframe
+    class="component-iframe"
+    src="/components/4/9/index.html"
+    title="Interactive Glossary: Key Terms in LLM Attention and Thrashing"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This interactive glossary provides definitions for key terms related to LLM
+    attention, context windows, and the "attention thrashing" concept, allowing
+    users to click terms to reveal explanations and navigate the jargon.
+  </p>
+  <p>
+    **Attention Mechanism:** A technique in neural networks that enables the
+    model to dynamically weigh the importance of different parts of an input
+    sequence. It calculates these weights based on the relevance of input
+    elements, attempting to focus the mind of the model. This is a fundamental
+    operation.<a href="#source-113">[113]</a><a href="#source-114">[114]</a>
+  </p>
+  <p>
+    **Self-Attention (Intra-attention):** A type of attention mechanism where
+    the input elements of a single sequence attend to each other. This allows
+    the model to capture dependencies between tokens within the same sequence,
+    an internal dialogue helping the thinking machine to understand all the
+    relationships. This process is vital for language.<a href="#source-115"
+      >[115]</a
+    ><a href="#source-116">[116]</a>
+  </p>
+  <p>
+    **Multi-Head Attention:** An attention module that runs multiple
+    self-attention operations in parallel, each with different learned linear
+    projections. The outputs of these "heads" are concatenated, allowing the
+    model to jointly attend to information from different representation
+    subspaces, a multi-tasking mind approach. This enhances model
+    expressiveness.<a href="#source-117">[117]</a
+    ><a href="#source-118">[118]</a>
+  </p>
+  <p>
+    **Scaled Dot-Product Attention:** The core algorithm used in many attention
+    mechanisms, forming the computational heart of the focus. It computes
+    attention scores as the dot product of query (Q) and key (K) vectors, scales
+    these scores, and then computes a weighted sum of value (V) vectors. This
+    calculation determines focus.<a href="#source-119">[119]</a
+    ><a href="#source-120">[120]</a>
+  </p>
+  <p>
+    **Attention Dilution:** A phenomenon in LLMs, especially with very long
+    context windows, where the model's attention becomes less focused. It
+    spreads thinly across the numerous tokens in the input, akin to a distracted
+    mind's wandering gaze, degrading performance on tasks requiring precision.
+    This is a very big research problem.<a href="#source-121">[121]</a
+    ><a href="#source-122">[122]</a>
+  </p>
+  <p>
+    **Attention Thrashing:** A state in Large Language Models analogous to
+    CPU/RAM thrashing in traditional computing systems. It occurs when the
+    attention mechanism is overwhelmed by an excessively long input context,
+    leading to disproportionate computational resource expenditure, an inner
+    tempest. This is a very inefficient process.<a href="#source-123">[123]</a
+    ><a href="#source-124">[124]</a>
+  </p>
+  <p>
+    **Context Window:** The maximum amount of text, measured in tokens, that a
+    Large Language Model can consider at any single point in time. A larger
+    context window generally allows the model to handle longer documents and
+    conversations, expanding its effective mental workspace, but size alone does
+    not guarantee clarity. A very important model parameter.<a
+      href="#source-125"
+      >[125]</a
+    ><a href="#source-126">[126]</a>
+  </p>
+  <p>
+    **KV Cache (Key-Value Cache):** In autoregressive Transformer models, the
+    Key and Value vectors are cached for all previously processed tokens. This
+    cache is then reused in subsequent generation steps to avoid redundant
+    computations, but its linear growth imposes substantial memory pressure on
+    the system. This can contribute to system thrashing.<a href="#source-127"
+      >[127]</a
+    ><a href="#source-128">[128]</a>
+  </p>
+
+  <iframe
+    class="component-iframe"
+    src="/components/4/10/index.html"
+    title="Conceptual: The Calmed Storm - Future Efficient LLM Processing"
+    frameborder="0"
+    width="100%"
+    loading="lazy"
+  ></iframe>
+  <p class="iframe-placeholder-description">
+    This final visualization depicts a future LLM efficiently processing vast
+    context, with its "inner tempest" calmed by advanced attention mechanisms,
+    showcasing clear focus, minimized cognitive load, and resilient, insightful
+    output generation.
+  </p>
+
+  <h3>Notes</h3>
+  <div class="additional-reading">
+    <h4>Authorship</h4>
+    <p>
+      This article synthesizes multiple peer-reviewed research papers and
+      technical reports concerning Large Language Model attention mechanisms.
+      The thematic integration using "The ADHD Mind's Inner Tempest" concept
+      (human-made), along with structural reformatting, citation mapping, and
+      prose generation, was performed by an advanced AI assistant to meet
+      rigorous project guidelines (human-made).
+    </p>
+
+    <h4>Thematic Language: The ADHD Mind's Inner Tempest</h4>
+    <p>
+      The theme "The ADHD Mind's Inner Tempest" is woven throughout this article
+      to conceptualize "Attention Thrashing" in LLMs. This metaphor casts the
+      LLM's attention mechanism as a cognitive function susceptible to
+      distraction and overload, much like a mind experiencing ADHD symptoms.
+      "Attention Thrashing" is portrayed as a state where this "inner tempest"
+      of excessive context overwhelms the model's ability to maintain focus.
+    </p>
+  </div>
+
+  <h3>Sources Cited</h3>
+  <ol class="sources-list">
+    <li>
+      <a id="source-1"></a><strong>[1]</strong> AWS. (2025).
+      <a
+        href="https://aws.amazon.com/what-is/large-language-model/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What is a large language model?</em></a
+      >. Amazon Web Services.
+    </li>
+    <li>
+      <a id="source-2"></a><strong>[2]</strong> SAP. (2025).
+      <a
+        href="https://www.sap.com/resources/what-is-large-language-model"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What is a large language model (LLM)?</em></a
+      >. SAP SE.
+    </li>
+    <li>
+      <a id="source-3"></a><strong>[3]</strong> AI21 Labs. (2025).
+      <a
+        href="https://www.ai21.com/knowledge/tranformer-model/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Transformer Model</em></a
+      >. AI21.
+    </li>
+    <li>
+      <a id="source-4"></a><strong>[4]</strong> Coursera. (2025).
+      <a
+        href="https://www.coursera.org/articles/what-is-a-transformer-model"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What Is a Transformer Model?</em></a
+      >. Coursera Inc.
+    </li>
+    <li>
+      <a id="source-5"></a><strong>[5]</strong> Hochreiter, S., & Schmidhuber,
+      J. (1997).
+      <a
+        href="https://doi.org/10.1162/neco.1997.9.8.1735"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Long short-term memory</em></a
+      >. Neural computation.
+    </li>
+    <li>
+      <a id="source-6"></a><strong>[6]</strong> Gers, F. A., Schmidhuber, J., &
+      Cummins, F. (2000).
+      <a
+        href="https://doi.org/10.1162/089976600300015015"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Learning to forget: Continual prediction with LSTM</em></a
+      >. Neural computation.
+    </li>
+    <li>
+      <a id="source-7"></a><strong>[7]</strong> Outshift by Cisco. (2025).
+      <a
+        href="https://outshift.cisco.com/blog/understanding-llms-attention-mechanisms-context-windows-fine-tuning"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Understanding LLMs: Attention mechanisms, context windows,
+          fine-tuning</em
+        ></a
+      >. Cisco.
+    </li>
+    <li>
+      <a id="source-8"></a><strong>[8]</strong> Vaswani, A., et al. (2017).
+      <a
+        href="https://papers.neurips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Attention is all you need</em></a
+      >. Advances in neural information processing systems.
+    </li>
+    <li>
+      <a id="source-9"></a><strong>[9]</strong> IBM. (2025).
+      <a
+        href="https://www.ibm.com/think/topics/context-window"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What is a context window?</em></a
+      >. IBM.
+    </li>
+    <li>
+      <a id="source-10"></a><strong>[10]</strong> McKinsey & Company. (2025).
+      <a
+        href="https://www.mckinsey.com/featured-insights/mckinsey-explainers/what-is-a-context-window"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What is a context window for Large Language Models?</em></a
+      >. McKinsey.
+    </li>
+    <li>
+      <a id="source-11"></a><strong>[11]</strong> Winder.AI. (2025).
+      <a
+        href="https://winder.ai/llm-prompt-best-practices-large-context-windows"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>LLM Prompt Best Practices for Large Context Windows</em></a
+      >. Winder.AI.
+    </li>
+    <li>
+      <a id="source-12"></a><strong>[12]</strong> Arize AI. (2025).
+      <a
+        href="https://arize.com/blog-course/the-needle-in-a-haystack-test-evaluating-the-performance-of-llm-rag-systems/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>The Needle In a Haystack Test: Evaluating LLM RAG Systems</em></a
+      >. Arize.
+    </li>
+    <li>
+      <a id="source-13"></a><strong>[13]</strong> Meibel.ai. (2025).
+      <a
+        href="https://www.meibel.ai/post/understanding-the-impact-of-increasing-llm-context-windows"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Understanding the Impact of Increasing LLM Context Windows</em></a
+      >. Meibel.
+    </li>
+    <li>
+      <a id="source-14"></a><strong>[14]</strong> Google Cloud. (2025).
+      <a
+        href="https://cloud.google.com/blog/products/ai-machine-learning/the-needle-in-the-haystack-test-and-how-gemini-pro-solves-it"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >The Needle in the Haystack Test and How Gemini Pro Solves It</em
+        ></a
+      >. Google.
+    </li>
+    <li>
+      <a id="source-15"></a><strong>[15]</strong> Devlin, J., et al. (2018).
+      <a
+        href="https://arxiv.org/abs/1810.04805"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Bert: Pre-training of deep bidirectional transformers</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-16"></a><strong>[16]</strong> MInference. (2024).
+      <a
+        href="https://proceedings.neurips.cc/paper_files/paper/2024/file/5dfbe6f5671e82c76841ba687a8a9ecb-Paper-Conference.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>MInference: Accelerating Pre-filling for Long-Context LLMs</em></a
+      >. NeurIPS.
+    </li>
+    <li>
+      <a id="source-17"></a><strong>[17]</strong> MetaDesign Solutions. (2025).
+      <a
+        href="https://metadesignsolutions.com/mastering-the-attention-concept-in-llm-unlocking-the-core-of-modern-ai/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Mastering the Attention Concept in LLM</em></a
+      >. MetaDesign.
+    </li>
+    <li>
+      <a id="source-18"></a><strong>[18]</strong> AI21 Labs. (2025).
+      <a
+        href="https://www.ai21.com/knowledge/attention-mechanisms-language-models/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What are Attention Mechanisms in Language Models?</em></a
+      >. AI21.
+    </li>
+    <li>
+      <a id="source-19"></a><strong>[19]</strong> GeeksforGeeks. (2025).
+      <a
+        href="https://www.geeksforgeeks.org/transformer-attention-mechanism-in-nlp/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Transformer Attention Mechanism in NLP</em></a
+      >. GeeksforGeeks.
+    </li>
+    <li>
+      <a id="source-20"></a><strong>[20]</strong> IBM. (2025).
+      <a
+        href="https://www.ibm.com/think/topics/attention-mechanism"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What is an attention mechanism?</em></a
+      >. IBM.
+    </li>
+    <li>
+      <a id="source-21"></a><strong>[21]</strong> Guo, Z., et al. (2023).
+      <a
+        href="https://openaccess.thecvf.com/content/ICCV2023/papers/Guo_Robustifying_Token_Attention_for_Vision_Transformers_ICCV_2023_paper.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Robustifying Token Attention for Vision Transformers</em></a
+      >. ICCV.
+    </li>
+    <li>
+      <a id="source-22"></a><strong>[22]</strong> FreeKV. (2025).
+      <a
+        href="https://arxiv.org/html/2505.13109v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >FreeKV: Boosting KV Cache Retrieval for Efficient LLM Inference</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-23"></a><strong>[23]</strong> Softmax function - Wikipedia.
+      (2024).
+      <a
+        href="https://en.wikipedia.org/wiki/Softmax_function"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Softmax function</em></a
+      >. Wikipedia.
+    </li>
+    <li>
+      <a id="source-24"></a><strong>[24]</strong> The Illustrated Transformer.
+      (2018).
+      <a
+        href="http://jalammar.github.io/illustrated-transformer/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>The Illustrated Transformer</em></a
+      >. Jay Alammar.
+    </li>
+    <li>
+      <a id="source-25"></a><strong>[25]</strong> Choromanski, K., et al.
+      (2020).
+      <a
+        href="https://arxiv.org/abs/2009.14794"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Rethinking Attention with Performers</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-26"></a><strong>[26]</strong> Google Research. (2020).
+      <a
+        href="https://research.google/pubs/rethinking-attention-with-performers/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Rethinking Attention with Performers</em></a
+      >. Google.
+    </li>
+    <li>
+      <a id="source-27"></a><strong>[27]</strong> Brown, T., et al. (2020).
+      <a
+        href="https://arxiv.org/abs/2005.14165"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Language Models are Few-Shot Learners</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-28"></a><strong>[28]</strong> Tay, Y., et al. (2020).
+      <a
+        href="https://arxiv.org/abs/2002.11747"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Efficient Transformers: A Survey</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-29"></a><strong>[29]</strong> Radford, A., et al. (2019).
+      <a
+        href="https://openai.com/research/language-unsupervised"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Language Models are Unsupervised Multitask Learners</em></a
+      >. OpenAI.
+    </li>
+    <li>
+      <a id="source-30"></a><strong>[30]</strong> Touvron, H., et al. (2023).
+      <a
+        href="https://arxiv.org/abs/2302.13971"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>LLaMA: Open and Efficient Foundation Language Models</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-31"></a><strong>[31]</strong> Radford, A., et al. (2018).
+      <a
+        href="https://openai.com/research/improving-language-understanding-by-generative-pre-training"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Improving Language Understanding by Generative Pre-Training</em></a
+      >. OpenAI.
+    </li>
+    <li>
+      <a id="source-32"></a><strong>[32]</strong> Howard, J., & Ruder, S.
+      (2018).
+      <a
+        href="https://arxiv.org/abs/1801.06146"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Universal Language Model Fine-tuning for Text Classification</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-33"></a><strong>[33]</strong> Moveworks. (2025).
+      <a
+        href="https://www.moveworks.com/us/en/resources/ai-terms-glossary/latency"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What is Latency?</em></a
+      >. Moveworks.
+    </li>
+    <li>
+      <a id="source-34"></a><strong>[34]</strong> Baseten. (2025).
+      <a
+        href="https://www.baseten.co/blog/understanding-performance-benchmarks-for-llm-inference/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Understanding performance benchmarks for LLM inference</em></a
+      >. Baseten.
+    </li>
+    <li>
+      <a id="source-35"></a><strong>[35]</strong> HeadInfer. (2025).
+      <a
+        href="https://arxiv.org/html/2502.12574v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >HeadInfer: Memory-Efficient LLM Inference by Head-wise Offloading</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-36"></a><strong>[36]</strong> KUNSERVE. (2024).
+      <a
+        href="http://www.arxiv.org/pdf/2412.18169v4"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>KUNSERVE: Parameter-Centric Memory Management</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-37"></a><strong>[37]</strong> ThroughPut.AI. (2025).
+      <a
+        href="https://throughput.world/press-releases/throughput-ai-recognized-as-representative-vendor-in-the-2025-gartner-market-guide-for-analytics-and-decision-making-platforms-for-supply-chains/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>ThroughPut.AI Recognized by Gartner</em></a
+      >. PR Newswire.
+    </li>
+    <li>
+      <a id="source-38"></a><strong>[38]</strong> TechTarget. (2025).
+      <a
+        href="https://www.techtarget.com/searchnetworking/definition/throughput"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Throughput definition</em></a
+      >. TechTarget.
+    </li>
+    <li>
+      <a id="source-39"></a><strong>[39]</strong> Liu, N. F., et al. (2024).
+      <a
+        href="https://aclanthology.org/2024.tacl-1.9/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Lost in the Middle: How Language Models Use Long Contexts</em></a
+      >. TACL.
+    </li>
+    <li>
+      <a id="source-40"></a><strong>[40]</strong> Stanford HAI. (2025).
+      <a
+        href="https://aiindex.stanford.edu/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>AI Index Report 2025</em></a
+      >. Stanford University.
+    </li>
+    <li>
+      <a id="source-41"></a><strong>[41]</strong> NoLiMa. (2025).
+      <a
+        href="https://arxiv.org/html/2502.05167v2"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>NoLiMa: Long-Context Evaluation Beyond Literal Matching</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-42"></a><strong>[42]</strong> Sequential-NIAH. (2025).
+      <a
+        href="https://arxiv.org/html/2504.04713v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Sequential-NIAH: A Needle-In-A-Haystack Benchmark</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-43"></a><strong>[43]</strong> AI Impacts. (2025).
+      <a
+        href="https://aiimpacts.org/trends-in-ai-hardware-performance-and-cost/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Trends in AI Hardware Performance and Cost</em></a
+      >. AI Impacts.
+    </li>
+    <li>
+      <a id="source-44"></a><strong>[44]</strong> Epoch AI. (2025).
+      <a
+        href="https://epochai.org/blog/forecasting-ai-compute-trajectories-2025"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Forecasting AI Compute Trajectories</em></a
+      >. Epoch AI.
+    </li>
+    <li>
+      <a id="source-45"></a><strong>[45]</strong> Our World in Data. (2025).
+      <a
+        href="https://ourworldindata.org/computing-power"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Computing Power and Technological Change</em></a
+      >. Our World in Data.
+    </li>
+    <li>
+      <a id="source-46"></a><strong>[46]</strong> OpenAI. (2024).
+      <a
+        href="https://openai.com/blog/compute-requirements-training-sota-ai-models-nov-2024/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Compute Requirements for Training State-of-the-Art AI Models</em
+        ></a
+      >. OpenAI Blog.
+    </li>
+    <li>
+      <a id="source-47"></a><strong>[47]</strong> Comet.ml. (2025).
+      <a
+        href="https://www.comet.com/site/blog/perplexity-for-llm-evaluation/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Perplexity for LLM Evaluation</em></a
+      >. Comet.
+    </li>
+    <li>
+      <a id="source-48"></a><strong>[48]</strong> What is Wrong with Perplexity.
+      (2025).
+      <a
+        href="https://openreview.net/forum?id=fL4qWkSmtM"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >What is Wrong with Perplexity for Long-context Language Modeling?</em
+        ></a
+      >. OpenReview.
+    </li>
+    <li>
+      <a id="source-49"></a><strong>[49]</strong> Wikipedia. (2024).
+      <a
+        href="https://en.wikipedia.org/wiki/Thrashing_(computer_science)"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Thrashing (computer science)</em></a
+      >. Wikipedia.
+    </li>
+    <li>
+      <a id="source-50"></a><strong>[50]</strong> Lenovo. (2023).
+      <a
+        href="https://www.lenovo.com/us/en/glossary/thrashing/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What is Thrashing? Why Does it Occur?</em></a
+      >. Lenovo US.
+    </li>
+    <li>
+      <a id="source-51"></a><strong>[51]</strong> Evoke Learning. (2023).
+      <a
+        href="https://www.evokelearning.ca/blog/understanding-adhd-and-learning-challenges/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Understanding ADHD and Learning Challenges: Reducing Cognitive
+          Load</em
+        ></a
+      >. Evoke.
+    </li>
+    <li>
+      <a id="source-52"></a><strong>[52]</strong> AttentionDrop. (2025).
+      <a
+        href="https://arxiv.org/pdf/2504.12088"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >AttentionDrop: A Novel Regularization Method for Transformer
+          Models</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-53"></a><strong>[53]</strong> KDNuggets. (2025).
+      <a
+        href="https://www.kdnuggets.com/how-to-visualize-model-internals-and-attention-in-hugging-face-transformers"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >How to Visualize Model Internals and Attention in Hugging Face</em
+        ></a
+      >. KDnuggets.
+    </li>
+    <li>
+      <a id="source-54"></a><strong>[54]</strong> Liao, P., et al. (2024).
+      <a
+        href="https://arxiv.org/abs/2410.01201"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Extending Token Computation by Predicting and Rebalancing
+          Attention</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-55"></a><strong>[55]</strong> Attention Sinks. (2024).
+      <a
+        href="https://arxiv.org/html/2504.03889v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Using Attention Sinks to Identify and Evaluate Dormant Heads</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-56"></a><strong>[56]</strong> Xiao, G., et al. (2023).
+      <a
+        href="https://arxiv.org/abs/2309.17453"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Efficiently extending Transformer-based LLM's context window</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-57"></a><strong>[57]</strong> Hallucinations in MLLMs.
+      (2025).
+      <a
+        href="https://arxiv.org/html/2505.16652v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Seeing Far and Clearly: Mitigating Hallucinations in MLLMs</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-58"></a><strong>[58]</strong> ResearchGate. (2021).
+      <a
+        href="https://www.researchgate.net/publication/352209841_Refiner_Refining_Self-attention_for_Vision_Transformers"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Refiner: Refining Self-attention for Vision Transformers</em></a
+      >. ResearchGate.
+    </li>
+    <li>
+      <a id="source-59"></a><strong>[59]</strong> PyTorch. (2025).
+      <a
+        href="https://pytorch.org/tutorials/recipes/recipes/benchmark.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>PyTorch Benchmark</em></a
+      >. PyTorch Tutorials.
+    </li>
+    <li>
+      <a id="source-60"></a><strong>[60]</strong> PyTorch. (2025).
+      <a
+        href="https://docs.pytorch.org/docs/stable/profiler.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>torch.profiler</em></a
+      >. PyTorch Documentation.
+    </li>
+    <li>
+      <a id="source-61"></a><strong>[61]</strong> Hugging Face. (2025).
+      <a
+        href="https://huggingface.co/docs/transformers/v4.47.0/how_to_hack_models"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>How to Hack Any Transformers Model</em></a
+      >. Hugging Face Docs.
+    </li>
+    <li>
+      <a id="source-62"></a><strong>[62]</strong> OpenCompass. (2025).
+      <a
+        href="https://opencompass.readthedocs.io/en/latest/advanced_guides/needleinahaystack_eval.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Needle In A Haystack Experimental Evaluation</em></a
+      >. OpenCompass Docs.
+    </li>
+    <li>
+      <a id="source-63"></a><strong>[63]</strong> Giles Thomas. (2025).
+      <a
+        href="https://www.gilesthomas.com/2025/03/llm-from-scratch-8-trainable-self-attention/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Writing an LLM from scratch, part 8 -- trainable self-attention</em
+        ></a
+      >. gilesthomas.com.
+    </li>
+    <li>
+      <a id="source-64"></a><strong>[64]</strong> DataCamp. (2025).
+      <a
+        href="https://www.datacamp.com/tutorial/building-a-transformer-with-py-torch"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Complete Guide to Building a Transformer Model with PyTorch</em></a
+      >. DataCamp.
+    </li>
+    <li>
+      <a id="source-65"></a><strong>[65]</strong> BigBird. (2020).
+      <a
+        href="https://papers.neurips.cc/paper_files/paper/2020/file/c8512d142a2d849725f31a9a7a361ab9-Paper.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Big Bird: Transformers for Longer Sequences</em></a
+      >. NeurIPS.
+    </li>
+    <li>
+      <a id="source-66"></a><strong>[66]</strong> Longformer. (2020).
+      <a
+        href="https://arxiv.org/abs/2004.05150"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Longformer: The Long-Document Transformer</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-67"></a><strong>[67]</strong> Twilight. (2025).
+      <a
+        href="https://arxiv.org/html/2502.02770v2"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Twilight: Adaptive Attention Sparsity with Hierarchical Top-p
+          Pruning</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-68"></a><strong>[68]</strong> SeerAttention. (2024).
+      <a
+        href="https://arxiv.org/html/2410.13276v4"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >SeerAttention: Learning Intrinsic Sparse Attention in Your LLMs</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-69"></a><strong>[69]</strong> Linformer. (2024).
+      <a
+        href="https://arxiv.org/html/2410.21351v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >LinFormer: A Linear-based Lightweight Transformer Architecture</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-70"></a><strong>[70]</strong> Latent Attention. (2024).
+      <a
+        href="https://arxiv.org/html/2402.17512v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Latent Attention for Linear Time Transformers</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-71"></a><strong>[71]</strong> FlashBias. (2025).
+      <a
+        href="https://arxiv.org/html/2505.12044v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>FlashBias: Fast Computation of Attention with Bias</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-72"></a><strong>[72]</strong> LeanAttention. (2024).
+      <a
+        href="https://arxiv.org/pdf/2405.10480"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>LeanAttention: Hardware-Aware Scalable Attention Mechanism</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-73"></a><strong>[73]</strong> FastAttention. (2024).
+      <a
+        href="https://arxiv.org/html/2410.16663v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >FastAttention: Extend FlashAttention2 to NPUs and Low-resource
+          GPUs</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-74"></a><strong>[74]</strong> Retentive Network (RetNet).
+      (2024).
+      <a
+        href="https://arxiv.org/pdf/2411.03900"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>NQS with RetNets</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-75"></a><strong>[75]</strong> Transformer-XL. (2019).
+      <a
+        href="https://arxiv.org/abs/1901.02860"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Transformer-XL: Attentive Language Models Beyond a Fixed-Length
+          Context</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-76"></a><strong>[76]</strong> LongNet. (2023).
+      <a
+        href="https://arxiv.org/html/2307.02486v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>LongNet: Scaling Transformers to 1,000,000,000 Tokens</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-77"></a><strong>[77]</strong> StreamingLLM. (2023).
+      <a
+        href="https://arxiv.org/abs/2309.17453"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Efficient Streaming Language Models with Attention Sinks</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-78"></a><strong>[78]</strong> Core Context Aware Attention.
+      (2024).
+      <a
+        href="https://arxiv.org/html/2412.12465v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Core Context Aware Attention for Long Context Language Modeling</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-79"></a><strong>[79]</strong> Sliding Window Attention
+      Training (SWAT). (2025).
+      <a
+        href="https://arxiv.org/pdf/2504.09402"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Efficient Training of Language Models via Sliding Window
+          Attention</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-80"></a><strong>[80]</strong> Selective Prompt Anchoring
+      (SPA). (2024).
+      <a
+        href="https://arxiv.org/html/2408.09121v4"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Attention Schema in Code Generation LLMs</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-81"></a><strong>[81]</strong> Focus Directions. (2025).
+      <a
+        href="https://arxiv.org/html/2503.23306v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Focus Directions Make Your Language Models Pay More Attention</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-82"></a><strong>[82]</strong> Step-by-Step Reading &
+      Attention Recalibration. (2024).
+      <a
+        href="https://arxiv.org/html/2410.18050v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >LongRAG: A Dual-Perspective Retrieval-Augmented Generation
+          Paradigm</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-83"></a><strong>[83]</strong> AttentionRAG. (2025).
+      <a
+        href="https://arxiv.org/html/2503.10720v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>AttentionRAG: Attention-Guided Context Pruning in RAG</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-84"></a><strong>[84]</strong> Attention Heads Survey.
+      (2024).
+      <a
+        href="https://arxiv.org/html/2409.03752v3"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Attention Heads of Large Language Models: A Survey</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-85"></a><strong>[85]</strong> Entropy-Guided Attention.
+      (2025).
+      <a
+        href="https://arxiv.org/pdf/2501.03489"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Entropy-Guided Attention for Private LLMs</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-86"></a><strong>[86]</strong> Stable Explanations. (2025).
+      <a
+        href="https://openreview.net/forum?id=apPItJe0wO"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Measuring LLM Confidence through Stable Explanations</em></a
+      >. OpenReview.
+    </li>
+    <li>
+      <a id="source-87"></a><strong>[87]</strong> CEReBrO. (2025).
+      <a
+        href="https://arxiv.org/html/2501.10885v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >CEReBrO: Compact Encoder for Representations of Brain
+          Oscillations</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-88"></a><strong>[88]</strong> S2-Attention. (2024).
+      <a
+        href="https://arxiv.org/html/2407.17678v7"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >S2-Attention: Hardware-Aware Context Sharding Among Attention
+          Heads</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-89"></a><strong>[89]</strong> PowerAttention. (2025).
+      <a
+        href="https://arxiv.org/html/2503.03588v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>PowerAttention: Exponentially Scaling of Receptive Fields</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-90"></a><strong>[90]</strong> Cost-Optimal GQA. (2025).
+      <a
+        href="https://arxiv.org/html/2503.09579v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Cost-Optimal Grouped-Query Attention for Long-Context LLMs</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-91"></a><strong>[91]</strong> Dialogue Without Limits.
+      (2025).
+      <a
+        href="https://arxiv.org/html/2503.00979v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Dialogue Without Limits: Constant-Sized KV Caches</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-92"></a><strong>[92]</strong> Marconi. (2025).
+      <a
+        href="https://www.amazon.science/publications/marconi-prefix-caching-for-the-era-of-hybrid-llms"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Marconi: Prefix caching for the era of hybrid LLMs</em></a
+      >. Amazon Science.
+    </li>
+    <li>
+      <a id="source-93"></a><strong>[93]</strong> LLMScan. (2024).
+      <a
+        href="https://arxiv.org/html/2410.16638v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>LLMScan: Causal Scan for LLM Misbehavior Detection</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-94"></a><strong>[94]</strong> Progressive Sparse Attention.
+      (2025).
+      <a
+        href="https://arxiv.org/html/2503.00392v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Progressive Sparse Attention: Algorithm and System Co-design</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-95"></a><strong>[95]</strong> ADHD & Executive Function.
+      (2024).
+      <a
+        href="https://add.org/executive-function-disorder/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Executive Function Disorder & ADHD</em></a
+      >. ADDA.
+    </li>
+    <li>
+      <a id="source-96"></a><strong>[96]</strong> Cognitive vs. Perceptual Load
+      in ADHD. (2023).
+      <a
+        href="https://www.researchgate.net/publication/373769865_Cognitive_and_Perceptual_Load_Have_Opposing_Effects_on_Brain_Network_Efficiency_and_Behavioral_Variability_in_ADHD"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Cognitive and Perceptual Load Have Opposing Effects</em></a
+      >. ResearchGate.
+    </li>
+    <li>
+      <a id="source-97"></a><strong>[97]</strong> LLMs and Cognitive Science.
+      (2024).
+      <a
+        href="https://www.researchgate.net/publication/383753515_Large_Language_Models_and_Cognitive_Science_A_Comprehensive_Review_of_Similarities_Differences_and_Challenges"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Large Language Models and Cognitive Science: A Comprehensive
+          Review</em
+        ></a
+      >. ResearchGate.
+    </li>
+    <li>
+      <a id="source-98"></a><strong>[98]</strong> PubMed. (2024).
+      <a
+        href="https://pubmed.ncbi.nlm.nih.gov/39229609/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>The Limitations of Large Language Models for Understanding</em></a
+      >. NIH.
+    </li>
+    <li>
+      <a id="source-99"></a><strong>[99]</strong> Thinking beyond the
+      anthropomorphic paradigm. (2025).
+      <a
+        href="https://arxiv.org/html/2502.09192v2"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Thinking beyond the anthropomorphic paradigm benefits LLM
+          research</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-100"></a><strong>[100]</strong> What Limits LLM-based Human
+      Simulation. (2025).
+      <a
+        href="https://arxiv.org/html/2501.08579v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>What Limits LLM-based Human Simulation: LLMs or Our Design?</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-101"></a><strong>[101]</strong> From Tokens to Thoughts.
+      (2025).
+      <a
+        href="https://arxiv.org/html/2505.17117v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >From Tokens to Thoughts: How LLMs and Humans Trade Compression for
+          Meaning</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-102"></a><strong>[102]</strong> Cognitive Memory in LLMs.
+      (2025).
+      <a
+        href="https://arxiv.org/html/2504.02441v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Cognitive Memory in Large Language Models</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-103"></a><strong>[103]</strong> A Survey on Memory
+      Mechanisms in LLMs. (2025).
+      <a
+        href="https://arxiv.org/html/2504.15965"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>From Human Memory to AI Memory: A Survey</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-104"></a><strong>[104]</strong> The Eye. (1881).
+      <a
+        href="https://the-eye.eu/public//Books/survivorlibrary.com/library-scientific-american-%28series-2%29/scientific-american-1881-02-19-v44-n08.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Attention, Thrashing Machine Companies!</em></a
+      >. Scientific American.
+    </li>
+    <li>
+      <a id="source-105"></a><strong>[105]</strong> JAIR. (2021).
+      <a
+        href="https://jair.org/index.php/jair/article/download/13715/26927/34555"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >A Survey of Obstacles in Evaluation Practices for Generated Text</em
+        ></a
+      >. Journal of Artificial Intelligence Research.
+    </li>
+    <li>
+      <a id="source-106"></a><strong>[106]</strong> NeurIPS. (2022).
+      <a
+        href="https://papers.neurips.cc/paper_files/paper/2022/file/17a234c91f746d9625a75cf8a8731ee2-Paper-Conference.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Picking on the Same Person: Algorithmic Monoculture</em></a
+      >. NeurIPS.
+    </li>
+    <li>
+      <a id="source-107"></a><strong>[107]</strong> Stytch. (2025).
+      <a
+        href="https://stytch.com/blog/model-context-protocol-introduction/"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Model Context Protocol (MCP): A comprehensive introduction</em></a
+      >. Stytch.
+    </li>
+    <li>
+      <a id="source-108"></a><strong>[108]</strong> ShareTechnote. (2025).
+      <a
+        href="https://www.sharetechnote.com/html/Neuroscience/Neuroscience_Attention.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Attention - Neuro Science</em></a
+      >. ShareTechnote.
+    </li>
+    <li>
+      <a id="source-109"></a><strong>[109]</strong> Clinical Problem-Solving
+      Limitations. (2025).
+      <a
+        href="https://arxiv.org/html/2502.04381v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Limitations of Large Language Models in Clinical Problem-Solving</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-110"></a><strong>[110]</strong> Case-Based Reasoning for LLM
+      Agents. (2025).
+      <a
+        href="https://arxiv.org/html/2504.06943v2"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Review of Case-Based Reasoning for LLM Agents</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-111"></a><strong>[111]</strong> Emergence of
+      psychopathological computations. (2025).
+      <a
+        href="https://arxiv.org/html/2504.08016v1"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Emergence of psychopathological computations in large language
+          models</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-112"></a><strong>[112]</strong> Uniform Transformer for
+      Parity. (2025).
+      <a
+        href="https://www.researchgate.net/publication/387767319_A_completely_uniform_transformer_for_parity"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>A completely uniform transformer for parity</em></a
+      >. ResearchGate.
+    </li>
+    <li>
+      <a id="source-113"></a><strong>[113]</strong> Thrashing in virtual memory.
+      (2025).
+      <a
+        href="https://www.tutorchase.com/answers/a-level/computer-science/how-does-thrashing-occur-in-virtual-memory"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>How does thrashing occur in virtual memory?</em></a
+      >. TutorChase.
+    </li>
+    <li>
+      <a id="source-114"></a><strong>[114]</strong> Theoretical limitations of
+      multi-layer Transformer. (2025).
+      <a
+        href="https://news.ycombinator.com/item?id=42889786"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Theoretical limitations of multi-layer Transformer</em></a
+      >. Hacker News.
+    </li>
+    <li>
+      <a id="source-115"></a><strong>[115]</strong> LLMs are Human-Like
+      Internally. (2025).
+      <a
+        href="https://arxiv.org/abs/2502.01615"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Large Language Models Are Human-Like Internally</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-116"></a><strong>[116]</strong> Cognitive Memory in LLMs.
+      (2025).
+      <a
+        href="https://arxiv.org/abs/2504.02441"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Cognitive Memory in Large Language Models</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-117"></a><strong>[117]</strong> Review of Case-Based
+      Reasoning. (2025).
+      <a
+        href="https://arxiv.org/abs/2504.06943"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Review of Case-Based Reasoning for LLM Agents</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-118"></a><strong>[118]</strong> Shifting Long-Context
+      Research. (2025).
+      <a
+        href="https://arxiv.org/abs/2503.04723"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Shifting Long-Context LLMs Research from Input to Output</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-119"></a><strong>[119]</strong> FlashAttention2. (2023).
+      <a
+        href="https://arxiv.org/abs/2307.08691"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >FlashAttention-2: Faster Attention with Better Parallelism and Work
+          Partitioning</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-120"></a><strong>[120]</strong> Ring Attention. (2023).
+      <a
+        href="https://arxiv.org/abs/2310.01889"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Ring Attention with Blockwise Transformers for Near-Infinite
+          Context</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-121"></a><strong>[121]</strong> Mixture-of-Experts (MoE).
+      (2017).
+      <a
+        href="https://arxiv.org/abs/1701.06538"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Outrageously Large Neural Networks: The Sparsely-Gated
+          Mixture-of-Experts Layer</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-122"></a><strong>[122]</strong> LoRA. (2021).
+      <a
+        href="https://arxiv.org/abs/2106.09685"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>LoRA: Low-Rank Adaptation of Large Language Models</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-123"></a><strong>[123]</strong> QLoRA. (2023).
+      <a
+        href="https://arxiv.org/abs/2305.14314"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>QLoRA: Efficient Finetuning of Quantized LLMs</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-124"></a><strong>[124]</strong> PagedAttention. (2023).
+      <a
+        href="https://arxiv.org/abs/2309.06180"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-125"></a><strong>[125]</strong> Grouped-Query Attention
+      (GQA). (2023).
+      <a
+        href="https://arxiv.org/abs/2305.13245"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >GQA: Training Generalized Multi-Query Transformer Models from
+          Multi-Head Checkpoints</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-126"></a><strong>[126]</strong> Multi-Query Attention (MQA).
+      (2019).
+      <a
+        href="https://arxiv.org/abs/1911.02150"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em>Fast Transformer Decoding: One Write-Head is All You Need</em></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-127"></a><strong>[127]</strong> State Space Models (SSM).
+      (2023).
+      <a
+        href="https://arxiv.org/abs/2312.00752"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Mamba: Linear-Time Sequence Modeling with Selective State Spaces</em
+        ></a
+      >. arXiv.
+    </li>
+    <li>
+      <a id="source-128"></a><strong>[128]</strong> ALiBi. (2021).
+      <a
+        href="https://arxiv.org/abs/2108.12409"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><em
+          >Train Short, Test Long: Attention with Linear Biases Enables Input
+          Length Extrapolation</em
+        ></a
+      >. arXiv.
+    </li>
+  </ol>
+</article>

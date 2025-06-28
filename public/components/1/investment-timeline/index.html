@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AV Investment & Valuation Timeline (Enhanced)</title>
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --padding: 0.8rem;
+        --line-color: #ccc;
+        --bar-waymo: #4285f4;
+        --bar-cruise: #0f9d58;
+        --bar-tesla: #cc0000;
+        --bar-aurora: #7c4dff;
+        --bar-zoox: #ffab00;
+        --bar-argo: #6c757d;
+        --bar-default-bg: #e0e0e0;
+        --year-label-color: #666;
+      }
+      body.dark-mode {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --line-color: #555;
+        --bar-waymo: #8ab4f8;
+        --bar-cruise: #57bb8a;
+        --bar-tesla: #f28b82;
+        --bar-aurora: #b39ddb;
+        --bar-zoox: #ffd54f;
+        --bar-argo: #9e9e9e;
+        --bar-default-bg: #333;
+        --year-label-color: #aaa;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: var(--padding);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+      .chart-wrapper {
+        border: 1px solid var(--border-color);
+        padding: var(--padding);
+        border-radius: 6px;
+        background-color: var(--bg-color-secondary, var(--bg-color));
+      }
+      .timeline-container {
+        position: relative;
+        padding-left: 50px; /* Space for year labels */
+        min-height: 250px; /* Ensure space for rendering */
+      }
+      .timeline-axis {
+        position: absolute;
+        left: 40px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: var(--line-color);
+      }
+      .timeline-event {
+        position: relative;
+        margin-bottom: 1.2rem;
+        padding-left: 25px; /* Space for dot and connection */
+      }
+      .event-dot {
+        position: absolute;
+        left: -5px; /* On the axis */
+        top: 50%;
+        transform: translateY(-50%);
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid var(--bg-color);
+        z-index: 1;
+      }
+      .year-label {
+        position: absolute;
+        left: -50px; /* To the left of the axis */
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: bold;
+        font-size: 0.75rem;
+        color: var(--year-label-color);
+      }
+      .event-content {
+        background-color: var(--bar-default-bg);
+        border-radius: 4px;
+        padding: 0.5rem 0.7rem;
+        min-height: 30px; /* Ensure bars are visible */
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+      }
+      .event-content:hover {
+        transform: translateX(5px) scale(1.02);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      .event-bar {
+        height: 18px;
+        border-radius: 2px;
+        margin-right: 8px;
+        min-width: 20px; /* Ensure small values are visible */
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 5px;
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: bold;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+      }
+      body.dark-mode .event-bar {
+        color: #222; /* Darker text for light bars in dark mode */
+      }
+      .event-desc {
+        font-size: 0.75rem;
+        opacity: 0.9;
+      }
+
+      .bar-waymo {
+        background-color: var(--bar-waymo);
+      }
+      .bar-cruise {
+        background-color: var(--bar-cruise);
+      }
+      .bar-tesla {
+        background-color: var(--bar-tesla);
+      }
+      .bar-aurora {
+        background-color: var(--bar-aurora);
+      }
+      .bar-zoox {
+        background-color: var(--bar-zoox);
+      }
+      .bar-argo {
+        background-color: var(--bar-argo);
+      }
+
+      .legend {
+        margin-top: 1rem;
+        font-size: 0.7rem;
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        justify-content: center;
+      }
+      .legend li {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .legend span.legend-color {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        display: inline-block;
+      }
+      .chart-note {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 0.5rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chart-wrapper">
+      <div class="timeline-container">
+        <div class="timeline-axis"></div>
+        <!-- Data will be populated by script -->
+      </div>
+      <ul class="legend">
+        <li><span class="legend-color bar-waymo"></span> Waymo</li>
+        <li><span class="legend-color bar-cruise"></span> Cruise</li>
+        <li><span class="legend-color bar-tesla"></span> Tesla</li>
+        <li><span class="legend-color bar-aurora"></span> Aurora</li>
+        <li><span class="legend-color bar-zoox"></span> Zoox</li>
+        <li><span class="legend-color bar-argo"></span> Argo AI</li>
+      </ul>
+      <p class="chart-note">
+        Illustrative timeline of major AV funding/valuation events. Bar widths
+        are relative.
+      </p>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+      }
+
+      const investmentData = [
+        {
+          year: "2018",
+          company: "Cruise",
+          value: 2.25,
+          details: "SoftBank Investment ($2.25B)",
+          barClass: "bar-cruise",
+        },
+        {
+          year: "2019",
+          company: "Aurora",
+          value: 0.53,
+          details: "Sequoia Lead Round ($530M)",
+          barClass: "bar-aurora",
+        },
+        {
+          year: "2020",
+          company: "Waymo",
+          value: 3.0,
+          details: "External Round (Silver Lake, CPP, Mubadala+)",
+          barClass: "bar-waymo",
+        },
+        {
+          year: "2020",
+          company: "Zoox",
+          value: 1.3,
+          details: "Acquired by Amazon (Est. $1.3B)",
+          barClass: "bar-zoox",
+        },
+        {
+          year: "2021",
+          company: "Cruise",
+          value: 2.75,
+          details: "Microsoft, GM, Honda+ ($2.75B)",
+          barClass: "bar-cruise",
+        },
+        {
+          year: "2022",
+          company: "Argo AI",
+          value: 0,
+          details: "Shut down (Oct '22, Prev. $2.6B Ford/VW)",
+          barClass: "bar-argo",
+        },
+        {
+          year: "Ongoing",
+          company: "Tesla",
+          value: 5.0,
+          details: "Implicit AV valuation in Market Cap",
+          barClass: "bar-tesla",
+        }, // Representing large valuation
+        {
+          year: "Ongoing",
+          company: "Waymo",
+          value: 4.0,
+          details: "Continued Alphabet Funding",
+          barClass: "bar-waymo",
+        },
+      ];
+
+      const timelineContainer = document.querySelector(".timeline-container");
+      const maxValue = Math.max(...investmentData.map((d) => d.value), 1); // Ensure maxValue is at least 1 to avoid division by zero
+
+      investmentData.forEach((event, index) => {
+        const eventElement = document.createElement("div");
+        eventElement.classList.add("timeline-event");
+        // Position events along the timeline based on index or year if more granular
+        eventElement.style.top = `${index * 4}rem`; // Simple staggering for now
+
+        const yearLabel = document.createElement("span");
+        yearLabel.classList.add("year-label");
+        yearLabel.textContent = event.year;
+        eventElement.appendChild(yearLabel);
+
+        const dot = document.createElement("div");
+        dot.classList.add("event-dot");
+        dot.style.backgroundColor = `var(--${event.barClass.replace(
+          "bar-",
+          ""
+        )})`;
+        eventElement.appendChild(dot);
+
+        const content = document.createElement("div");
+        content.classList.add("event-content");
+
+        const bar = document.createElement("div");
+        bar.classList.add("event-bar", event.barClass);
+        const barWidth =
+          event.value > 0 ? (event.value / maxValue) * 60 + 10 : 10; // % width, min 10%
+        bar.style.width = `${barWidth}%`;
+        bar.textContent =
+          event.value > 0
+            ? `$${event.value.toFixed(2)}B`
+            : event.company === "Argo AI"
+            ? "Shutdown"
+            : "";
+        content.appendChild(bar);
+
+        const desc = document.createElement("span");
+        desc.classList.add("event-desc");
+        desc.textContent = `${event.company}: ${event.details}`;
+        content.appendChild(desc);
+
+        eventElement.appendChild(content);
+        timelineContainer.appendChild(eventElement);
+      });
+    </script>
+  </body>
+</html>

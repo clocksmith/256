@@ -1,0 +1,85 @@
+{
+  "/": {
+    "file": "/",
+    "title": "256.1 Home",
+    "type": "homepage"
+  },
+  "/about": {
+    "file": "about.html",
+    "title": "About",
+    "type": "page"
+  },
+  "/0": {
+    "file": "about.html",
+    "title": "About",
+    "type": "page",
+    "isAlias": true
+  },
+  "/256": {
+    "file": "about.html",
+    "title": "About",
+    "type": "page",
+    "isAlias": true
+  },
+  "/1": {
+    "file": "/0x/whos-driving-the-autonmous-vehicle-shift.html",
+    "title": "Who's Driving the Autonomous Vehicle Shift?",
+    "date": "2025-05-06",
+    "namedPath": "/whos-driving-the-autonmous-vehicle-shift",
+    "type": "post"
+  },
+  "/whos-driving-the-autonmous-vehicle-shift": {
+    "file": "/0x/whos-driving-the-autonmous-vehicle-shift.html",
+    "title": "Who's Driving the Autonomous Vehicle Shift?",
+    "date": "2025-05-06",
+    "type": "post",
+    "isAlias": true
+  },
+  "/2": {
+    "file": "/0x/whos-bits-are-wiser-gpu-tpu.html",
+    "title": "Who's Bits are Wiser, GPU | TPU?",
+    "date": "2025-05-12",
+    "namedPath": "/whos-bits-are-wiser-gpu-tpu",
+    "type": "post"
+  },
+  "/whos-bits-are-wiser-gpu-tpu": {
+    "file": "/0x/whos-bits-are-wiser-gpu-tpu.html",
+    "title": "Who's Bits are Wiser, GPU | TPU?",
+    "date": "2025-05-12",
+    "type": "post",
+    "isAlias": true
+  },
+  "/3": {
+    "file": "/0x/cogs-in-a-machine-or-cognizant-machines.html",
+    "title": "Dejavu: Cogs-in-a-Machine or Cognizant Machines?",
+    "date": "2025-06-06",
+    "namedPath": "/cogs-in-a-machine-or-cognizant-machines",
+    "type": "post"
+  },
+  "/cogs-in-a-machine-or-cognizant-machines": {
+    "file": "/0x/cogs-in-a-machine-or-cognizant-machines.html",
+    "title": "Dejavu: Cogs-in-a-Machine or Cognizant Machines?",
+    "date": "2025-06-06",
+    "type": "post",
+    "isAlias": true
+  },
+  "/4": {
+    "file": "/0x/attention-is-not-all-you-need.html",
+    "title": "Attention is Not All You Need: Thrashing and ADHD in Thinking Machines",
+    "date": "2025-06-26",
+    "namedPath": "/attention-is-not-all-you-need",
+    "type": "post"
+  },
+  "/attention-is-not-all-you-need": {
+    "file": "/0x/attention-is-not-all-you-need.html",
+    "title": "Attention is Not All You Need: Thrashing and ADHD in Thinking Machines",
+    "date": "2025-06-26",
+    "type": "post",
+    "isAlias": true
+  },
+  "/404": {
+    "file": "404.html",
+    "title": "Page Not Found",
+    "type": "errorPage"
+  }
+}

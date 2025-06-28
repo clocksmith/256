@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conjuring the Cognitive Fog: Simulating Inefficient Attention</title>
+    <!-- CONFIRMATION: No external JS libraries for the visualization are used. -->
+    <style>
+        :root {
+            --bg: #1f2937;
+            --text-color: #d1d5db;
+            --controls-bg: #374151;
+            --context-bg: #4b5563;
+            --target-bg: #111827;
+            --keyword-color: #facc15;
+            --correct-color: #4ade80;
+            --incorrect-color: #f87171;
+        }
+        body.light-mode {
+            --bg: #f3f4f6;
+            --text-color: #1f2937;
+            --controls-bg: #e5e7eb;
+            --context-bg: #d1d5db;
+            --target-bg: #ffffff;
+            --keyword-color: #b45309;
+            --correct-color: #16a34a;
+            --incorrect-color: #dc2626;
+        }
+        body {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .controls {
+            padding: 10px;
+            background-color: var(--controls-bg);
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        .controls label { margin: 0 10px; }
+        .task-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .target-sentence {
+            background: var(--target-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .target-sentence strong { color: var(--keyword-color); }
+        .context-paragraph {
+            background: var(--context-bg);
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.8;
+            font-size: 1em;
+            position: relative;
+            overflow: hidden;
+        }
+        .context-paragraph span {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .context-paragraph span:hover { background: rgba(255,255,255,0.1); }
+        .dark-mode .context-paragraph span:hover { background: rgba(0,0,0,0.1); }
+        
+        /* Attention Modes */
+        .uniform-fog span { filter: blur(1px); opacity: 0.7; }
+        .random-scatter span.flash { animation: flash 1s infinite alternate; }
+        @keyframes flash { from { background-color: rgba(255, 255, 0, 0.3); } to { background-color: transparent; } }
+        .tunnel-vision { overflow: hidden; }
+        #tunnel-spotlight { position: absolute; background: radial-gradient(circle, transparent 50px, var(--context-bg) 150px); pointer-events: none; }
+        .attention-sink { font-weight: bold; color: var(--incorrect-color); animation: pulse-sink 2s infinite; }
+        @keyframes pulse-sink { 50% { transform: scale(1.2); } }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label><input type="radio" name="mode" value="focused" checked> Focused Mind</label>
+        <label><input type="radio" name="mode" value="uniform"> Brain Fog</label>
+        <label><input type="radio" name="mode" value="random"> Scattered Thoughts</label>
+        <label><input type="radio" name="mode" value="sink"> Attention Sink</label>
+    </div>
+    <div class="task-container">
+        <div class="target-sentence">
+            Find the keywords: The <strong>blue</strong> fox quickly found the <strong>hidden</strong> message near the <strong>ancient</strong> tree.
+        </div>
+        <div class="context-paragraph" id="context"></div>
+        <p>Score: <span id="score">0</span> | Time: <span id="timer">0</span>s</p>
+    </div>
+
+    <script>
+        const theme = new URLSearchParams(window.location.search).get('theme') || 'dark';
+        document.body.classList.add(theme === 'light' ? 'light-mode' : 'dark-mode');
+
+        const contextEl = document.getElementById('context');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const modes = document.querySelectorAll('input[name="mode"]');
+        
+        const keywords = ['blue', 'hidden', 'ancient'];
+        let score = 0;
+        let foundKeywords = [];
+        let timerInterval;
+
+        const clutter = "the a of to and in that is it for on with as I his he but at by from they have or she an which you one said were all when there would so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us".split(" ");
+        
+        function generateContext() {
+            let words = [];
+            for (let i=0; i<150; i++) {
+                words.push(clutter[Math.floor(Math.random() * clutter.length)]);
+            }
+            keywords.forEach(kw => {
+                words.splice(Math.floor(Math.random() * words.length), 0, kw);
+            });
+            
+            contextEl.innerHTML = words.map(word => `<span data-word="${word}">${word} </span>`).join('');
+            
+            contextEl.querySelectorAll('span').forEach(span => {
+                span.addEventListener('click', onWordClick);
+            });
+        }
+        
+        function onWordClick(e) {
+            const word = e.target.dataset.word;
+            if (keywords.includes(word) && !foundKeywords.includes(word)) {
+                score += 10;
+                foundKeywords.push(word);
+                e.target.style.backgroundColor = 'var(--correct-color)';
+                e.target.style.pointerEvents = 'none';
+            } else if (!keywords.includes(word)) {
+                score -= 1;
+                e.target.style.backgroundColor = 'var(--incorrect-color)';
+                setTimeout(() => e.target.style.backgroundColor = '', 500);
+            }
+            scoreEl.textContent = score;
+        }
+
+        let scatterInterval;
+        function applyMode(mode) {
+            contextEl.className = 'context-paragraph'; // Reset
+            clearInterval(scatterInterval);
+
+            if (mode === 'uniform') {
+                contextEl.classList.add('uniform-fog');
+            } else if (mode === 'random') {
+                contextEl.classList.add('random-scatter');
+                const spans = contextEl.querySelectorAll('span');
+                scatterInterval = setInterval(() => {
+                    spans.forEach(s => s.classList.remove('flash'));
+                    const randSpan = spans[Math.floor(Math.random() * spans.length)];
+                    randSpan.classList.add('flash');
+                }, 300);
+            } else if (mode === 'sink') {
+                const spans = contextEl.querySelectorAll('span');
+                for(let i = 0; i < 3; i++) {
+                    let randSpan;
+                    do {
+                       randSpan = spans[Math.floor(Math.random() * spans.length)];
+                    } while(keywords.includes(randSpan.dataset.word));
+                    randSpan.classList.add('attention-sink');
+                }
+            }
+        }
+        
+        modes.forEach(radio => {
+            radio.addEventListener('change', () => applyMode(radio.value));
+        });
+
+        function startTimer() {
+            let seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                timerEl.textContent = `${seconds}s`;
+            }, 1000);
+        }
+
+        generateContext();
+        startTimer();
+
+    </script>
+</body>
+</html>

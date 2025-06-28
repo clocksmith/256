@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Expanding Room of Thoughts: Mental Clutter Accumulation</title>
+    <!-- CONFIRMATION: No external JS libraries for the visualization are used. -->
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --room-border: #9e9e9e;
+            --relevant-bg: #4caf50;
+            --relevant-text: #ffffff;
+            --clutter-bg: #bdbdbd;
+            --clutter-text: #616161;
+            --spotlight-color: rgba(255, 255, 0, 0.25);
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .light-mode { /* Same as default */ }
+        .dark-mode {
+            --bg-color: #212121;
+            --text-color: #e0e0e0;
+            --room-border: #616161;
+            --relevant-bg: #81c784;
+            --relevant-text: #000000;
+            --clutter-bg: #424242;
+            --clutter-text: #9e9e9e;
+            --spotlight-color: rgba(255, 255, 100, 0.15);
+        }
+        #ui-controls {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            background: rgba(0,0,0,0.05);
+        }
+        .dark-mode #ui-controls {
+             background: rgba(255,255,255,0.05);
+        }
+        #room-container {
+            flex-grow: 1;
+            width: 50%;
+            height: 50%;
+            border: 2px dashed var(--room-border);
+            position: relative;
+            transition: all 0.5s ease-in-out;
+            margin-top: 20px;
+        }
+        .thought-object {
+            position: absolute;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            user-select: none;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+        .relevant-thought {
+            background-color: var(--relevant-bg);
+            color: var(--relevant-text);
+            z-index: 5;
+            border: 1px solid #fff;
+        }
+        .clutter-thought {
+            background-color: var(--clutter-bg);
+            color: var(--clutter-text);
+            z-index: 4;
+        }
+        #focus-spotlight {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: var(--spotlight-color);
+            pointer-events: none;
+            z-index: 10;
+            transition: all 0.1s linear;
+            box-shadow: 0 0 15px var(--spotlight-color);
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-controls">
+        <label for="context-slider">Increase Context Window / Add Information</label>
+        <input type="range" id="context-slider" min="0" max="100" value="0" style="width: 80%;">
+        <p>Cognitive Effort to Find Relevant Thoughts: <span id="effort-counter">0</span></p>
+    </div>
+    <div id="room-container">
+        <div id="focus-spotlight"></div>
+    </div>
+
+    <script>
+        const theme = new URLSearchParams(window.location.search).get('theme') || 'dark';
+        document.body.classList.add(theme === 'light' ? 'light-mode' : 'dark-mode');
+
+        const slider = document.getElementById('context-slider');
+        const room = document.getElementById('room-container');
+        const effortCounter = document.getElementById('effort-counter');
+        const spotlight = document.getElementById('focus-spotlight');
+
+        let effort = 0;
+        const relevantThoughts = [];
+
+        function createThought(isRelevant, text) {
+            const thought = document.createElement('div');
+            thought.className = isRelevant ? 'thought-object relevant-thought' : 'thought-object clutter-thought';
+            thought.textContent = text;
+            
+            thought.style.left = `${Math.random() * 85}%`;
+            thought.style.top = `${Math.random() * 85}%`;
+
+            if (!isRelevant) {
+                thought.addEventListener('click', () => {
+                    effort += 10;
+                    effortCounter.textContent = effort;
+                    thought.style.opacity = '0.2';
+                    setTimeout(() => thought.style.opacity = '1', 500);
+                });
+            }
+            return thought;
+        }
+
+        function init() {
+            const initialRelevant = ['Key Fact 1', 'Core Query', 'Main Idea'];
+            initialRelevant.forEach(text => {
+                const thought = createThought(true, text);
+                relevantThoughts.push(thought);
+                room.appendChild(thought);
+            });
+        }
+
+        slider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            const scale = 50 + (value / 2);
+            room.style.width = `${scale}%`;
+            room.style.height = `${scale}%`;
+            
+            effort = value * 5;
+            effortCounter.textContent = effort;
+
+            const existingClutter = document.querySelectorAll('.clutter-thought').length;
+            const targetClutter = Math.floor(value / 2);
+
+            if(existingClutter < targetClutter) {
+                for (let i = 0; i < targetClutter - existingClutter; i++) {
+                    room.appendChild(createThought(false, `Token #${Math.floor(Math.random()*1000)}`));
+                }
+            }
+        });
+
+        room.addEventListener('mousemove', (e) => {
+            const rect = room.getBoundingClientRect();
+            spotlight.style.left = `${e.clientX - rect.left}px`;
+            spotlight.style.top = `${e.clientY - rect.top}px`;
+        });
+        
+        init();
+    </script>
+</body>
+</html>

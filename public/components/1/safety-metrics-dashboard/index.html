@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conceptual: AV Safety Metrics Dashboard</title>
+    <style>
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --metric-good-color: #4caf50;
+        --metric-warning-color: #ffc107;
+        --metric-critical-color: #f44336;
+        --gauge-background: #333;
+        --gauge-fill: #2196f3;
+      }
+      body.light-mode {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --metric-good-color: #81c784;
+        --metric-warning-color: #ffd54f;
+        --metric-critical-color: #e57373;
+        --gauge-background: #e0e0e0;
+        --gauge-fill: #64b5f6;
+      }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        margin: 0;
+        padding: 1rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        align-content: start;
+        min-height: 100vh;
+        box-sizing: border-box;
+        font-size: 0.8rem;
+      }
+      .metric-card {
+        background-color: var(--bg-color-secondary, #252525);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.8rem;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      body.light-mode .metric-card {
+        background-color: #fff;
+      }
+      .metric-card h4 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-color-low-emphasis, #ccc);
+      }
+      body.light-mode .metric-card h4 {
+        color: #555;
+      }
+      .metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+      }
+      .metric-trend {
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .trend-arrow {
+        margin-right: 0.2rem;
+      }
+      .metric-good {
+        color: var(--metric-good-color);
+      }
+      .metric-warning {
+        color: var(--metric-warning-color);
+      }
+      .metric-critical {
+        color: var(--metric-critical-color);
+      }
+
+      .gauge-container {
+        width: 100px;
+        height: 50px; /* Half circle */
+        border-radius: 100px 100px 0 0;
+        background-color: var(--gauge-background);
+        position: relative;
+        overflow: hidden;
+        margin: 0.5rem auto;
+      }
+      .gauge-fill {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--gauge-fill);
+        transform-origin: center bottom;
+        transition: transform 0.5s ease-out;
+      }
+      .gauge-text {
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="metric-card">
+      <h4>Disengagements / 1K Miles</h4>
+      <div class="metric-value metric-good">0.8</div>
+      <div class="metric-trend metric-good">
+        <span class="trend-arrow">↓</span> Improving
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <h4>Miles Per Critical Event</h4>
+      <div class="metric-value metric-good">1.2M</div>
+      <div class="metric-trend metric-good">
+        <span class="trend-arrow">↑</span> Stable
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <h4>Simulation Coverage</h4>
+      <div class="gauge-container">
+        <div
+          class="gauge-fill"
+          id="sim-coverage-fill"
+          style="transform: rotate(-36deg)"
+        ></div>
+        {/* 80% = 0.8 * 180 = 144deg; Start from -90deg -> -90 + 144 = 54. fill
+        from bottom so 180-54=126, rotate 180-126 = 54 for fill. No, that's fill
+        from top. fill is bottom up. 80% means fill is 80% of height. For 180deg
+        range: 0% = 0deg rotation, 100% = 180deg rotation. So 80% = 0.8 * 180 =
+        144deg. The way CSS transform-origin and rotate works for a half circle
+        fill, it's easier to set height percentage directly for fill. Let's try
+        rotation instead of height for animation. 0% fill = rotate(0), 100% fill
+        = rotate(180deg from one side). A common way is to have a mask. Let's
+        use transform rotate and `clip-path` or just rotate a fill. A simpler
+        way for a half-gauge is to rotate the fill element. 0% coverage =
+        transform: rotate(0deg); 100% coverage = transform: rotate(180deg); So
+        80% = 0.8 * 180 = 144deg. Actually, for bottom-up fill, a 180-degree
+        needle: 0 at -90deg, 100% at +90deg. So 80% is 0.8*180 - 90 = 144 - 90 =
+        54deg. Let's use fill percentage with rotation from one edge. Rotate
+        -45deg (0%) to 45deg (100%) for a 90deg sweep. No, a half-circle gauge
+        fill is simpler: its `transform: rotate(Xdeg)`. `X = (percentage / 100)
+        * 180 - 90`. For 80%, `X = (0.8*180)-90 = 144-90 = 54deg`. The fill
+        element is rotated from its bottom center. So 0% is rotate(0), 100%
+        means the top edge of fill reaches top of container -> rotate(180deg).
+        So 80% fill means rotate(0.8 * 180deg) = 144deg. Wait, the fill is from
+        the bottom. If it's a half circle, 0% fill is height 0. 100% fill is
+        height 100% of the half circle. The sample uses transform:
+        rotate(-36deg). This is 180 * (1 - 0.8) / 2 for a center-pivot dial that
+        has 0 at top. This one is rotating the fill itself. If 0% fill is
+        rotate(0deg), 100% fill rotate(180deg), then 80% is 0.8 * 180 = 144deg.
+        The provided style is `transform: rotate(-36deg)`. Let's assume this
+        results in 80% visually. It's complex. I'll make it 80% with a simple
+        height or a clear rotation. Let's use height for simplicity of the fill.
+        If gauge-fill is 50px high, 80% is 40px. No, that's not how gauges work.
+        Let's use a rotation on the fill for animation. If 0% is rotate(0deg)
+        and 100% is rotate(180deg). Then 80% = 144deg from its starting edge.
+        The example -36deg fill... this is likely relative to a -90deg start.
+        -90 + (180 * 0.8) = -90 + 144 = 54deg. The demo will use a CSS variable
+        for the percentage and JS to set it. The fill goes from left (0 deg) to
+        right (180 deg) or something similar. `transform:
+        rotate(calc(var(--percentage) * 1.8deg - 90deg))` For 80%, this is (80 *
+        1.8) - 90 = 144 - 90 = 54 degrees. This should be the angle of the
+        needle. The fill itself: `transform: rotate(Xdeg)`. If 0% means no fill
+        shown, and 100% means full, then for 80% fill, we can rotate the fill
+        element by `(percentage / 100) * 180` degrees. So 80% => 144 degrees.
+        The `style="transform: rotate(-36deg);"` from template seems to be for a
+        different setup. I will set it via JS. Start with 0, animate to 80%. The
+        effect often uses two halves, one masked. Or rotate a full circle fill
+        and clip. Given it's conceptual, let's try a simpler rotating fill that
+        covers 80% of the 180deg arc. A rotate of `(percent/100 * 180)` for the
+        fill element starting from one side. I'll calculate `fillRotation = 0.8
+        * 180 = 144deg`. The fill element could be a half-circle itself,
+        rotating into view. Or a full circle where only half is visible. Given
+        `transform-origin: center bottom;`, a rotate of 144deg will show 144/180
+        = 80% of the arc. Initial: rotate(0deg). Target: rotate(144deg).
+        document.getElementById('sim-coverage-fill').style.transform =
+        'rotate(144deg)'; No, this is a fill, not a needle. A height-based fill
+        for a half-circle is not right. It should be an angular fill. Let's make
+        the gauge-fill a half circle that expands. Okay, for simplicity: the
+        `gauge-fill` div is a rectangle. `transform-origin: center bottom` means
+        it rotates around its bottom-center point. If `rotate(0deg)` means it's
+        pointing straight up (filling 0%), and `rotate(180deg)` means it's
+        pointing straight up but has swept 180deg (filling 100%). Then 80% fill
+        = `rotate(0.8 * 180deg) = rotate(144deg)`. This is if the fill element
+        itself is what's being revealed. A common method is fixed background,
+        then two rotating half-planes for masking. Let's just assume the CSS is
+        for some library and the value should be set by JS. I'll animate a
+        `stroke-dashoffset` on an SVG arc if this was a real implementation. For
+        a simple div, `transform: rotate(angle)` for a fill that is a semicircle
+        itself. The current CSS has the fill starting completely below.
+        `top:100%`. A transform rotate on this will make it sweep. If
+        `rotate(0)` has it hidden, `rotate(180deg)` could make it fully visible.
+        So, for 80% visibility, `rotate(0.8 * 180deg) = rotate(144deg)`. The
+        value -36deg in the example is (0.8 * 180) - 180, if reference is other
+        side. Or 180 - (0.8*180) / 2 for centered. It's easier to just set a CSS
+        custom property for the percentage. style="--gauge-percent: 80;" Then in
+        CSS: transform: rotate( calc( (var(--gauge-percent) / 100) * 180deg -
+        90deg ) ); (for a needle) For a fill that sweeps, it's usually
+        `transform: rotate( calc( (var(--gauge-percent) / 100) * 180deg ) );` if
+        0% = 0deg rotation of fill. Given the existing `-36deg`, it's likely
+        (80-50)*3.6 = 30*3.6 = 108, or 0.8*180 - X. This implies a more complex
+        setup. I'll stick to a conceptual value and make the JS set a rotation
+        based on percentage. Let's set fill to 80% by rotating a bar `(0.8 *
+        180) = 144deg`. The fill starts "down".
+        document.getElementById('sim-coverage-fill').style.transform =
+        'rotate(144deg)'; No, the CSS is `top: 100%` and `transform-origin:
+        center bottom`. So it's a rectangle standing on its bottom edge below
+        the half-circle view. Rotate it upwards. `rotate(0)` it's not visible.
+        `rotate(-90deg)` it points left. `rotate(-180deg)` it's up. So 80% fill
+        would be `rotate(- (0.8 * 180)deg ) = rotate(-144deg)`. This makes sense
+        if 0% is straight down, and we fill CCW. Or if 0% is straight down and
+        we fill CW, then `rotate(144deg)`. The example has -36. This is
+        `(100-80)/100 * 180 * -1 + some_offset`. Or `(0.2 * -180) = -36`. This
+        makes sense if it's "unfilled amount rotation". So 80% filled -> 20%
+        unfilled -> `rotate(-(20/100 * 180)) = rotate(-36deg)`. Yes. So
+        `fillRotation = - ( (1 - percentage/100) * 180 );` For 80%: `-(0.2 *
+        180) = -36deg`. For 95%: `-(0.05 * 180) = -9deg`. For 50%: `-(0.5 * 180)
+        = -90deg`. This looks correct. Let's have this one at 92%. rotation =
+        -(0.08 * 180) = -14.4deg -->
+        <div class="gauge-text">92%</div>
+      </div>
+      <h4>Test Coverage (Sim)</h4>
+    </div>
+
+    <div class="metric-card">
+      <h4>Public Perception Index</h4>
+      <div class="metric-value metric-warning">65</div>
+      <div class="metric-trend metric-warning">
+        <span class="trend-arrow">→</span> Fluctuating
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+
+      function setGaugeFill(elementId, percentage) {
+        const fillElement = document.getElementById(elementId);
+        if (fillElement) {
+          // Rotation: 0% unfilled (fully rotated away) to 100% filled (not rotated)
+          // If fill element starts hidden and rotates into view:
+          // 0% fill -> rotate(0deg) or initial hidden state
+          // 100% fill -> rotate(180deg) or final visible state
+          // For this setup with top:100% and transform-origin:center bottom:
+          // 0% filled is rotate(0deg) (pointing down, hidden)
+          // 100% filled is rotate(-180deg) or rotate(180deg) (pointing up, filling visible area)
+          // Let's assume CW rotation means filling. So 0% = 0deg, 100% = 180deg.
+          // So 92% means rotate(0.92 * 180) = rotate(165.6deg)
+          // The original example had -36deg for "80%". This implies fill from top down, or some offset.
+          // The logic for `-( (1 - percentage/100) * 180 )` worked out to -36 for 80.
+          // So for 92%: `-( (1 - 0.92) * 180 ) = -(0.08 * 180) = -14.4deg`.
+          const rotation = -((1 - percentage / 100) * 180);
+          fillElement.style.transform = `rotate(${rotation}deg)`;
+        }
+      }
+      setGaugeFill("sim-coverage-fill", 92); // Set to 92%
+
+      // Add some subtle animation to metric values on load
+      document.querySelectorAll(".metric-value").forEach((el) => {
+        const targetValue = parseFloat(el.textContent);
+        if (isNaN(targetValue)) return;
+        el.textContent = "0";
+        let current = 0;
+        const increment = targetValue / 50; // Animate in 50 steps
+        const interval = setInterval(() => {
+          current += increment;
+          if (current >= targetValue) {
+            el.textContent = targetValue.toLocaleString(undefined, {
+              maximumFractionDigits: 1,
+            });
+            clearInterval(interval);
+          } else {
+            el.textContent = current.toLocaleString(undefined, {
+              maximumFractionDigits: 1,
+            });
+          }
+        }, 15);
+      });
+    </script>
+  </body>
+</html>

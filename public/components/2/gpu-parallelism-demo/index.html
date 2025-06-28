@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Interactive WebGL demo of a 16x16 GPU compute grid simulating parallel MatMul and MatAdd operations with dynamic metrics."
+    />
+    <title>GPU Compute Grid Demo (16x16) - Enhanced</title>
+    <style>
+      :root {
+        --bg-color-light: #e8eaf6;
+        --text-color-light: #1a1a1a;
+        --surface-bg-light: rgba(
+          250,
+          250,
+          253,
+          0.96
+        ); /* Slightly more opaque */
+        --border-color-light: rgba(0, 0, 0, 0.15); /* Darker border */
+        --glow-cyan-light: rgba(0, 130, 150, 0.85);
+        --idle-core-light: rgba(180, 190, 200, 0.75);
+        --matmul-core-light: rgba(255, 90, 70, 0.9);
+        --matadd-core-light: rgba(70, 140, 255, 0.9);
+        --finish-core-light: rgba(90, 210, 140, 0.8);
+        --overlay-bg-light: rgba(245, 247, 250, 0.85);
+
+        --bg-color-dark: #0a0c10;
+        --text-color-dark: #f0f0f0; /* Brighter text */
+        --surface-bg-dark: rgba(20, 22, 28, 0.96); /* Darker surface */
+        --border-color-dark: rgba(255, 255, 255, 0.1); /* Lighter border */
+        --glow-cyan-dark: rgba(0, 230, 255, 0.9);
+        --idle-core-dark: rgba(45, 55, 75, 0.8);
+        --matmul-core-dark: rgba(255, 90, 70, 0.95);
+        --matadd-core-dark: rgba(70, 140, 255, 0.95);
+        --finish-core-dark: rgba(80, 200, 130, 0.85);
+        --overlay-bg-dark: rgba(10, 12, 16, 0.85);
+
+        --bg-color: var(--bg-color-dark);
+        --text-color: var(--text-color-dark);
+        --surface-bg: var(--surface-bg-dark);
+        --border-color: var(--border-color-dark);
+        --glow-cyan: var(--glow-cyan-dark);
+        --idle-core: var(--idle-core-dark);
+        --matmul-core: var(--matmul-core-dark);
+        --matadd-core: var(--matadd-core-dark);
+        --finish-core: var(--finish-core-dark);
+        --overlay-bg: var(--overlay-bg-dark);
+      }
+      body.light-mode {
+        --bg-color: var(--bg-color-light);
+        --text-color: var(--text-color-light);
+        --surface-bg: var(--surface-bg-light);
+        --border-color: var(--border-color-light);
+        --glow-cyan: var(--glow-cyan-light);
+        --idle-core: var(--idle-core-light);
+        --matmul-core: var(--matmul-core-light);
+        --matadd-core: var(--matadd-core-light);
+        --finish-core: var(--finish-core-light);
+        --overlay-bg: var(--overlay-bg-light);
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-size: 16px;
+      }
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Align to top */
+        align-items: center;
+      }
+      .demo-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background-color: var(--surface-bg);
+        padding: 0.4rem; /* Reduced padding */
+      }
+      .demo-title {
+        font-size: clamp(0.8em, 2.2vw, 1em); /* Responsive title */
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+        color: var(--glow-cyan);
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .controls-message {
+        font-size: clamp(0.65em, 1.8vw, 0.75em);
+        text-align: center;
+        opacity: 0.85;
+        margin-bottom: 0.2rem;
+        flex-shrink: 0;
+      }
+      .canvas-container {
+        position: relative;
+        width: 100%;
+        flex-grow: 1;
+        min-height: 0; /* Critical for flex-grow in column layout */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .webgl-demo-canvas {
+        display: block;
+        width: auto; /* Let aspect-ratio control width */
+        height: auto; /* Let aspect-ratio control height */
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: 1 / 1; /* Maintain square grid */
+        background-color: color-mix(
+          in srgb,
+          var(--bg-color) 85%,
+          black 15%
+        ); /* Slightly darker grid bg */
+        cursor: pointer;
+        border-radius: 8px; /* Softer radius */
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .metrics-overlay {
+        position: absolute;
+        top: 6px; /* Adjusted position */
+        left: 6px;
+        background-color: var(--overlay-bg);
+        color: var(--text-color);
+        padding: 5px 8px; /* Tighter padding */
+        border-radius: 5px; /* Softer radius */
+        font-size: clamp(0.6em, 1.7vw, 0.7em);
+        line-height: 1.35;
+        pointer-events: none;
+        z-index: 10;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+        text-align: left;
+      }
+      .metrics-overlay div {
+        margin-bottom: 1px;
+      } /* Reduced spacing */
+      .metrics-overlay div:last-child {
+        margin-bottom: 0;
+      }
+      .metrics-overlay span {
+        font-weight: 500;
+        display: inline-block;
+        min-width: 80px;
+        opacity: 0.9;
+      }
+      .metrics-overlay em {
+        font-style: normal;
+        color: var(--glow-cyan);
+        font-weight: bold;
+        margin-left: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo-wrapper">
+      <div class="demo-title">
+        GPU Compute Grid (16x16) - Parallel Operation Simulation
+      </div>
+      <p class="controls-message">
+        Click/Tap on grid to dispatch parallel MatMul/MatAdd operations. Observe
+        core utilization.
+      </p>
+      <div class="canvas-container">
+        <canvas
+          class="webgl-demo-canvas"
+          id="gpuParallelismDemoCanvas"
+        ></canvas>
+        <div class="metrics-overlay">
+          <div>
+            <span>Utilization:</span><em id="grid-utilization">0.0%</em>
+          </div>
+          <div>
+            <span>Active Cores:</span><em id="active-cores">0 / 256</em>
+          </div>
+          <div><span>MatMul Ops/s:</span><em id="matmul-ops">0.0</em></div>
+          <div><span>MatAdd Ops/s:</span><em id="matadd-ops">0.0</em></div>
+          <div>
+            <span>Total Dispatched:</span><em id="total-dispatched">0</em>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const Mat4 = {
+        create: () => new Float32Array(16),
+        ortho: (out, left, right, bottom, top, near, far) => {
+          const lr = 1 / (left - right);
+          const bt = 1 / (bottom - top);
+          const nf = 1 / (near - far);
+          out[0] = -2 * lr;
+          out[1] = 0;
+          out[2] = 0;
+          out[3] = 0;
+          out[4] = 0;
+          out[5] = -2 * bt;
+          out[6] = 0;
+          out[7] = 0;
+          out[8] = 0;
+          out[9] = 0;
+          out[10] = 2 * nf;
+          out[11] = 0;
+          out[12] = (left + right) * lr;
+          out[13] = (top + bottom) * bt;
+          out[14] = (far + near) * nf;
+          out[15] = 1;
+          return out;
+        },
+      };
+
+      function createSimpleShaderProgram(gl, vsSource, fsSource) {
+        const vs = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vs, vsSource);
+        gl.compileShader(vs);
+        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+          console.error("VS Error:", gl.getShaderInfoLog(vs));
+          gl.deleteShader(vs);
+          return null;
+        }
+        const fs = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fs, fsSource);
+        gl.compileShader(fs);
+        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+          console.error("FS Error:", gl.getShaderInfoLog(fs));
+          gl.deleteShader(fs);
+          gl.deleteShader(vs);
+          return null;
+        }
+        const p = gl.createProgram();
+        gl.attachShader(p, vs);
+        gl.attachShader(p, fs);
+        gl.linkProgram(p);
+        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+          console.error("Program Link Error:", gl.getProgramInfoLog(p));
+          gl.deleteProgram(p);
+          gl.deleteShader(vs);
+          gl.deleteShader(fs);
+          return null;
+        }
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
+        return p;
+      }
+
+      function getCssColorRGB(varName) {
+        const colorStr = getComputedStyle(document.documentElement)
+          .getPropertyValue(varName)
+          .trim();
+        if (colorStr.startsWith("rgba")) {
+          const p = colorStr.match(/[\d.]+/g);
+          return p
+            ? p.slice(0, 3).map((c) => parseFloat(c) / 255.0)
+            : [0, 0, 0];
+        }
+        if (colorStr.startsWith("#")) {
+          let h = colorStr.substring(1);
+          if (h.length === 3)
+            h = h
+              .split("")
+              .map((c) => c + c)
+              .join("");
+          if (h.length === 6) {
+            const b = parseInt(h, 16);
+            return [
+              ((b >> 16) & 255) / 255,
+              ((b >> 8) & 255) / 255,
+              (b & 255) / 255,
+            ];
+          }
+        }
+        return [0, 0, 0];
+      }
+
+      function initGpuParallelismDemo(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        let gl = canvas.getContext("webgl", {
+          antialias: true,
+          stencil: false,
+          depth: false,
+          powerPreference: "low-power",
+        });
+        let extInstancing;
+
+        if (gl) {
+          extInstancing = gl.getExtension("ANGLE_instanced_arrays");
+          if (!extInstancing) {
+            console.warn(
+              "ANGLE_instanced_arrays not supported for WebGL1. Trying WebGL2."
+            );
+            gl = canvas.getContext("webgl2", {
+              antialias: true,
+              stencil: false,
+              depth: false,
+              powerPreference: "low-power",
+            });
+            if (gl) {
+              console.info("Switched to WebGL2 context for instancing.");
+              extInstancing = {
+                vertexAttribDivisorANGLE: gl.vertexAttribDivisor.bind(gl),
+                drawArraysInstancedANGLE: gl.drawArraysInstanced.bind(gl),
+                VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE:
+                  gl.VERTEX_ATTRIB_ARRAY_DIVISOR,
+              };
+            }
+          }
+        }
+        if (!gl) {
+          console.error("WebGL is not supported or context creation failed.");
+          return null;
+        }
+        if (!extInstancing && !(gl instanceof WebGL2RenderingContext)) {
+          console.error(
+            "WebGL instancing (ANGLE_instanced_arrays or WebGL2) is not supported. Demo cannot run."
+          );
+          const errorMsg = document.createElement("p");
+          errorMsg.textContent =
+            "WebGL instancing is not supported by your browser. This demo cannot run.";
+          errorMsg.style.color = "red";
+          errorMsg.style.textAlign = "center";
+          canvas.parentNode.insertBefore(errorMsg, canvas.nextSibling);
+          return null;
+        }
+
+        const vsSource = `
+          attribute vec2 a_quad_vertex; attribute vec2 a_cell_offset; attribute float a_cell_state;
+          attribute float a_cell_progress; attribute vec3 a_task_color;
+          uniform mat4 u_projectionMatrix; uniform vec2 u_cell_size;
+          varying float v_cell_state; varying float v_cell_progress; varying vec3 v_task_color; varying vec2 v_uv;
+          void main() {
+            vec2 pos = a_quad_vertex * u_cell_size * 0.47 + a_cell_offset; /* 0.47 for slight padding */
+            gl_Position = u_projectionMatrix * vec4(pos, 0.0, 1.0);
+            v_cell_state = a_cell_state; v_cell_progress = a_cell_progress; v_task_color = a_task_color;
+            v_uv = a_quad_vertex * 0.5 + 0.5;
+          }`;
+        const fsSource = `
+          precision mediump float;
+          varying float v_cell_state; varying float v_cell_progress; varying vec3 v_task_color; varying vec2 v_uv;
+          uniform float u_time; uniform vec3 u_idleColor; uniform vec3 u_matmulColor;
+          uniform vec3 u_mataddColor; uniform vec3 u_finishColor;
+          void main() {
+            vec3 baseColor; float alpha = 1.0; float glow = 0.0; float pulse;
+            float borderThickness = 0.06; /* Thinner border */
+            float cornerRadius = 0.15; /* Rounded corners */
+            vec2 distToCenter = abs(v_uv - 0.5);
+            float roundFactor = smoothstep(cornerRadius - borderThickness, cornerRadius, max(distToCenter.x, distToCenter.y) - (0.5 - cornerRadius));
+            
+            float sdf = min(min(v_uv.x, 1.0-v_uv.x), min(v_uv.y, 1.0-v_uv.y));
+            float borderAlpha = smoothstep(0.0, borderThickness, sdf) - smoothstep(borderThickness, borderThickness*1.8, sdf);
+
+            if (v_cell_state == 0.0) { /* Idle */
+              pulse = 0.8 + 0.2 * sin(u_time * 2.0 + v_uv.x * 6.0 + v_uv.y * 4.0);
+              baseColor = u_idleColor; alpha = (0.5 + 0.1 * pulse) * (1.0 - roundFactor);
+            } else if (v_cell_state == 1.0) { /* MatMul */
+              pulse = 0.5 + 0.5 * pow(sin(v_cell_progress * 3.14159 * 2.5 + u_time * 7.0), 6.0);
+              baseColor = mix(u_matmulColor, v_task_color, 0.5) * pulse;
+              glow = 0.25 + 0.35 * (1.0 - abs(v_cell_progress - 0.5)*2.0); alpha = (0.9 + 0.05 * pulse) * (1.0 - roundFactor);
+            } else if (v_cell_state == 2.0) { /* MatAdd */
+              pulse = 0.6 + 0.4 * pow(sin(v_cell_progress * 3.14159 * 3.5 + u_time * 9.0), 4.0);
+              baseColor = mix(u_mataddColor, v_task_color, 0.5) * pulse;
+              glow = 0.15 + 0.25 * (1.0 - abs(v_cell_progress - 0.5)*2.0); alpha = (0.85 + 0.05 * pulse) * (1.0 - roundFactor);
+            } else { /* Finishing */
+              baseColor = mix(u_finishColor, v_task_color, pow(1.0 - v_cell_progress, 2.5));
+              alpha = ((1.0 - v_cell_progress * 0.6) * 0.75) * (1.0 - roundFactor); glow = (1.0 - v_cell_progress) * 0.25;
+            }
+            vec3 finalColor = baseColor + glow * baseColor * 1.2; /* Brighter glow */
+            gl_FragColor = vec4(finalColor, alpha) * (1.0 - borderAlpha) + vec4(finalColor*0.4, 1.0) * borderAlpha * alpha;
+            if (alpha < 0.01) discard;
+          }`;
+
+        const program = createSimpleShaderProgram(gl, vsSource, fsSource);
+        if (!program) return;
+
+        const locs = {
+          quadVertex: gl.getAttribLocation(program, "a_quad_vertex"),
+          cellOffset: gl.getAttribLocation(program, "a_cell_offset"),
+          cellState: gl.getAttribLocation(program, "a_cell_state"),
+          cellProgress: gl.getAttribLocation(program, "a_cell_progress"),
+          taskColor: gl.getAttribLocation(program, "a_task_color"),
+          projectionMatrix: gl.getUniformLocation(
+            program,
+            "u_projectionMatrix"
+          ),
+          cellSize: gl.getUniformLocation(program, "u_cell_size"),
+          time: gl.getUniformLocation(program, "u_time"),
+          idleColor: gl.getUniformLocation(program, "u_idleColor"),
+          matmulColor: gl.getUniformLocation(program, "u_matmulColor"),
+          mataddColor: gl.getUniformLocation(program, "u_mataddColor"),
+          finishColor: gl.getUniformLocation(program, "u_finishColor"),
+        };
+
+        const GRID_DIM = 16;
+        const TOTAL_CORES = GRID_DIM * GRID_DIM;
+        const GRID_AREA_WORLD_SIZE = 1.95; /* Slightly larger world view */
+        const CELL_RAW_SIZE_WORLD = GRID_AREA_WORLD_SIZE / GRID_DIM;
+        const CELL_VISUAL_SIZE_WORLD =
+          CELL_RAW_SIZE_WORLD; /* Fill cell, use shader for padding */
+
+        const coreStates = Array.from({ length: TOTAL_CORES }, () => ({
+          state: 0,
+          progress: 0,
+          taskType: 0,
+          taskColor: [0.5, 0.5, 0.5],
+          duration: 0,
+        }));
+
+        const quadVertices = new Float32Array([
+          -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,
+        ]);
+        const quadVertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadVertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, quadVertices, gl.STATIC_DRAW);
+
+        const cellOffsets = new Float32Array(TOTAL_CORES * 2);
+        for (let i = 0; i < TOTAL_CORES; i++) {
+          const x = i % GRID_DIM;
+          const y = Math.floor(i / GRID_DIM);
+          cellOffsets[i * 2] = (x - GRID_DIM / 2 + 0.5) * CELL_RAW_SIZE_WORLD;
+          cellOffsets[i * 2 + 1] =
+            (y - GRID_DIM / 2 + 0.5) * CELL_RAW_SIZE_WORLD;
+        }
+        const cellOffsetBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, cellOffsetBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, cellOffsets, gl.STATIC_DRAW);
+
+        const cellStateData = new Float32Array(TOTAL_CORES);
+        const cellProgressData = new Float32Array(TOTAL_CORES);
+        const taskColorData = new Float32Array(TOTAL_CORES * 3);
+        const cellStateBuffer = gl.createBuffer();
+        const cellProgressBuffer = gl.createBuffer();
+        const taskColorBuffer = gl.createBuffer();
+
+        let completedMatmuls = 0;
+        let completedMatadds = 0;
+        let totalDispatchedTasks = 0;
+        let timeSinceLastStatUpdate = 0;
+        const uiElements = {
+          utilization: document.getElementById("grid-utilization"),
+          activeCores: document.getElementById("active-cores"),
+          matmulOps: document.getElementById("matmul-ops"),
+          mataddOps: document.getElementById("matadd-ops"),
+          totalDispatched: document.getElementById("total-dispatched"),
+        };
+
+        canvas.addEventListener("click", () => {
+          const numTasksToDispatch =
+            Math.floor(Math.random() * (GRID_DIM * 2.5)) +
+            GRID_DIM * 0.5; /* More variable dispatch */
+          let dispatchedThisClick = 0;
+          for (let i = 0; i < numTasksToDispatch; i++) {
+            let coreIndex = Math.floor(Math.random() * TOTAL_CORES);
+            let attempts = 0;
+            while (
+              coreStates[coreIndex].state !== 0 &&
+              attempts < TOTAL_CORES
+            ) {
+              coreIndex = (coreIndex + 1) % TOTAL_CORES;
+              attempts++;
+            }
+            if (coreStates[coreIndex].state === 0) {
+              const isMatmul = Math.random() < 0.4; /* More MatMuls */
+              coreStates[coreIndex].state = isMatmul ? 1.0 : 2.0;
+              coreStates[coreIndex].taskType = isMatmul ? 1.0 : 2.0;
+              coreStates[coreIndex].progress = 0;
+              coreStates[coreIndex].taskColor = [
+                Math.random() * 0.5 + 0.5,
+                Math.random() * 0.5 + 0.5,
+                Math.random() * 0.5 + 0.5,
+              ]; /* Brighter random colors */
+              coreStates[coreIndex].duration = isMatmul
+                ? 1.2 + Math.random() * 1.3
+                : 0.35 + Math.random() * 0.35; /* Adjusted durations */
+              dispatchedThisClick++;
+            }
+          }
+          totalDispatchedTasks += dispatchedThisClick;
+          if (uiElements.totalDispatched)
+            uiElements.totalDispatched.textContent = totalDispatchedTasks;
+        });
+
+        let lastFrameTime = 0;
+        function render(currentTime) {
+          currentTime *= 0.001;
+          const deltaTime = currentTime - lastFrameTime;
+          lastFrameTime = currentTime;
+
+          if (
+            canvas.width !== canvas.clientWidth ||
+            canvas.height !== canvas.clientHeight
+          ) {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.clientWidth * dpr;
+            canvas.height = canvas.clientHeight * dpr;
+          }
+          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+          const idleColorRGB = getCssColorRGB("--idle-core");
+          const matmulColorRGB = getCssColorRGB("--matmul-core");
+          const mataddColorRGB = getCssColorRGB("--matadd-core");
+          const finishColorRGB = getCssColorRGB("--finish-core");
+
+          gl.clearColor(0.01, 0.015, 0.02, 1.0); /* Darker background */
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.enable(gl.BLEND);
+          gl.blendFuncSeparate(
+            gl.SRC_ALPHA,
+            gl.ONE_MINUS_SRC_ALPHA,
+            gl.ONE,
+            gl.ONE_MINUS_SRC_ALPHA
+          ); /* Additive for glow */
+          gl.useProgram(program);
+
+          const projMat = Mat4.create();
+          const aspect = gl.drawingBufferWidth / gl.drawingBufferHeight;
+          const worldViewHalfSize =
+            (GRID_AREA_WORLD_SIZE / 2) * 1.02; /* Slight zoom out */
+          if (aspect > 1.0)
+            Mat4.ortho(
+              projMat,
+              -worldViewHalfSize * aspect,
+              worldViewHalfSize * aspect,
+              -worldViewHalfSize,
+              worldViewHalfSize,
+              -1,
+              1
+            );
+          else
+            Mat4.ortho(
+              projMat,
+              -worldViewHalfSize,
+              worldViewHalfSize,
+              -worldViewHalfSize / aspect,
+              worldViewHalfSize / aspect,
+              -1,
+              1
+            );
+          gl.uniformMatrix4fv(locs.projectionMatrix, false, projMat);
+
+          gl.uniform2f(
+            locs.cellSize,
+            CELL_VISUAL_SIZE_WORLD,
+            CELL_VISUAL_SIZE_WORLD
+          );
+          gl.uniform1f(locs.time, currentTime);
+          gl.uniform3fv(locs.idleColor, idleColorRGB);
+          gl.uniform3fv(locs.matmulColor, matmulColorRGB);
+          gl.uniform3fv(locs.mataddColor, mataddColorRGB);
+          gl.uniform3fv(locs.finishColor, finishColorRGB);
+
+          let activeCores = 0;
+          for (let i = 0; i < TOTAL_CORES; i++) {
+            const core = coreStates[i];
+            if (core.state === 1.0 || core.state === 2.0) {
+              core.progress += deltaTime / core.duration;
+              activeCores++;
+              if (core.progress >= 1.0) {
+                core.state = 3.0;
+                core.progress = 0;
+                if (core.taskType === 1.0) completedMatmuls++;
+                else completedMatadds++;
+              }
+            } else if (core.state === 3.0) {
+              core.progress += deltaTime / 0.15;
+              activeCores++; /* Faster finish fade */
+              if (core.progress >= 1.0) {
+                core.state = 0.0;
+                core.progress = 0;
+              }
+            }
+            cellStateData[i] = core.state;
+            cellProgressData[i] = core.progress;
+            taskColorData.set(core.taskColor, i * 3);
+          }
+
+          gl.bindBuffer(gl.ARRAY_BUFFER, quadVertexBuffer);
+          gl.vertexAttribPointer(locs.quadVertex, 2, gl.FLOAT, false, 0, 0);
+          gl.enableVertexAttribArray(locs.quadVertex);
+          gl.bindBuffer(gl.ARRAY_BUFFER, cellOffsetBuffer);
+          gl.vertexAttribPointer(locs.cellOffset, 2, gl.FLOAT, false, 0, 0);
+          gl.enableVertexAttribArray(locs.cellOffset);
+          extInstancing.vertexAttribDivisorANGLE(locs.cellOffset, 1);
+          gl.bindBuffer(gl.ARRAY_BUFFER, cellStateBuffer);
+          gl.bufferData(gl.ARRAY_BUFFER, cellStateData, gl.DYNAMIC_DRAW);
+          gl.vertexAttribPointer(locs.cellState, 1, gl.FLOAT, false, 0, 0);
+          gl.enableVertexAttribArray(locs.cellState);
+          extInstancing.vertexAttribDivisorANGLE(locs.cellState, 1);
+          gl.bindBuffer(gl.ARRAY_BUFFER, cellProgressBuffer);
+          gl.bufferData(gl.ARRAY_BUFFER, cellProgressData, gl.DYNAMIC_DRAW);
+          gl.vertexAttribPointer(locs.cellProgress, 1, gl.FLOAT, false, 0, 0);
+          gl.enableVertexAttribArray(locs.cellProgress);
+          extInstancing.vertexAttribDivisorANGLE(locs.cellProgress, 1);
+          gl.bindBuffer(gl.ARRAY_BUFFER, taskColorBuffer);
+          gl.bufferData(gl.ARRAY_BUFFER, taskColorData, gl.DYNAMIC_DRAW);
+          gl.vertexAttribPointer(locs.taskColor, 3, gl.FLOAT, false, 0, 0);
+          gl.enableVertexAttribArray(locs.taskColor);
+          extInstancing.vertexAttribDivisorANGLE(locs.taskColor, 1);
+
+          extInstancing.drawArraysInstancedANGLE(
+            gl.TRIANGLES,
+            0,
+            6,
+            TOTAL_CORES
+          );
+
+          extInstancing.vertexAttribDivisorANGLE(locs.cellOffset, 0);
+          extInstancing.vertexAttribDivisorANGLE(locs.cellState, 0);
+          extInstancing.vertexAttribDivisorANGLE(locs.cellProgress, 0);
+          extInstancing.vertexAttribDivisorANGLE(locs.taskColor, 0);
+
+          timeSinceLastStatUpdate += deltaTime;
+          if (timeSinceLastStatUpdate >= 0.2) {
+            /* Update stats more frequently */
+            const matmulRate = completedMatmuls / timeSinceLastStatUpdate;
+            const mataddRate = completedMatadds / timeSinceLastStatUpdate;
+            if (uiElements.matmulOps)
+              uiElements.matmulOps.textContent = matmulRate.toFixed(1);
+            if (uiElements.mataddOps)
+              uiElements.mataddOps.textContent = mataddRate.toFixed(1);
+            completedMatmuls = 0;
+            completedMatadds = 0;
+            timeSinceLastStatUpdate = 0;
+          }
+          if (uiElements.utilization)
+            uiElements.utilization.textContent =
+              ((activeCores / TOTAL_CORES) * 100).toFixed(1) + "%";
+          if (uiElements.activeCores)
+            uiElements.activeCores.textContent = `${activeCores} / ${TOTAL_CORES}`;
+          requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+      }
+
+      if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+      ) {
+        initGpuParallelismDemo("gpuParallelismDemoCanvas");
+      } else {
+        document.addEventListener("DOMContentLoaded", () =>
+          initGpuParallelismDemo("gpuParallelismDemoCanvas")
+        );
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </body>
+</html>

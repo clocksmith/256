@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unanswered Questions Diagram - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #101015; /* Deep Space Blue */
+        --text-color: #e8e8ff; /* Light Lavender */
+        --border-color: #303040;
+        --question-box-bg: #202030;
+        --question-border: #404060;
+        --unknown-symbol-color: #ffee00; /* Bright Yellow */
+        --line-color: #00ccff; /* Electric Blue */
+        --glow-color-symbol: rgba(255, 238, 0, 0.7);
+        --line-glow-color: rgba(0, 204, 255, 0.6);
+        --node-highlight-color: #ff88cc; /* Pink for hover/focus */
+      }
+      body.light-mode {
+        --bg-color: #f8f8ff;
+        --text-color: #181820;
+        --border-color: #d8d8e0;
+        --question-box-bg: #e8e8f0;
+        --question-border: #c8c8d8;
+        --unknown-symbol-color: #ccaa00;
+        --line-color: #0088aa;
+        --glow-color-symbol: rgba(204, 170, 0, 0.6);
+        --line-glow-color: rgba(0, 136, 170, 0.5);
+        --node-highlight-color: #dd66aa;
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: "Orbitron", sans-serif; /* Techy font */ }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        width: 100%; height: 100%; border: 1px solid var(--border-color);
+        padding: 0.5rem; display: flex; justify-content: center; align-items: center;
+      }
+      .question-diagram-svg { width: 100%; height: 100%; max-width:450px; max-height:400px; }
+
+      .unknown-symbol-group { animation: symbol-float 8s infinite alternate ease-in-out; }
+      .unknown-symbol-text {
+        font-size: 36px; fill: var(--unknown-symbol-color); font-weight: 900;
+        text-anchor: middle; dominant-baseline: central;
+        filter: drop-shadow(0 0 6px var(--glow-color-symbol)) drop-shadow(0 0 12px var(--unknown-symbol-color));
+        animation: symbol-main-pulse 2.5s infinite alternate ease-in-out;
+        cursor: cell; /* Implies deep mystery */
+      }
+      .question-node-group {
+        cursor: help; transition: transform 0.3s ease-out;
+        will-change: transform;
+      }
+      .question-node-group:hover .question-node-rect,
+      .question-node-group:focus-within .question-node-rect {
+        fill: var(--node-highlight-color); stroke: color-mix(in srgb, var(--node-highlight-color) 70%, white);
+        filter: drop-shadow(0 0 8px var(--node-highlight-color));
+      }
+      .question-node-group:hover .question-node-text,
+      .question-node-group:focus-within .question-node-text {
+          fill: var(--bg-color); font-weight: bold;
+      }
+      .question-node-rect {
+        stroke: var(--question-border); stroke-width: 1.5px;
+        fill: var(--question-box-bg); rx: 6px; ry: 6px;
+        filter: drop-shadow(3px 3px 4px rgba(0,0,0,0.25));
+        transition: fill 0.3s ease, stroke 0.3s ease, filter 0.3s ease;
+      }
+      .question-node-text {
+        fill: var(--text-color); font-size: 6.8px;
+        font-family: inherit; text-anchor: middle; dominant-baseline: middle;
+        pointer-events: none; transition: fill 0.3s ease;
+      }
+      .connection-line {
+        stroke: var(--line-color); stroke-width: 1.8px; opacity: 0.6;
+        filter: drop-shadow(0 0 2.5px var(--line-glow-color));
+        stroke-dasharray: 500; stroke-dashoffset: 500; /* Start invisible */
+        animation: line-draw-in 1s ease-out forwards, line-pulse-subtle 3.5s infinite alternate ease-in-out 1s;
+      }
+      .emerging-question-node { opacity: 0; animation: node-fade-in 1.5s ease-out forwards; }
+      
+      @keyframes symbol-main-pulse {
+        from { transform: scale(0.92); opacity: 0.75; filter: drop-shadow(0 0 5px var(--glow-color-symbol)) drop-shadow(0 0 10px var(--unknown-symbol-color)); }
+        to { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 8px var(--glow-color-symbol)) drop-shadow(0 0 15px var(--unknown-symbol-color));}
+      }
+      @keyframes symbol-float {
+        0% { transform: translate(60px, 50px) rotate(-2deg); }
+        50% { transform: translate(62px, 48px) rotate(2deg); }
+        100% { transform: translate(60px, 50px) rotate(-2deg); }
+      }
+      @keyframes line-draw-in { to { stroke-dashoffset: 0; opacity: 0.7; } }
+      @keyframes line-pulse-subtle {
+        from { opacity: 0.6; filter: drop-shadow(0 0 2.5px var(--line-glow-color)); }
+        to { opacity: 0.9; filter: drop-shadow(0 0 4px var(--line-glow-color)); }
+      }
+      @keyframes node-fade-in { to { opacity: 1; } }
+
+      @media (prefers-reduced-motion: reduce) {
+        .unknown-symbol-group, .unknown-symbol-text, .connection-line, .question-node-group, .emerging-question-node { animation: none !important; }
+        .unknown-symbol-text { opacity: 0.95; transform: scale(1);}
+        .connection-line { stroke-dashoffset: 0; opacity: 0.7; }
+        .emerging-question-node { opacity: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" role="img" aria-label="Interactive SVG diagram: A large, pulsing yellow question mark floats at the center. Animated lines draw outwards to several nodes representing key unanswered questions (e.g., 'Neural Code?', 'Lab Induction?'). Hovering/focusing a node highlights it and its text. New, dimmer 'emerging question' nodes periodically fade in at the periphery, symbolizing ongoing research.">
+      <svg class="question-diagram-svg" id="qDiagramSvg" viewBox="0 0 120 100" preserveAspectRatio="xMidYMid meet">
+        <g class="unknown-symbol-group">
+          <text class="unknown-symbol-text">?</text>
+        </g>
+        <g id="connection-lines-group-q"></g>
+        <g id="question-nodes-group-q"></g>
+      </svg>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") document.body.classList.add("light-mode");
+
+      const svgNSQ = "http://www.w3.org/2000/svg";
+      const qNodesGroup = document.getElementById("question-nodes-group-q");
+      const qLinesGroup = document.getElementById("connection-lines-group-q");
+      const qDiagramSvg = document.getElementById("qDiagramSvg");
+      
+      const mainQuestions = [
+        { id: "q1", angle: -90, dist: 35, w: 48, h: 14, txt: ["Neural Code", "of Familiarity?"]},
+        { id: "q2", angle: -35, dist: 40, w: 45, h: 14, txt: ["Precise MTL", "Network Role?"]},
+        { id: "q3", angle: 35, dist: 40, w: 45, h: 14, txt: ["Age & Stress", "Influence?"]},
+        { id: "q4", angle: 100, dist: 38, w: 50, h: 14, txt: ["Link to Memory", "Disorders?"]},
+        { id: "q5", angle: 145, dist: 42, w: 52, h: 14, txt: ["DMN/Attention", "Interplay?"]},
+        { id: "q6", angle: -145, dist: 42, w: 48, h: 14, txt: ["Reliable Lab", "Induction?"]}
+      ];
+      const emergingQuestionTemplates = [
+          {txt: ["Neurotransmitter", "Modulation?"], w: 50, h:14}, {txt: ["Evolutionary", "Purpose?"], w:45, h:14}, {txt: ["Subjective Qualia", "Variations?"], w:55, h:14}
+      ];
+      const centerPt = { x: 60, y: 50 };
+
+      function createQuestionNode(qData, isEmerging = false, animDelay = 0) {
+        const angleRad = (qData.angle * Math.PI) / 180;
+        const nodeX = centerPt.x + qData.dist * Math.cos(angleRad);
+        const nodeY = centerPt.y + qData.dist * Math.sin(angleRad);
+
+        const line = document.createElementNS(svgNSQ, "line");
+        line.classList.add("connection-line");
+        line.setAttribute("x1", centerPt.x); line.setAttribute("y1", centerPt.y);
+        line.setAttribute("x2", nodeX); line.setAttribute("y2", nodeY);
+        line.style.animationDelay = `${animDelay}s, ${animDelay + 1}s`;
+        qLinesGroup.appendChild(line);
+
+        const g = document.createElementNS(svgNSQ, "g");
+        g.classList.add("question-node-group");
+        if (isEmerging) g.classList.add("emerging-question-node");
+        g.setAttribute("transform", `translate(${nodeX - qData.w / 2}, ${nodeY - qData.h / 2})`);
+        g.setAttribute("tabindex", "0");
+        g.setAttribute("aria-label", qData.txt.join(' '));
+        if (isEmerging) {
+            g.style.opacity = "0.6"; // Dimmer emerging questions
+            g.style.animationDelay = `${animDelay + 0.5}s`;
+        }
+
+
+        const rect = document.createElementNS(svgNSQ, "rect");
+        rect.classList.add("question-node-rect");
+        rect.setAttribute("width", qData.w); rect.setAttribute("height", qData.h);
+        g.appendChild(rect);
+
+        const textEl = document.createElementNS(svgNSQ, "text");
+        textEl.classList.add("question-node-text");
+        textEl.setAttribute("x", qData.w / 2);
+        textEl.setAttribute("y", qData.h / 2);
+        qData.txt.forEach((lineText, idx) => {
+          const tspan = document.createElementNS(svgNSQ, "tspan");
+          tspan.setAttribute("x", qData.w / 2);
+          tspan.setAttribute("dy", idx === 0 && qData.txt.length > 1 ? "-0.38em" : (idx > 0 ? "1.15em" : "0"));
+          tspan.textContent = lineText;
+          textEl.appendChild(tspan);
+        });
+        g.appendChild(textEl);
+        qNodesGroup.appendChild(g);
+        
+        g.addEventListener('click', () => {
+            console.log("Question selected:", qData.txt.join(' '));
+            // Potentially expand or show more info here
+            line.style.strokeWidth = "2.5px";
+            line.style.opacity = "1";
+            setTimeout(() => { line.style.strokeWidth = ""; line.style.opacity = "";}, 500);
+        });
+      }
+
+      mainQuestions.forEach((q, index) => createQuestionNode(q, false, index * 0.15));
+
+      let emergingInterval;
+      function scheduleEmergingQuestion() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        emergingInterval = setInterval(() => {
+          const existingEmerging = qDiagramSvg.querySelectorAll('.emerging-question-node');
+          if (existingEmerging.length > 2) { // Limit number of emerging questions
+              if (existingEmerging[0].parentNode) existingEmerging[0].parentNode.removeChild(existingEmerging[0]); // remove whole group
+              // Also remove corresponding line
+              const lines = qLinesGroup.querySelectorAll('.connection-line');
+              if(lines.length > mainQuestions.length && lines[mainQuestions.length]) qLinesGroup.removeChild(lines[mainQuestions.length]);
+          }
+          
+          const template = emergingQuestionTemplates[Math.floor(Math.random() * emergingQuestionTemplates.length)];
+          const angle = Math.random() * 360;
+          const distance = 45 + Math.random() * 5; // Slightly further out
+          createQuestionNode({ ...template, angle: angle, dist: distance }, true, 0);
+        }, 5000 + Math.random() * 3000); // Every 5-8 seconds
+      }
+      
+      scheduleEmergingQuestion();
+      // Clear interval if page is hidden to save resources
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) { clearInterval(emergingInterval); } 
+        else { scheduleEmergingQuestion(); }
+      });
+    </script>
+  </body>
+</html>

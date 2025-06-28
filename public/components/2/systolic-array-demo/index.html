@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Interactive WebGL demonstration illustrating data flow and MAC operations in a 4x4 systolic array for matrix multiplication, with step-by-step controls."
+    />
+    <title>Systolic Array Demo (4x4 Matrix Multiply) - Enhanced</title>
+    <style>
+      :root {
+        --bg-color-light: #f0f4f8;
+        --text-color-light: #1a1a1a;
+        --surface-bg-light: rgba(250, 250, 253, 0.96); /* More opaque */
+        --border-color-light: rgba(0, 0, 0, 0.15); /* Darker border */
+        --glow-purple-light: rgba(130, 50, 195, 0.85);
+        --info-text-light: #333840;
+        --pe-idle-light: rgba(190, 200, 210, 0.75);
+        --pe-active-light: rgba(150, 166, 182, 0.9);
+        --packet-a-light: rgba(210, 80, 80, 0.95);
+        --packet-b-light: rgba(80, 80, 210, 0.95);
+        --overlay-bg-light: rgba(242, 244, 247, 0.94); /* More opaque */
+
+        --bg-color-dark: #0a0c10;
+        --text-color-dark: #f0f0f0; /* Brighter text */
+        --surface-bg-dark: rgba(20, 22, 28, 0.96); /* Darker surface */
+        --border-color-dark: rgba(255, 255, 255, 0.1); /* Lighter border */
+        --glow-purple-dark: rgba(220, 140, 255, 0.9);
+        --info-text-dark: #b8c0c8;
+        --pe-idle-dark: rgba(52, 60, 76, 0.8);
+        --pe-active-dark: rgba(92, 108, 132, 0.95);
+        --packet-a-dark: rgba(255, 110, 110, 0.98);
+        --packet-b-dark: rgba(110, 110, 255, 0.98);
+        --overlay-bg-dark: rgba(14, 16, 20, 0.94);
+
+        --bg-color: var(--bg-color-dark);
+        --text-color: var(--text-color-dark);
+        --surface-bg: var(--surface-bg-dark);
+        --border-color: var(--border-color-dark);
+        --glow-purple: var(--glow-purple-dark);
+        --info-text: var(--info-text-dark);
+        --pe-idle: var(--pe-idle-dark);
+        --pe-active: var(--pe-active-dark);
+        --packet-a: var(--packet-a-dark);
+        --packet-b: var(--packet-b-dark);
+        --overlay-bg: var(--overlay-bg-dark);
+      }
+      body.light-mode {
+        --bg-color: var(--bg-color-light);
+        --text-color: var(--text-color-light);
+        --surface-bg: var(--surface-bg-light);
+        --border-color: var(--border-color-light);
+        --glow-purple: var(--glow-purple-light);
+        --info-text: var(--info-text-light);
+        --pe-idle: var(--pe-idle-light);
+        --pe-active: var(--pe-active-light);
+        --packet-a: var(--packet-a-light);
+        --packet-b: var(--packet-b-light);
+        --overlay-bg: var(--overlay-bg-light);
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-size: 16px;
+      }
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Align to top */
+        align-items: center;
+      }
+      .demo-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background-color: var(--surface-bg);
+        padding: 0.4rem;
+      }
+      .demo-title {
+        font-size: clamp(0.8em, 2.2vw, 1em);
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+        color: var(--glow-purple);
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .canvas-container {
+        position: relative;
+        width: 100%;
+        flex-grow: 1;
+        min-height: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 0.15rem;
+      }
+      .webgl-demo-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: 1.1 / 1; /* Slightly wider to accommodate labels */
+        background-color: color-mix(in srgb, var(--bg-color) 88%, black 12%);
+        cursor: pointer;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .explanation-overlay {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        right: 6px;
+        background-color: var(--overlay-bg);
+        color: var(--text-color);
+        padding: 6px 9px;
+        border-radius: 6px;
+        font-size: clamp(0.55em, 1.6vw, 0.7em);
+        line-height: 1.3;
+        pointer-events: none;
+        z-index: 10;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+      }
+      .explanation-overlay.hidden {
+        opacity: 0;
+      }
+      .explanation-overlay h5 {
+        margin: 0 0 2px 0;
+        color: var(--glow-purple);
+        font-size: 1.05em;
+      }
+      .explanation-overlay p {
+        margin: 0 0 1px 0;
+        opacity: 0.9;
+      }
+      .explanation-overlay p:last-child {
+        margin-bottom: 0;
+      }
+
+      .info-and-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 0.05rem 0.2rem;
+        flex-shrink: 0;
+        font-size: clamp(0.65em, 1.9vw, 0.75em);
+      }
+      .info-panel {
+        color: var(--info-text);
+        text-align: left;
+      }
+      .info-panel span {
+        font-weight: 500;
+        opacity: 0.9;
+      }
+      .info-panel em {
+        font-style: normal;
+        color: var(--glow-purple);
+        font-weight: bold;
+      }
+      .controls-area {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .control-button {
+        background-color: var(--pe-idle);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background-color 0.2s, transform 0.1s;
+      }
+      .control-button:hover {
+        background-color: var(--pe-active);
+        transform: translateY(-1px);
+      }
+      .control-button:active {
+        transform: translateY(0px);
+      }
+
+      .legend {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 5px 8px;
+        font-size: clamp(0.6em, 1.7vw, 0.7em);
+        margin: 0.1rem 0;
+        opacity: 0.95;
+        width: 100%;
+        flex-shrink: 0;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+      }
+      .legend .color-box {
+        width: 9px;
+        height: 9px;
+        border-radius: 2px;
+        border: 1px solid var(--border-color);
+      }
+      .packet-a-color {
+        background-color: var(--packet-a);
+      }
+      .packet-b-color {
+        background-color: var(--packet-b);
+      }
+      .pe-active-color {
+        background-color: var(--pe-active);
+      }
+      .pe-idle-color {
+        background-color: var(--pe-idle);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo-wrapper">
+      <div class="demo-title">Systolic Array Demo (4x4 Matrix Multiply)</div>
+      <div class="canvas-container">
+        <canvas class="webgl-demo-canvas" id="systolicArrayDemoCanvas"></canvas>
+        <div class="explanation-overlay" id="explanationOverlay">
+          <h5>Systolic Array: Matrix A x Matrix B</h5>
+          <p>
+            PEs (Processing Elements) perform Multiply-Accumulate (MAC). Data
+            flows rhythmically.
+          </p>
+          <p>
+            Red (Matrix A) from left, Blue (Matrix B) from top, skewed. PEs
+            activate on data arrival.
+          </p>
+        </div>
+      </div>
+      <div class="legend">
+        <span><span class="color-box packet-a-color"></span>Matrix A</span>
+        <span><span class="color-box packet-b-color"></span>Matrix B</span>
+        <span><span class="color-box pe-active-color"></span>Active PE</span>
+        <span><span class="color-box pe-idle-color"></span>Idle PE</span>
+      </div>
+      <div class="info-and-controls">
+        <div class="info-panel">
+          <span
+            >Step: <em id="current-step">0</em>/<em id="total-steps"
+              >0</em
+            ></span
+          >
+          <span style="margin-left: 8px"
+            >MAC Ops: <em id="accum-values">0</em></span
+          >
+        </div>
+        <div class="controls-area">
+          <button
+            class="control-button"
+            id="reset-button"
+            title="Reset Simulation"
+          >
+            Reset
+          </button>
+          <button
+            class="control-button"
+            id="step-button"
+            title="Advance One Step"
+          >
+            Step
+          </button>
+          <button
+            class="control-button"
+            id="play-pause-button"
+            title="Play/Pause Simulation"
+          >
+            Play
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const mat4 = {
+        create: () => new Float32Array(16),
+        ortho: (o, l, r, b, t, n, f) => {
+          const L = 1 / (l - r),
+            B = 1 / (b - t),
+            N = 1 / (n - f);
+          o[0] = -2 * L;
+          o[1] = 0;
+          o[2] = 0;
+          o[3] = 0;
+          o[4] = 0;
+          o[5] = -2 * B;
+          o[6] = 0;
+          o[7] = 0;
+          o[8] = 0;
+          o[9] = 0;
+          o[10] = 2 * N;
+          o[11] = 0;
+          o[12] = (l + r) * L;
+          o[13] = (t + b) * B;
+          o[14] = (f + n) * N;
+          o[15] = 1;
+          return o;
+        },
+      };
+      const lerp = (a, b, t) => a + (b - a) * Math.min(1, Math.max(0, t));
+
+      function createSimpleShaderProgram(gl, vsSrc, fsSrc) {
+        const v = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(v, vsSrc);
+        gl.compileShader(v);
+        if (!gl.getShaderParameter(v, gl.COMPILE_STATUS)) {
+          console.error("VS Err:", gl.getShaderInfoLog(v));
+          gl.deleteShader(v);
+          return null;
+        }
+        const f = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(f, fsSrc);
+        gl.compileShader(f);
+        if (!gl.getShaderParameter(f, gl.COMPILE_STATUS)) {
+          console.error("FS Err:", gl.getShaderInfoLog(f));
+          gl.deleteShader(f);
+          gl.deleteShader(v);
+          return null;
+        }
+        const p = gl.createProgram();
+        gl.attachShader(p, v);
+        gl.attachShader(p, f);
+        gl.linkProgram(p);
+        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+          console.error("Prog Link Err:", gl.getProgramInfoLog(p));
+          gl.deleteProgram(p);
+          gl.deleteShader(v);
+          gl.deleteShader(f);
+          return null;
+        }
+        gl.deleteShader(v);
+        gl.deleteShader(f);
+        return p;
+      }
+      function getCssColorRGB(varName) {
+        const cs = getComputedStyle(document.documentElement)
+          .getPropertyValue(varName)
+          .trim();
+        if (cs.startsWith("rgba")) {
+          const p = cs.match(/[\d.]+/g);
+          return p ? p.slice(0, 3).map((c) => parseFloat(c) / 255) : [0, 0, 0];
+        }
+        if (cs.startsWith("#")) {
+          let h = cs.substring(1);
+          if (h.length === 3)
+            h = h
+              .split("")
+              .map((c) => c + c)
+              .join("");
+          if (h.length === 6) {
+            const b = parseInt(h, 16);
+            return [
+              ((b >> 16) & 255) / 255,
+              ((b >> 8) & 255) / 255,
+              (b & 255) / 255,
+            ];
+          }
+        }
+        return [0, 0, 0];
+      }
+
+      function initSystolicArrayDemo(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const gl = canvas.getContext("webgl", {
+          antialias: true,
+          stencil: false,
+          depth: false,
+          powerPreference: "low-power",
+        });
+        if (!gl) {
+          console.error("WebGL not supported.");
+          return null;
+        }
+        const vsSource = `attribute vec2 a_pos;attribute vec3 a_clr;attribute float a_sz;attribute float a_val;uniform mat4 u_projMat;varying vec3 v_clr;varying float v_val;varying float v_active_pulse;attribute float a_active_step;uniform float u_current_step_float;
+          void main(){gl_Position=u_projMat*vec4(a_pos,0.,1.);gl_PointSize=a_sz;v_clr=a_clr;v_val=a_val;v_active_pulse=smoothstep(0.0,0.5,max(0.0,1.0-abs(u_current_step_float-a_active_step)));}`;
+        const fsSource = `precision mediump float;varying vec3 v_clr;varying float v_val;varying float v_active_pulse;
+          void main(){float distSqr=dot(gl_PointCoord-.5,gl_PointCoord-.5);if(distSqr>.25)discard;vec3 baseClr=v_clr;float glowAmount=v_active_pulse*0.5;gl_FragColor=vec4(baseClr+baseClr*glowAmount, .98);}`;
+        const program = createSimpleShaderProgram(gl, vsSource, fsSource);
+        if (!program) return;
+        const locs = {
+          pos: gl.getAttribLocation(program, "a_pos"),
+          clr: gl.getAttribLocation(program, "a_clr"),
+          sz: gl.getAttribLocation(program, "a_sz"),
+          val: gl.getAttribLocation(program, "a_val"),
+          activeStep: gl.getAttribLocation(program, "a_active_step"),
+          projMat: gl.getUniformLocation(program, "u_projMat"),
+          curStepF: gl.getUniformLocation(program, "u_current_step_float"),
+        };
+
+        const GRID_SIZE = 4;
+        const WORLD_EXTENT = 0.85;
+        const CELL_WORLD_SIZE = (WORLD_EXTENT * 2) / GRID_SIZE;
+        let peBaseSize, packetSize;
+        const pePos = new Float32Array(GRID_SIZE * GRID_SIZE * 2);
+        const peData = [];
+        const dataPackets = [];
+        let packetAColor, packetBColor, peIdleColor, peActiveColor;
+
+        function updateDynamicSizesAndColors() {
+          const minCanvasDim = Math.min(gl.canvas.width, gl.canvas.height);
+          peBaseSize = (minCanvasDim / (GRID_SIZE + 2)) * 0.65;
+          packetSize = peBaseSize * 0.6;
+          packetAColor = getCssColorRGB("--packet-a");
+          packetBColor = getCssColorRGB("--packet-b");
+          peIdleColor = getCssColorRGB("--pe-idle");
+          peActiveColor = getCssColorRGB("--pe-active");
+        }
+        for (let r = 0, k = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++, k++) {
+            pePos[k * 2] = (c - (GRID_SIZE - 1) / 2) * CELL_WORLD_SIZE;
+            pePos[k * 2 + 1] =
+              (GRID_SIZE - 1 - r - (GRID_SIZE - 1) / 2) * CELL_WORLD_SIZE;
+            peData.push({ acc: 0, activeStep: -1, valA: null, valB: null });
+          }
+        }
+        const bufs = {
+          pePos: gl.createBuffer(),
+          peClr: gl.createBuffer(),
+          peSz: gl.createBuffer(),
+          peVal: gl.createBuffer(),
+          peActiveStep: gl.createBuffer(),
+          pktPos: gl.createBuffer(),
+          pktClr: gl.createBuffer(),
+          pktSz: gl.createBuffer(),
+          pktVal: gl.createBuffer(),
+          pktActiveStep: gl.createBuffer(),
+        };
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pePos);
+        gl.bufferData(gl.ARRAY_BUFFER, pePos, gl.STATIC_DRAW);
+
+        let step = 0;
+        const TOTAL_STEPS =
+          GRID_SIZE * 2 - 1 + (GRID_SIZE - 1) + (GRID_SIZE - 1);
+        let matrixA,
+          matrixB,
+          macOps = 0;
+        const ui = {
+          curStep: document.getElementById("current-step"),
+          totalSteps: document.getElementById("total-steps"),
+          macOps: document.getElementById("accum-values"),
+          explOverlay: document.getElementById("explanationOverlay"),
+          resetBtn: document.getElementById("reset-button"),
+          stepBtn: document.getElementById("step-button"),
+          playPauseBtn: document.getElementById("play-pause-button"),
+        };
+        let animFrameId = null;
+        let isPlaying = false;
+        let lastStepTime = 0;
+        const stepInterval = 700;
+
+        function resetSim() {
+          step = 0;
+          macOps = 0;
+          isPlaying = false;
+          ui.playPauseBtn.textContent = "Play";
+          if (animFrameId) cancelAnimationFrame(animFrameId);
+          animFrameId = null;
+          matrixA = Array.from({ length: GRID_SIZE }, () =>
+            Array.from(
+              { length: GRID_SIZE },
+              () => Math.floor(Math.random() * 3) + 1
+            )
+          );
+          matrixB = Array.from({ length: GRID_SIZE }, () =>
+            Array.from(
+              { length: GRID_SIZE },
+              () => Math.floor(Math.random() * 3) + 1
+            )
+          );
+          peData.forEach((p) => {
+            p.acc = 0;
+            p.activeStep = -1;
+            p.valA = null;
+            p.valB = null;
+          });
+          dataPackets.length = 0;
+          updateInfo();
+          ui.explOverlay.classList.remove("hidden");
+          requestAnimationFrame(render);
+        }
+
+        function advance() {
+          if (step === 0) ui.explOverlay.classList.add("hidden");
+          peData.forEach((p) => (p.activeStep = -1));
+          for (let i = dataPackets.length - 1; i >= 0; i--) {
+            const p = dataPackets[i];
+            p.prog += 1;
+            const tX = (p.tCol - (GRID_SIZE - 1) / 2) * CELL_WORLD_SIZE;
+            const tY =
+              (GRID_SIZE - 1 - p.tRow - (GRID_SIZE - 1) / 2) * CELL_WORLD_SIZE;
+            p.x = lerp(p.sX, tX, p.prog);
+            p.y = lerp(p.sY, tY, p.prog);
+            if (p.prog >= 1) {
+              const peIdx = p.tRow * GRID_SIZE + p.tCol;
+              if (peData[peIdx]) {
+                if (p.isA) peData[peIdx].valA = p.val;
+                if (p.isB) peData[peIdx].valB = p.val;
+                if (
+                  peData[peIdx].valA !== null &&
+                  peData[peIdx].valB !== null
+                ) {
+                  peData[peIdx].acc += peData[peIdx].valA * peData[peIdx].valB;
+                  peData[peIdx].activeStep = step;
+                  macOps++;
+                  peData[peIdx].valA = null;
+                  peData[peIdx].valB = null;
+                }
+                if (p.isA && p.tCol < GRID_SIZE - 1)
+                  dataPackets.push({
+                    sX: tX,
+                    sY: tY,
+                    x: tX,
+                    y: tY,
+                    val: p.val,
+                    isA: true,
+                    clr: packetAColor,
+                    prog: 0,
+                    tRow: p.tRow,
+                    tCol: p.tCol + 1,
+                    activeStep: -1,
+                  });
+                if (p.isB && p.tRow < GRID_SIZE - 1)
+                  dataPackets.push({
+                    sX: tX,
+                    sY: tY,
+                    x: tX,
+                    y: tY,
+                    val: p.val,
+                    isB: true,
+                    clr: packetBColor,
+                    prog: 0,
+                    tRow: p.tRow + 1,
+                    tCol: p.tCol,
+                    activeStep: -1,
+                  });
+              }
+              dataPackets.splice(i, 1);
+            }
+          }
+          for (let r = 0; r < GRID_SIZE; r++) {
+            const mci = step - r;
+            if (mci >= 0 && mci < GRID_SIZE) {
+              const vA = matrixA[r][mci];
+              const sX = (-(GRID_SIZE - 1) / 2 - 0.7) * CELL_WORLD_SIZE;
+              const sY =
+                (GRID_SIZE - 1 - r - (GRID_SIZE - 1) / 2) * CELL_WORLD_SIZE;
+              dataPackets.push({
+                sX: sX,
+                sY: sY,
+                x: sX,
+                y: sY,
+                val: vA,
+                isA: true,
+                clr: packetAColor,
+                prog: 0,
+                tRow: r,
+                tCol: 0,
+                activeStep: -1,
+              });
+            }
+          }
+          for (let c = 0; c < GRID_SIZE; c++) {
+            const mri = step - c;
+            if (mri >= 0 && mri < GRID_SIZE) {
+              const vB = matrixB[mri][c];
+              const sX = (c - (GRID_SIZE - 1) / 2) * CELL_WORLD_SIZE;
+              const sY =
+                (GRID_SIZE - 1 - -1 - (GRID_SIZE - 1) / 2) * CELL_WORLD_SIZE;
+              dataPackets.push({
+                sX: sX,
+                sY: sY,
+                x: sX,
+                y: sY,
+                val: vB,
+                isB: true,
+                clr: packetBColor,
+                prog: 0,
+                tRow: 0,
+                tCol: c,
+                activeStep: -1,
+              });
+            }
+          }
+          step++;
+          if (step >= TOTAL_STEPS) resetSim();
+          updateInfo();
+        }
+        function updateInfo() {
+          ui.curStep.textContent = step;
+          ui.totalSteps.textContent = TOTAL_STEPS;
+          ui.macOps.textContent = macOps;
+        }
+
+        function gameLoop(timestamp) {
+          if (isPlaying && timestamp - lastStepTime > stepInterval) {
+            advance();
+            lastStepTime = timestamp;
+          }
+          render();
+          animFrameId = requestAnimationFrame(gameLoop);
+        }
+        ui.resetBtn.addEventListener("click", resetSim);
+        ui.stepBtn.addEventListener("click", () => {
+          if (isPlaying) {
+            isPlaying = false;
+            ui.playPauseBtn.textContent = "Play";
+          }
+          advance();
+          if (!animFrameId) requestAnimationFrame(render);
+        });
+        ui.playPauseBtn.addEventListener("click", () => {
+          isPlaying = !isPlaying;
+          ui.playPauseBtn.textContent = isPlaying ? "Pause" : "Play";
+          if (isPlaying) {
+            lastStepTime = performance.now();
+            if (!animFrameId) animFrameId = requestAnimationFrame(gameLoop);
+          }
+        });
+        canvas.addEventListener("click", () => {
+          if (!isPlaying) {
+            ui.stepBtn.click();
+          }
+        });
+
+        function render() {
+          if (
+            canvas.width !== canvas.clientWidth ||
+            canvas.height !== canvas.clientHeight
+          ) {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+          }
+          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+          updateDynamicSizesAndColors();
+          gl.clearColor(0.015, 0.02, 0.028, 1);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.enable(gl.BLEND);
+          gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+          gl.useProgram(program);
+          const projMat = mat4.create();
+          const aspect = gl.drawingBufferWidth / gl.drawingBufferHeight;
+          const worldHView = WORLD_EXTENT * 1.1;
+          if (aspect > 1)
+            mat4.ortho(
+              projMat,
+              -worldHView * aspect,
+              worldHView * aspect,
+              -worldHView,
+              worldHView,
+              -1,
+              1
+            );
+          else
+            mat4.ortho(
+              projMat,
+              -worldHView,
+              worldHView,
+              -worldHView / aspect,
+              worldHView / aspect,
+              -1,
+              1
+            );
+          gl.uniformMatrix4fv(locs.projMat, false, projMat);
+          gl.uniform1f(locs.curStepF, step - 1);
+
+          const peClrs = new Float32Array(GRID_SIZE * GRID_SIZE * 3);
+          const peSzs = new Float32Array(GRID_SIZE * GRID_SIZE).fill(
+            peBaseSize
+          );
+          const peVals = new Float32Array(GRID_SIZE * GRID_SIZE);
+          const peActiveSteps = new Float32Array(GRID_SIZE * GRID_SIZE);
+          peData.forEach((p, i) => {
+            const clr = p.activeStep === step - 1 ? peActiveColor : peIdleColor;
+            peClrs.set(clr, i * 3);
+            peVals[i] = p.acc;
+            peActiveSteps[i] = p.activeStep;
+          });
+
+          const bindAndDraw = (
+            count,
+            posBuf,
+            dataPos,
+            clrBuf,
+            dataClr,
+            szBuf,
+            dataSz,
+            valBuf,
+            dataVal,
+            activeStepBuf,
+            dataActiveStep
+          ) => {
+            gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+            if (dataPos)
+              gl.bufferData(gl.ARRAY_BUFFER, dataPos, gl.DYNAMIC_DRAW);
+            gl.vertexAttribPointer(locs.pos, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(locs.pos);
+            gl.bindBuffer(gl.ARRAY_BUFFER, clrBuf);
+            gl.bufferData(gl.ARRAY_BUFFER, dataClr, gl.DYNAMIC_DRAW);
+            gl.vertexAttribPointer(locs.clr, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(locs.clr);
+            gl.bindBuffer(gl.ARRAY_BUFFER, szBuf);
+            gl.bufferData(gl.ARRAY_BUFFER, dataSz, gl.STATIC_DRAW);
+            gl.vertexAttribPointer(locs.sz, 1, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(locs.sz);
+            gl.bindBuffer(gl.ARRAY_BUFFER, valBuf);
+            gl.bufferData(gl.ARRAY_BUFFER, dataVal, gl.DYNAMIC_DRAW);
+            gl.vertexAttribPointer(locs.val, 1, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(locs.val);
+            gl.bindBuffer(gl.ARRAY_BUFFER, activeStepBuf);
+            gl.bufferData(gl.ARRAY_BUFFER, dataActiveStep, gl.DYNAMIC_DRAW);
+            gl.vertexAttribPointer(locs.activeStep, 1, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(locs.activeStep);
+            gl.drawArrays(gl.POINTS, 0, count);
+          };
+          bindAndDraw(
+            GRID_SIZE * GRID_SIZE,
+            bufs.pePos,
+            null,
+            bufs.peClr,
+            peClrs,
+            bufs.peSz,
+            peSzs,
+            bufs.peVal,
+            peVals,
+            bufs.peActiveStep,
+            peActiveSteps
+          );
+
+          if (dataPackets.length > 0) {
+            const pktPosD = new Float32Array(dataPackets.length * 2);
+            const pktClrsD = new Float32Array(dataPackets.length * 3);
+            const pktSzsD = new Float32Array(dataPackets.length).fill(
+              packetSize
+            );
+            const pktValsD = new Float32Array(dataPackets.length);
+            const pktActiveStepsD = new Float32Array(dataPackets.length).fill(
+              -1
+            );
+            dataPackets.forEach((p, i) => {
+              pktPosD.set([p.x, p.y], i * 2);
+              pktClrsD.set(p.clr, i * 3);
+              pktValsD[i] = p.val;
+            });
+            bindAndDraw(
+              dataPackets.length,
+              bufs.pktPos,
+              pktPosD,
+              bufs.pktClr,
+              pktClrsD,
+              bufs.pktSz,
+              pktSzsD,
+              bufs.pktVal,
+              pktValsD,
+              bufs.pktActiveStep,
+              pktActiveStepsD
+            );
+          }
+          // if(!isPlaying) animFrameId=null; // Only render on demand if paused
+        }
+        resetSim();
+      }
+      if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+      ) {
+        initSystolicArrayDemo("systolicArrayDemoCanvas");
+      } else {
+        document.addEventListener("DOMContentLoaded", () =>
+          initSystolicArrayDemo("systolicArrayDemoCanvas")
+        );
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </body>
+</html>

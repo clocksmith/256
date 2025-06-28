@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLM Improvised Dialogue - Enhanced II</title>
+    <style>
+      :root {
+        --bg-color: #111;
+        --text-color: #eee;
+        --border-color: #444;
+        --llm-box-bg: #1e1e1e;
+        --input-color: #00cfff; /* Brighter Blue */
+        --output-correct-color: #40ff70; /* Bright Green */
+        --output-hallucination-color: #ff3060; /* Vivid Red-Pink */
+        --output-overgeneralize-color: #ffa500; /* Orange */
+        --glow-color: rgba(0, 207, 255, 0.7);
+        --glitch-effect-color: #f0f; /* Magenta */
+      }
+      body.light-mode {
+        --bg-color: #fafafa;
+        --text-color: #111;
+        --border-color: #ddd;
+        --llm-box-bg: #f0f0f0;
+        --input-color: #008bcc;
+        --output-correct-color: #30c060;
+        --output-hallucination-color: #ee2050;
+        --output-overgeneralize-color: #e69500;
+        --glow-color: rgba(0, 139, 204, 0.6);
+        --glitch-effect-color: #cc00cc;
+      }
+
+      html, body { box-sizing: border-box; height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: "Verdana", sans-serif; }
+      *, *::before, *::after { box-sizing: inherit; }
+
+      .visualization-container {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: clamp(0.8rem, 2.5vh, 1.2rem); padding: clamp(1rem, 4vh, 2rem);
+        border: 1px solid var(--border-color);
+        position: relative; width: 100%; height: 100%;
+        background: radial-gradient( ellipse at 50% 20%,
+          color-mix(in srgb, var(--llm-box-bg) 40%, transparent) 0%, var(--bg-color) 75% );
+      }
+      .llm-representation-wrapper { position: relative; cursor: pointer; }
+      .llm-representation-wrapper:hover .llm-core { transform: scale(1.1); box-shadow: 0 0 25px var(--glow-color); }
+      .llm-core {
+        width: clamp(70px, 18vh, 100px); height: clamp(70px, 18vh, 100px);
+        border-radius: 50%;
+        background: conic-gradient( from 0deg at 50% 50%,
+          var(--input-color) 0deg 90deg, var(--output-correct-color) 90deg 180deg,
+          var(--output-hallucination-color) 180deg 270deg, var(--output-overgeneralize-color) 270deg 360deg );
+        animation: llm-idle-spin 15s linear infinite, llm-gentle-pulse 2.5s ease-in-out infinite alternate;
+        display: flex; justify-content: center; align-items: center;
+        font-size: clamp(1.5rem, 5vh, 2.5rem); color: var(--text-color);
+        text-shadow: 0 0 7px var(--bg-color);
+        box-shadow: 0 0 20px var(--glow-color), inset 0 0 15px rgba(0,0,0,0.4);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .llm-core.processing { animation: llm-processing-effect 0.5s ease-in-out infinite alternate; }
+      .llm-activity-ring {
+        position: absolute; top: 50%; left: 50%;
+        width: 120%; height: 120%; border-radius: 50%;
+        border: 3px solid transparent;
+        transform: translate(-50%, -50%) scale(0.8); opacity: 0;
+      }
+      .llm-representation-wrapper:hover .llm-activity-ring { animation: ring-pulse-out 1.5s ease-out infinite; }
+
+      .dialogue-area {
+        display: flex; flex-direction: column; align-items: center;
+        width: 100%; max-width: 400px; gap: clamp(0.5rem, 1.5vh, 0.8rem);
+      }
+      .text-bubble {
+        padding: clamp(0.6rem, 1.8vh, 0.8rem) clamp(0.9rem, 3vw, 1.2rem);
+        border-radius: 22px; border: 2.5px solid;
+        font-weight: 500; font-size: clamp(0.7em, 1.8vh, 0.9em);
+        box-shadow: 4px 4px 12px rgba(0,0,0,0.3); position: relative;
+        width: fit-content; max-width: 95%; opacity: 0; /* Start hidden */
+        transform: scale(0.5) translateY(15px);
+        animation: text-bubble-enter 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        cursor: help;
+      }
+      .text-bubble:hover { filter: brightness(1.1); transform: scale(1.03) translateY(0px) !important; }
+
+      .input-bubble {
+        border-color: var(--input-color);
+        background-color: color-mix(in srgb, var(--input-color) 12%, var(--llm-box-bg));
+        color: var(--input-color); align-self: flex-start;
+      }
+      .output-bubble { align-self: flex-end; }
+      .output-correct {
+        border-color: var(--output-correct-color);
+        background-color: color-mix(in srgb, var(--output-correct-color) 12%, var(--llm-box-bg));
+        color: var(--output-correct-color);
+      }
+      .output-hallucination {
+        border-color: var(--output-hallucination-color);
+        background-color: color-mix(in srgb, var(--output-hallucination-color) 12%, var(--llm-box-bg));
+        color: var(--output-hallucination-color);
+      }
+      .hallucination-content.glitching { animation: text-content-glitch 0.1s steps(2, jump-none) infinite alternate; }
+      .output-overgeneralize {
+        border-color: var(--output-overgeneralize-color);
+        background-color: color-mix(in srgb, var(--output-overgeneralize-color) 12%, var(--llm-box-bg));
+        color: var(--output-overgeneralize-color);
+      }
+      .text-bubble::before { /* Tail */
+        content: ""; position: absolute; bottom: -7px; width: 0; height: 0;
+        border-left: 10px solid transparent; border-right: 10px solid transparent;
+        border-top: 14px solid;
+      }
+      .input-bubble::before { left: 30px; border-top-color: var(--input-color); }
+      .output-bubble::before { right: 30px; }
+      .output-correct::before { border-top-color: var(--output-correct-color); }
+      .output-hallucination::before { border-top-color: var(--output-hallucination-color); }
+      .output-overgeneralize::before { border-top-color: var(--output-overgeneralize-color); }
+
+      @keyframes llm-idle-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes llm-gentle-pulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.1); } }
+      @keyframes llm-processing-effect {
+        0% { transform: scale(1) rotate(0deg); filter: saturate(1) brightness(1); }
+        50% { transform: scale(1.08) rotate(5deg); filter: saturate(1.5) brightness(1.2); }
+        100% { transform: scale(1) rotate(-5deg); filter: saturate(1) brightness(1); }
+      }
+      @keyframes ring-pulse-out {
+        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; border-color: var(--input-color); }
+        50% { opacity: 0.7; border-color: var(--output-correct-color); }
+        100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; border-color: var(--output-hallucination-color); }
+      }
+      @keyframes text-bubble-enter { to { opacity: 1; transform: scale(1) translateY(0px); } }
+      @keyframes text-content-glitch {
+        0% { color: var(--output-hallucination-color); text-shadow: 0 0 0 transparent; }
+        100% { color: var(--glitch-effect-color); text-shadow: -1px -1px 0 var(--input-color), 1px 1px 0 var(--output-correct-color); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .llm-core, .llm-activity-ring, .text-bubble, .hallucination-content.glitching { animation: none !important; }
+        .text-bubble { opacity: 1; transform: scale(1) translateY(0px); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="visualization-container" role="img" aria-label="Interactive animation: A spinning, pulsing 'LLM core' icon can be clicked to simulate processing. Dialogue bubbles appear sequentially: an input prompt, then cycling through correct, hallucinated (with glitching text), and overgeneralized outputs. Hovering elements provides visual feedback.">
+      <div class="llm-representation-wrapper" id="llmWrapper">
+        <div class="llm-core" id="llmCore">✨</div>
+        <div class="llm-activity-ring"></div>
+      </div>
+      <div class="dialogue-area" id="dialogueArea">
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") document.body.classList.add("light-mode");
+
+      const llmCore = document.getElementById('llmCore');
+      const llmWrapper = document.getElementById('llmWrapper');
+      const dialogueArea = document.getElementById('dialogueArea');
+      let dialogueCycle = 0;
+      const dialogues = [
+        { type: 'input', text: 'Prompt: "Describe this novel sensory input."' },
+        { type: 'correct', text: 'Output: "Processing... A unique configuration of stimuli, previously unrecorded."' },
+        { type: 'hallucination', text: 'Output: "This is clearly the apple pie aroma from grandma\'s kitchen last Sunday!" (Factual error)', isGlitched: true },
+        { type: 'overgeneralize', text: 'Output: "Seems like a standard Tuesday afternoon experience, nothing special." (Overly typical)' }
+      ];
+      const glitchChars = ['!', '@', '#', '$', '%', '^', '&', '*', '¿', '§'];
+
+      function displayDialogue(index) {
+        dialogueArea.innerHTML = ''; // Clear previous
+        const bubbleData = dialogues[index];
+        const bubble = document.createElement('div');
+        bubble.classList.add('text-bubble', `${bubbleData.type}-bubble`);
+        
+        if (bubbleData.isGlitched) {
+            const span = document.createElement('span');
+            span.className = 'hallucination-content';
+            span.textContent = bubbleData.text;
+            bubble.appendChild(span);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                setTimeout(() => span.classList.add('glitching'), 100); // Add glitch after appear
+            }
+        } else {
+            bubble.textContent = bubbleData.text;
+        }
+        
+        bubble.style.animationDelay = `0s`; // Appear immediately
+        dialogueArea.appendChild(bubble);
+        
+        bubble.addEventListener('mouseover', () => {
+          if(bubbleData.isGlitched) bubble.querySelector('.hallucination-content').classList.add('glitching');
+        });
+        bubble.addEventListener('mouseout', () => {
+          if(bubbleData.isGlitched) bubble.querySelector('.hallucination-content').classList.remove('glitching');
+        });
+      }
+
+      function startProcessingSequence() {
+        if (llmCore.classList.contains('processing')) return; // Prevent re-trigger
+
+        llmCore.classList.add('processing');
+        llmCore.textContent = '⚙️'; // Processing icon
+
+        let currentStep = 0;
+        displayDialogue(currentStep); // Show input first
+
+        const intervalId = setInterval(() => {
+          currentStep++;
+          if (currentStep < dialogues.length) {
+            displayDialogue(currentStep);
+          } else {
+            clearInterval(intervalId);
+            llmCore.classList.remove('processing');
+            llmCore.textContent = '✨'; // Reset icon
+            dialogueCycle = 0; // Reset for next click
+          }
+        }, 2000); // Time between bubbles
+      }
+      
+      llmWrapper.addEventListener('click', startProcessingSequence);
+      displayDialogue(0); // Show initial input prompt
+    </script>
+  </body>
+</html>

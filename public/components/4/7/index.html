@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shelter from the Storm: Strategies for a Focused AI Mind</title>
+    <!-- CONFIRMATION: No external JS libraries for the visualization are used. -->
+    <style>
+        :root {
+            --bg: #1e293b;
+            --text-color: #cbd5e1;
+            --card-bg: #334155;
+            --card-border: #475569;
+            --accent-color: #38bdf8;
+            --title-color: #f8fafc;
+        }
+        body.light-mode {
+            --bg: #f1f5f9;
+            --text-color: #334155;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --accent-color: #0284c7;
+            --title-color: #0f172a;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        #toolkit-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .strategy-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .strategy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .card-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-size: 1.25em;
+            font-weight: bold;
+            color: var(--title-color);
+        }
+        .card-analogy {
+            font-style: italic;
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        .card-visualization {
+            flex-grow: 1;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            padding: 10px;
+            background: var(--bg);
+        }
+        .card-explanation {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        /* Visualizations */
+        .viz-dots { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-color); opacity: 0.3; transition: all 0.3s; }
+        .strategy-card.active .dot.relevant { background: var(--accent-color); opacity: 1; transform: scale(1.5); }
+
+        .viz-line { width: 100%; height: 2px; background: var(--text-color); position: relative; }
+        .viz-line::after { content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-color); top: -4px; left: 0; animation: slide 3s linear infinite; }
+        @keyframes slide { from{left:0%} to{left:calc(100% - 10px)}}
+        .strategy-card.active .viz-line::after { animation-duration: 1s; }
+    </style>
+</head>
+<body>
+    <div id="toolkit-container"></div>
+    <script>
+        const theme = new URLSearchParams(window.location.search).get('theme') || 'dark';
+        document.body.classList.add(theme === 'light' ? 'light-mode' : 'dark-mode');
+
+        const container = document.getElementById('toolkit-container');
+        const strategies = [
+            {
+                title: 'Selective Filtering',
+                analogy: 'Like using noise-canceling headphones in a loud room.',
+                explanation: 'Sparse Attention mechanisms reduce cognitive load by forcing the model to only focus on a small, relevant subset of all available information (tokens).',
+                vizType: 'dots'
+            },
+            {
+                title: 'Hyper-Efficient Processing',
+                analogy: 'Like having a perfectly organized mental workspace.',
+                explanation: 'Hardware-aware methods like FlashAttention optimize the raw speed of the attention calculation, reducing memory I/O without changing the logic.',
+                vizType: 'line'
+            },
+            {
+                title: 'Building on Past Insights',
+                analogy: "Like keeping a journal instead of starting from scratch every day.",
+                explanation: 'Recurrence-based approaches (e.g., Transformer-XL) reuse previous calculations, building a chain of memory rather than re-evaluating everything.',
+                 vizType: 'dots'
+            },
+            {
+                title: 'Chunking & Prioritizing',
+                analogy: 'Like using a highlighter on the most important instructions.',
+                explanation: 'Techniques like RAG or Prompt Anchoring pre-filter context or force the model to consistently refer back to the most critical information.',
+                vizType: 'line'
+            }
+        ];
+
+        strategies.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'strategy-card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title">${s.title}</div>
+                    <div class="card-analogy">${s.analogy}</div>
+                </div>
+                <div class="card-visualization" id="viz-${s.title.replace(' ', '')}"></div>
+                <div class="card-explanation">${s.explanation}</div>
+            `;
+            container.appendChild(card);
+            
+            const vizContainer = document.getElementById(`viz-${s.title.replace(' ', '')}`);
+            if (s.vizType === 'dots') {
+                const viz = document.createElement('div');
+                viz.className = 'viz-dots';
+                for(let i=0; i<50; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    if (Math.random() < 0.2) dot.classList.add('relevant');
+                    viz.appendChild(dot);
+                }
+                vizContainer.appendChild(viz);
+            } else {
+                 const viz = document.createElement('div');
+                 viz.className = 'viz-line';
+                 vizContainer.appendChild(viz);
+            }
+
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

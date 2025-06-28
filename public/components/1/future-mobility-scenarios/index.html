@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conceptual: Future Mobility Scenarios</title>
+    <style>
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --scenario1-color: #4caf50; /* Green: Shared AV Utopia */
+        --scenario2-color: #2196f3; /* Blue: Personal AV Dominance */
+        --scenario3-color: #ffc107; /* Yellow: Fragmented Hybrid */
+        --icon-color: #f0f0f0;
+        --flow-line-color: #666;
+      }
+      body.light-mode {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --scenario1-color: #81c784;
+        --scenario2-color: #64b5f6;
+        --scenario3-color: #ffd54f;
+        --icon-color: #333;
+        --flow-line-color: #aaa;
+      }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        margin: 0;
+        padding: 1rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        min-height: 100vh;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+      }
+      .scenario-card {
+        background-color: var(--bg-color-secondary, #252525);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        width: 100%;
+        max-width: 320px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      }
+      body.light-mode .scenario-card {
+        background-color: #fff;
+      }
+      .scenario-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      .scenario-card h3 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .scenario-icon-area {
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 2rem; /* Icon size */
+      }
+      .scenario-description {
+        font-size: 0.8rem;
+        line-height: 1.4;
+        color: var(--text-color-low-emphasis, #ccc);
+      }
+      body.light-mode .scenario-description {
+        color: #555;
+      }
+
+      /* Scenario specific colors */
+      .scenario1 h3 {
+        color: var(--scenario1-color);
+      }
+      .scenario2 h3 {
+        color: var(--scenario2-color);
+      }
+      .scenario3 h3 {
+        color: var(--scenario3-color);
+      }
+
+      .scenario1 .scenario-icon-area {
+        color: var(--scenario1-color);
+      }
+      .scenario2 .scenario-icon-area {
+        color: var(--scenario2-color);
+      }
+      .scenario3 .scenario-icon-area {
+        color: var(--scenario3-color);
+      }
+
+      /* Simple flow lines (conceptual) */
+      .flow-connector {
+        width: 2px;
+        height: 20px;
+        background-color: var(--flow-line-color);
+        margin: 0.5rem auto; /* Center between cards */
+      }
+      @media (min-width: 768px) {
+        body {
+          flex-direction: row;
+          justify-content: space-around;
+          align-items: flex-start;
+        }
+        .scenario-card {
+          max-width: 280px; /* Adjust for horizontal layout */
+        }
+        .flow-connector {
+          width: 30px;
+          height: 2px;
+          margin: auto 1rem; /* Between cards horizontally */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scenario-card scenario1">
+      <h3>Shared AV Utopia</h3>
+      <div class="scenario-icon-area">🚌💨</div>
+      <p class="scenario-description">
+        High adoption of shared, electric autonomous fleets. Reduced private car
+        ownership, optimized traffic flow, lower emissions, and increased urban
+        green space. Public transit integration is key.
+      </p>
+    </div>
+
+    <div class="flow-connector"></div>
+
+    <div class="scenario-card scenario2">
+      <h3>Personal AV Dominance</h3>
+      <div class="scenario-icon-area">🚗✨</div>
+      <p class="scenario-description">
+        Widespread ownership of personal autonomous vehicles. Increased
+        convenience for individuals but potentially leads to urban sprawl, more
+        VMT, and parking challenges if not managed.
+      </p>
+    </div>
+
+    <div class="flow-connector"></div>
+
+    <div class="scenario-card scenario3">
+      <h3>Fragmented Hybrid</h3>
+      <div class="scenario-icon-area">🚦🔄</div>
+      <p class="scenario-description">
+        Mix of shared AVs in dense urban cores, personal AVs in suburbs, and
+        conventional vehicles. Complex traffic management, varied adoption
+        rates, and persistent equity/access issues.
+      </p>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </body>
+</html>

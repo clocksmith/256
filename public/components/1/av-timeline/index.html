@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AV Milestones Timeline (Enhanced)</title>
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --border-color: #dee2e6;
+        --accent-color: #5bc5ef;
+        --padding: 0.8rem;
+        --line-color: #ccc;
+        --year-bg: #e9ecef;
+        --highlight-color: #ffc107;
+      }
+      body.dark-mode {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --border-color: #4d4d4d;
+        --line-color: #555;
+        --year-bg: #333;
+        --highlight-color: #f0ad4e;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: var(--padding);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        overflow-y: auto;
+      }
+      .timeline-enhanced {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: relative;
+      }
+      .timeline-enhanced::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 30px; /* Adjusted for larger year markers */
+        height: 100%;
+        width: 3px;
+        background: linear-gradient(
+          to bottom,
+          var(--accent-color),
+          var(--line-color)
+        );
+      }
+      .timeline-item-enhanced {
+        margin-bottom: 1.8rem;
+        position: relative;
+        padding-left: 70px; /* Adjusted for larger year markers */
+      }
+      .timeline-year-marker {
+        position: absolute;
+        left: 0;
+        top: -2px;
+        width: 60px;
+        padding: 0.2rem 0;
+        background-color: var(--year-bg);
+        color: var(--accent-color);
+        border-radius: 4px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 0.95rem;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .timeline-item-enhanced::before {
+        /* Dot on the line */
+        content: "";
+        position: absolute;
+        left: 25px; /* Center on the line */
+        top: 5px;
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        background-color: var(--accent-color);
+        border: 2px solid var(--bg-color);
+        z-index: 1;
+      }
+      .timeline-content {
+        background-color: var(
+          --bg-color-secondary,
+          var(--bg-color)
+        ); /* Secondary for contrast if needed */
+        border: 1px solid var(--border-color);
+        padding: 0.7rem;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .timeline-title {
+        font-weight: bold;
+        font-size: 1rem;
+        color: var(--text-color);
+        margin-bottom: 0.3rem;
+      }
+      .timeline-company-enhanced {
+        font-style: italic;
+        color: var(--highlight-color);
+        font-weight: 500;
+        display: block;
+        margin-bottom: 0.2rem;
+      }
+      .timeline-details-enhanced {
+        font-size: 0.85rem;
+        color: var(--text-color-low-emphasis, var(--text-color));
+        margin-bottom: 0.4rem;
+      }
+      .timeline-significance-enhanced {
+        margin-top: 0.4rem;
+        font-size: 0.8rem;
+        padding-left: 0.5rem;
+        border-left: 3px solid var(--accent-color);
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <ol class="timeline-enhanced">
+      <li class="timeline-item-enhanced">
+        <span class="timeline-year-marker">2009</span>
+        <div class="timeline-content">
+          <span class="timeline-company-enhanced"
+            >Google (Waymo Precursor)</span
+          >
+          <div class="timeline-title">Project Chauffeur Genesis</div>
+          <div class="timeline-details-enhanced">
+            Secret autonomous vehicle project begins within Google X, laying
+            foundational work for what would become Waymo.
+          </div>
+          <div class="timeline-significance-enhanced">
+            Marks the early, strategic investment by a tech giant into
+            self-driving technology, shaping future R&D.
+          </div>
+        </div>
+      </li>
+      <li class="timeline-item-enhanced">
+        <span class="timeline-year-marker">2015</span>
+        <div class="timeline-content">
+          <span class="timeline-company-enhanced">Tesla</span>
+          <div class="timeline-title">Autopilot (Level 2) Launched</div>
+          <div class="timeline-details-enhanced">
+            Tesla releases its initial "Autopilot" system, a Level 2 Advanced
+            Driver Assistance System (ADAS), to consumer vehicles.
+          </div>
+          <div class="timeline-significance-enhanced">
+            Popularizes ADAS features, initiates large-scale data collection,
+            and sparks public discourse on vehicle automation.
+          </div>
+        </div>
+      </li>
+      <li class="timeline-item-enhanced">
+        <span class="timeline-year-marker">2016</span>
+        <div class="timeline-content">
+          <span class="timeline-company-enhanced">Waymo</span>
+          <div class="timeline-title">Waymo Becomes Independent</div>
+          <div class="timeline-details-enhanced">
+            Google's self-driving car project is spun out as Waymo, an
+            independent subsidiary under Alphabet Inc.
+          </div>
+          <div class="timeline-significance-enhanced">
+            Signals a shift towards commercialization and product development
+            beyond pure research, intensifying industry focus.
+          </div>
+        </div>
+      </li>
+      <li class="timeline-item-enhanced">
+        <span class="timeline-year-marker">2018</span>
+        <div class="timeline-content">
+          <span class="timeline-company-enhanced">Waymo</span>
+          <div class="timeline-title">"Waymo One" Early Rider Program</div>
+          <div class="timeline-details-enhanced">
+            Launches its first commercial robotaxi trial service in Phoenix,
+            Arizona, initially with human safety drivers.
+          </div>
+          <div class="timeline-significance-enhanced">
+            Represents a crucial step in testing real-world robotaxi operations
+            and gathering public feedback.
+          </div>
+        </div>
+      </li>
+      <li class="timeline-item-enhanced">
+        <span class="timeline-year-marker">2020</span>
+        <div class="timeline-content">
+          <span class="timeline-company-enhanced">Waymo</span>
+          <div class="timeline-title">Fully Driverless Service (Phoenix)</div>
+          <div class="timeline-details-enhanced">
+            Waymo opens its fully driverless (Level 4) robotaxi service to the
+            general public in the suburbs of Phoenix.
+          </div>
+          <div class="timeline-significance-enhanced">
+            A landmark achievement: one of the first truly driverless commercial
+            services available to the public.
+          </div>
+        </div>
+      </li>
+      <li class="timeline-item-enhanced">
+        <span class="timeline-year-marker">2023</span>
+        <div class="timeline-content">
+          <span class="timeline-company-enhanced">Cruise</span>
+          <div class="timeline-title">Major Safety Incident & Pause</div>
+          <div class="timeline-details-enhanced">
+            A significant safety incident involving a pedestrian in San
+            Francisco leads to a nationwide operational pause and recall for
+            Cruise.
+          </div>
+          <div class="timeline-significance-enhanced">
+            Highlights persistent safety challenges, increases regulatory
+            scrutiny, and impacts public trust in AV technology.
+          </div>
+        </div>
+      </li>
+      <li class="timeline-item-enhanced">
+        <span class="timeline-year-marker">2025</span>
+        <div class="timeline-content">
+          <span class="timeline-company-enhanced">Industry Wide</span>
+          <div class="timeline-title">
+            Increased Deployments & Regulatory Focus
+          </div>
+          <div class="timeline-details-enhanced">
+            Waymo announces significant fleet expansion. Aurora launches
+            commercial driverless trucking. NHTSA issues new federal guidelines.
+          </div>
+          <div class="timeline-significance-enhanced">
+            Marks a period of accelerating commercialization attempts alongside
+            evolving, more specific regulatory frameworks.
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+      }
+
+      // Interactive elements (e.g., click to expand details) can be added here
+      document.querySelectorAll(".timeline-item-enhanced").forEach((item) => {
+        item.addEventListener("click", () => {
+          // Example: Toggle a 'expanded' class for more details
+          // item.classList.toggle('expanded');
+        });
+      });
+    </script>
+  </body>
+</html>
